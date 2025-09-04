@@ -9,48 +9,48 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light Mode Palette */
-    --background: 210 20% 98%;
-    --foreground: 224 71% 4%;
+    /* Light Mode Palette - Clean & Modern */
+    --background: 0 0% 100%;
+    --foreground: 215 28% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-    --card-glass: 0 0% 100% / 0.8;
+    --card-foreground: 215 28% 15%;
+    --card-glass: 0 0% 100% / 0.85;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 215 28% 15%;
 
     --primary: 207 90% 54%;
-    --primary-foreground: 210 20% 98%;
-    --primary-glow: 207 90% 54% / 0.3;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 207 90% 54% / 0.15;
 
-    --secondary: 163 94% 62%;
-    --secondary-foreground: 224 71% 4%;
-    --secondary-glow: 163 94% 62% / 0.3;
+    --secondary: 210 10% 96%;
+    --secondary-foreground: 215 28% 15%;
+    --secondary-glow: 207 90% 54% / 0.08;
 
-    --muted: 215 28% 17%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 10% 96%;
+    --muted-foreground: 215 16% 45%;
 
     --accent: 163 94% 62%;
-    --accent-foreground: 224 71% 4%;
+    --accent-foreground: 215 28% 15%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 215 14% 89%;
+    --input: 215 14% 89%;
     --ring: 207 90% 54%;
 
     --carbon: 215 37% 7%;
     --electric-blue: 207 90% 54%;
     --neon-mint: 163 94% 62%;
-    --slate: 215 28% 17%;
-    --soft-white: 210 20% 98%;
+    --slate: 215 16% 45%;
+    --soft-white: 0 0% 100%;
 
-    /* Glassmorphism effects */
-    --glass-bg: 0 0% 100% / 0.1;
-    --glass-border: 0 0% 100% / 0.2;
-    --glass-shadow: 0 25% 30px -5px hsl(var(--carbon) / 0.1);
+    /* Glassmorphism effects - lighter for light mode */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 215 14% 89% / 0.5;
+    --glass-shadow: 0 4px 30px -8px hsl(215 28% 15% / 0.08);
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--neon-mint)));
