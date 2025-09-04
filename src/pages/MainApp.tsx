@@ -10,10 +10,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface MainAppProps {
-  onLogout: () => void;
+  user: any;
 }
 
-const MainApp = ({ onLogout }: MainAppProps) => {
+const MainApp = ({ user }: MainAppProps) => {
   const [isDark, setIsDark] = useState(true);
   const { toast } = useToast();
 
@@ -34,7 +34,6 @@ const MainApp = ({ onLogout }: MainAppProps) => {
         title: "Logged out",
         description: "You've been successfully logged out.",
       });
-      onLogout();
     } catch (error: any) {
       toast({
         title: "Error",

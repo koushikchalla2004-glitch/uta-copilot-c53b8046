@@ -1,42 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
+import Index from '@/pages/Index';
+import MainApp from '@/pages/MainApp';
+import { Toaster } from '@/components/ui/toaster';
 
 const App = () => {
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1e3a8a, #7c2d92)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>
-          UTA Copilot
-        </h1>
-        <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-          Your intelligent campus companion
-        </p>
-        <div style={{
-          width: '100px',
-          height: '100px',
-          background: 'linear-gradient(45deg, #60a5fa, #a855f7)',
-          borderRadius: '50%',
-          margin: '40px auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '36px',
-          fontWeight: 'bold'
-        }}>
-          UC
-        </div>
-        <p style={{ fontSize: '16px', opacity: 0.8 }}>
-          Ready to explore campus!
-        </p>
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <Routes>
+        <Route 
+          path="/auth" 
+          element={!session ? <Index /> : <Navigate to="/app" replace />} 
+        />
+        <Route 
+          path="/app" 
+          element={session ? <MainApp user={user} /> : <Navigate to="/auth" replace />} 
+        />
+        <Route 
+          path="/" 
+          element={<Navigate to={session ? "/app" : "/auth"} replace />} 
+        />
+      </Routes>
+      <Toaster />
+    </>
   );
 };
 
