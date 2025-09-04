@@ -1,6 +1,4 @@
-import React, { useState, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, MeshDistortMaterial } from '@react-three/drei';
+import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -9,118 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap, Brain, Zap } from 'lucide-react';
-import * as THREE from 'three';
-
-// 3D Scene Components
-const FloatingShape = ({ position, geometry, color, speed = 1 }: any) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += 0.01 * speed;
-      meshRef.current.rotation.y += 0.01 * speed;
-      meshRef.current.position.y += Math.sin(state.clock.elapsedTime * speed) * 0.002;
-    }
-  });
-
-  return (
-    <Float speed={speed} rotationIntensity={0.5} floatIntensity={0.5}>
-      <mesh ref={meshRef} position={position}>
-        {geometry}
-        <MeshDistortMaterial
-          color={color}
-          attach="material"
-          distort={0.4}
-          speed={2}
-          roughness={0.1}
-          metalness={0.8}
-        />
-      </mesh>
-    </Float>
-  );
-};
-
-const ParticleField = () => {
-  const points = useRef<THREE.Points>(null);
-  
-  useFrame((state) => {
-    if (points.current) {
-      points.current.rotation.x = state.clock.elapsedTime * 0.05;
-      points.current.rotation.y = state.clock.elapsedTime * 0.1;
-    }
-  });
-
-  const particlesPosition = new Float32Array(200 * 3);
-  for (let i = 0; i < 200; i++) {
-    particlesPosition[i * 3] = (Math.random() - 0.5) * 20;
-    particlesPosition[i * 3 + 1] = (Math.random() - 0.5) * 20;
-    particlesPosition[i * 3 + 2] = (Math.random() - 0.5) * 20;
-  }
-
-  return (
-    <points ref={points}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={200}
-          array={particlesPosition}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.15} color="#ff6b6b" opacity={0.8} transparent />
-    </points>
-  );
-};
-
-const Scene3D = () => {
-  return (
-    <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1.5} color="#ff6b6b" />
-      <pointLight position={[-10, -10, -10]} intensity={1} color="#4ecdc4" />
-      <pointLight position={[0, 10, -5]} intensity={0.8} color="#ffe66d" />
-      
-      <ParticleField />
-      
-      <FloatingShape
-        position={[-4, 2, -3]}
-        geometry={<octahedronGeometry args={[1.2]} />}
-        color="#ff6b6b"
-        speed={1.1}
-      />
-      
-      <FloatingShape
-        position={[4, -2, -2]}
-        geometry={<icosahedronGeometry args={[1]} />}
-        color="#4ecdc4"
-        speed={0.9}
-      />
-      
-      <FloatingShape
-        position={[0, 3, -4]}
-        geometry={<dodecahedronGeometry args={[1]} />}
-        color="#ffe66d"
-        speed={1.3}
-      />
-      
-      <FloatingShape
-        position={[-3, -3, -1]}
-        geometry={<coneGeometry args={[0.8, 2, 8]} />}
-        color="#ff8a65"
-        speed={0.7}
-      />
-      
-      <FloatingShape
-        position={[3, 1, -5]}
-        geometry={<tetrahedronGeometry args={[1]} />}
-        color="#ba68c8"
-        speed={1.4}
-      />
-      
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.8} />
-    </>
-  );
-};
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -229,11 +115,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* 3D Background */}
-      <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
-          <Scene3D />
-        </Canvas>
+      {/* Animated CSS Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-900 via-orange-900 to-amber-900">
+        {/* Floating geometric shapes using CSS */}
+        <div className="absolute top-20 left-20 w-16 h-16 bg-gradient-to-br from-rose-400 to-orange-500 rounded-lg rotate-45 animate-pulse opacity-60"></div>
+        <div className="absolute top-40 right-32 w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full animate-bounce opacity-50"></div>
+        <div className="absolute bottom-40 left-40 w-20 h-20 bg-gradient-to-br from-orange-400 to-rose-500 transform rotate-12 animate-pulse opacity-40"></div>
+        <div className="absolute bottom-20 right-20 w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-ping opacity-30"></div>
+        <div className="absolute top-60 left-1/2 w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-500 rotate-45 animate-spin opacity-50" style={{ animationDuration: '3s' }}></div>
       </div>
 
       {/* Gradient Overlay */}
@@ -285,13 +174,13 @@ const Index = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/10 backdrop-blur-sm border border-white/20">
                   <TabsTrigger 
                     value="login" 
-                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300"
+                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-300"
                   >
                     Login
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300"
+                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-orange-600 data-[state=active]:text-white transition-all duration-300"
                   >
                     Sign Up
                   </TabsTrigger>
@@ -313,7 +202,7 @@ const Index = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
                     <div className="relative">
@@ -323,13 +212,13 @@ const Index = () => {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-400 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -337,7 +226,7 @@ const Index = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-cyan-500 hover:from-blue-600 hover:via-purple-700 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-rose-500 via-orange-600 to-amber-500 hover:from-rose-600 hover:via-orange-700 hover:to-amber-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:transform-none"
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
@@ -359,7 +248,7 @@ const Index = () => {
                       placeholder="Display Name"
                       value={formData.displayName}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
                     <Input
@@ -368,7 +257,7 @@ const Index = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
                     <div className="relative">
@@ -378,13 +267,13 @@ const Index = () => {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-400 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -395,13 +284,13 @@ const Index = () => {
                       placeholder="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-orange-400 focus:ring-orange-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-cyan-500 hover:from-blue-600 hover:via-purple-700 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-rose-500 via-orange-600 to-amber-500 hover:from-rose-600 hover:via-orange-700 hover:to-amber-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:transform-none"
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
