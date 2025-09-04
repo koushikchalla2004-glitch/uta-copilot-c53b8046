@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
 import VoiceVisualizer from '@/components/VoiceVisualizer';
+import { TypingAnimation, TypingIndicator } from '@/components/TypingAnimation';
 import * as THREE from 'three';
 
 interface ChatMessage {
@@ -16,6 +17,7 @@ interface ChatMessage {
   text: string;
   isUser: boolean;
   timestamp: Date;
+  isTyping?: boolean;
 }
 
 // Moving 3D Stars Background
@@ -253,6 +255,7 @@ const Hero = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
 
   // Use voice messages if connected, otherwise use text messages
   const chatMessages = voiceConnected ? voiceMessages : textMessages;
@@ -310,22 +313,28 @@ const Hero = () => {
           throw error;
         }
 
+        const messageId = (Date.now() + 1).toString();
         const aiMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
+          id: messageId,
           text: data?.response || "I couldn't process your request. Please try again.",
           isUser: false,
-          timestamp: new Date()
+          timestamp: new Date(),
+          isTyping: true
         };
 
+        setTypingMessageId(messageId);
         setTextMessages(prev => [...prev, aiMessage]);
       } catch (error: any) {
         console.error('Search error:', error);
+        const errorId = (Date.now() + 1).toString();
         const errorMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
+          id: errorId,
           text: "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance.",
           isUser: false,
-          timestamp: new Date()
+          timestamp: new Date(),
+          isTyping: true
         };
+        setTypingMessageId(errorId);
         setTextMessages(prev => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
@@ -402,54 +411,66 @@ const Hero = () => {
                   key={message.id}
                   className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex gap-3 max-w-[80%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {/* Avatar */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      message.isUser 
-                        ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600' 
-                        : 'bg-purple-600'
-                    }`}>
-                      {message.isUser ? (
+                  {message.isUser ? (
+                    <div className="flex gap-3 max-w-[80%] flex-row-reverse">
+                      {/* User Avatar */}
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-white" />
-                      ) : (
-                        <Bot className="w-4 h-4 text-white" />
-                      )}
+                      </div>
+                      
+                      {/* User Message Bubble */}
+                      <div className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white rounded-2xl px-4 py-3">
+                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                          {message.text}
+                        </p>
+                        <p className="text-xs mt-1 text-white/70">
+                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                    
-                    {/* Message Bubble */}
-                    <div className={`rounded-2xl px-4 py-3 ${
-                      message.isUser
-                        ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white'
-                        : 'bg-white/10 backdrop-blur-xl border border-white/20 text-white'
-                    }`}>
-                      <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-                        {message.text}
-                      </p>
-                      <p className={`text-xs mt-1 ${
-                        message.isUser ? 'text-white/70' : 'text-white/50'
-                      }`}>
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    // AI Message with Typing Animation
+                    (message as any).isTyping ? (
+                      <TypingAnimation
+                        text={message.text}
+                        onComplete={() => {
+                          setTypingMessageId(null);
+                          setTextMessages(prev => 
+                            prev.map(msg => 
+                              msg.id === message.id 
+                                ? { ...msg, isTyping: false }
+                                : msg
+                            )
+                          );
+                        }}
+                        speed={30}
+                      />
+                    ) : (
+                      <div className="flex gap-3 max-w-[80%]">
+                        {/* AI Avatar */}
+                        <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                        
+                        {/* AI Message Bubble */}
+                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-2xl px-4 py-3">
+                          <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                            {message.text}
+                          </p>
+                          <p className="text-xs mt-1 text-white/50">
+                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  )}
                 </div>
               ))}
               
               {/* Loading Indicator */}
               {(isLoading || voiceConnecting) && (
                 <div className="flex justify-start">
-                  <div className="flex gap-3 max-w-[80%]">
-                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-3">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                    </div>
-                  </div>
+                  <TypingIndicator />
                 </div>
               )}
               
