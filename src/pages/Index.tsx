@@ -1,317 +1,404 @@
 import React, { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-
-type AppState = 'start' | 'login' | 'main';
 
 const Index = () => {
-  const [appState, setAppState] = useState<AppState>('start');
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [currentView, setCurrentView] = useState('start');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (!isMounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          setAppState('main');
-        } else if (appState === 'main') {
-          setAppState('login');
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        setAppState('main');
-      }
+    // Simple delay to show loading
+    const timer = setTimeout(() => {
       setLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
-
-  const handleStartComplete = () => {
-    setAppState('login');
-  };
-
-  const handleLoginSuccess = () => {
-    setAppState('main');
-  };
-
-  const handleLogout = () => {
-    setAppState('login');
-  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1e3a8a, #7c2d92)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            border: '2px solid #60a5fa',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }} />
+          <p>Loading UTA Copilot...</p>
         </div>
       </div>
     );
   }
 
-  if (appState === 'start') {
-    return <StartPageSimple onComplete={handleStartComplete} />;
+  if (currentView === 'start') {
+    return <StartPage onNext={() => setCurrentView('login')} />;
   }
 
-  if (appState === 'login') {
-    return <LoginPageSimple onLoginSuccess={handleLoginSuccess} />;
+  if (currentView === 'login') {
+    return <LoginPage onNext={() => setCurrentView('main')} onBack={() => setCurrentView('start')} />;
   }
 
-  return <MainAppSimple onLogout={handleLogout} />;
+  return <MainPage onLogout={() => setCurrentView('login')} />;
 };
 
-// Simplified components without complex 3D dependencies
-const StartPageSimple = ({ onComplete }: { onComplete: () => void }) => {
+const StartPage = ({ onNext }: { onNext: () => void }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 flex flex-col items-center justify-center text-white">
-      <div className="text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            UTA Copilot
-          </h1>
-          <p className="text-xl text-blue-200">Your intelligent campus companion</p>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1e3a8a, #7c2d92)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      textAlign: 'center',
+      padding: '20px'
+    }}>
+      <div style={{ marginBottom: '60px' }}>
+        {/* Simple animated logo */}
+        <div style={{
+          width: '120px',
+          height: '120px',
+          background: 'linear-gradient(45deg, #60a5fa, #a855f7)',
+          borderRadius: '50%',
+          margin: '0 auto 40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '48px',
+          fontWeight: 'bold',
+          animation: 'float 3s ease-in-out infinite'
+        }}>
+          UC
         </div>
         
-        <div className="space-y-4">
-          <div className="flex items-center justify-center space-x-2 text-sm text-blue-300">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-            <span>Initializing your experience...</span>
+        <h1 style={{
+          fontSize: '4rem',
+          fontWeight: 'bold',
+          marginBottom: '20px',
+          background: 'linear-gradient(45deg, #60a5fa, #a855f7)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          UTA Copilot
+        </h1>
+        
+        <p style={{
+          fontSize: '1.5rem',
+          marginBottom: '40px',
+          opacity: 0.9
+        }}>
+          Your intelligent campus companion
+        </p>
+        
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '20px'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              background: '#60a5fa',
+              borderRadius: '50%',
+              animation: 'pulse 2s infinite'
+            }} />
+            <span style={{ fontSize: '14px', opacity: 0.8 }}>
+              Initializing your experience...
+            </span>
           </div>
-          
-          <button 
-            onClick={onComplete}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105"
-          >
-            Get Started
-          </button>
         </div>
+        
+        <button
+          onClick={onNext}
+          style={{
+            background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+            border: 'none',
+            color: 'white',
+            fontWeight: '600',
+            padding: '16px 32px',
+            borderRadius: '16px',
+            fontSize: '18px',
+            cursor: 'pointer',
+            transition: 'transform 0.3s ease',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
+        >
+          Get Started
+        </button>
       </div>
+      
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+      `}</style>
     </div>
   );
 };
 
-const LoginPageSimple = ({ onLoginSuccess }: { onLoginSuccess: () => void }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('login');
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [signupData, setSignupData] = useState({ 
-    email: '', 
-    password: '', 
-    confirmPassword: '', 
-    fullName: '' 
-  });
+const LoginPage = ({ onNext, onBack }: { onNext: () => void; onBack: () => void }) => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
-        password: loginData.password,
-      });
-
-      if (error) throw error;
-      onLoginSuccess();
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    if (signupData.password !== signupData.confirmPassword) {
-      setError("Passwords don't match");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email: signupData.email,
-        password: signupData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: signupData.fullName,
-          }
-        }
-      });
-
-      if (error) throw error;
-      setActiveTab('login');
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    setLoading(true);
+    
+    // Simulate auth process
+    setTimeout(() => {
+      setLoading(false);
+      onNext();
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center p-4">
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 w-full max-w-md border border-white/20">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">UTA Copilot</h1>
-          <p className="text-blue-200">Your intelligent campus companion</p>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1e3a8a, #7c2d92)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '20px',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '400px',
+        border: '1px solid rgba(255,255,255,0.2)',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px' }}>
+            UTA Copilot
+          </h1>
+          <p style={{ opacity: 0.8 }}>Your intelligent campus companion</p>
         </div>
 
-        <div className="space-y-4">
-          {/* Tab Selection */}
-          <div className="flex space-x-2 mb-6">
-            <button
-              onClick={() => setActiveTab('login')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                activeTab === 'login' ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-200'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setActiveTab('signup')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                activeTab === 'signup' ? 'bg-blue-500 text-white' : 'bg-white/10 text-blue-200'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
+        {/* Tab Selection */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '24px',
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '12px',
+          padding: '4px'
+        }}>
+          <button
+            onClick={() => setIsLogin(true)}
+            style={{
+              flex: 1,
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: isLogin ? '#3b82f6' : 'transparent',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setIsLogin(false)}
+            style={{
+              flex: 1,
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: !isLogin ? '#3b82f6' : 'transparent',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
+          >
+            Sign Up
+          </button>
+        </div>
 
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          {activeTab === 'login' ? (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <input
-                type="email"
-                placeholder="Email"
-                value={loginData.email}
-                onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={loginData.password}
-                onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
-                required
-              />
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 disabled:opacity-50"
-              >
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleSignup} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+          {!isLogin && (
+            <div style={{ marginBottom: '16px' }}>
               <input
                 type="text"
                 placeholder="Full Name"
-                value={signupData.fullName}
-                onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  fontSize: '16px',
+                  boxSizing: 'border-box'
+                }}
                 required
               />
-              <input
-                type="email"
-                placeholder="Email"
-                value={signupData.email}
-                onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={signupData.password}
-                onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={signupData.confirmPassword}
-                onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                className="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-blue-300"
-                required
-              />
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 disabled:opacity-50"
-              >
-                {isLoading ? 'Creating account...' : 'Create Account'}
-              </button>
-            </form>
+            </div>
           )}
-        </div>
+          
+          <div style={{ marginBottom: '16px' }}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                fontSize: '16px',
+                boxSizing: 'border-box'
+              }}
+              required
+            />
+          </div>
+          
+          <div style={{ marginBottom: '24px' }}>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                fontSize: '16px',
+                boxSizing: 'border-box'
+              }}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+              border: 'none',
+              color: 'white',
+              fontWeight: '600',
+              padding: '12px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1
+            }}
+          >
+            {loading ? (isLogin ? 'Signing in...' : 'Creating account...') : (isLogin ? 'Sign In' : 'Create Account')}
+          </button>
+        </form>
+
+        <button
+          onClick={onBack}
+          style={{
+            width: '100%',
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          ← Back to Start
+        </button>
       </div>
     </div>
   );
 };
 
-const MainAppSimple = ({ onLogout }: { onLogout: () => void }) => {
-  const [isDark, setIsDark] = useState(true);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      onLogout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
+const MainPage = ({ onLogout }: { onLogout: () => void }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 text-white">
-      {/* Simple Navigation */}
-      <nav className="bg-white/10 backdrop-blur-md border-b border-white/20 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg"></div>
-            <span className="font-bold text-xl">UTA Copilot</span>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1e3a8a, #7c2d92)',
+      color: 'white'
+    }}>
+      {/* Navigation */}
+      <nav style={{
+        background: 'rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255,255,255,0.2)',
+        padding: '16px'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              background: 'linear-gradient(45deg, #60a5fa, #a855f7)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold'
+            }}>
+              UC
+            </div>
+            <span style={{ fontWeight: 'bold', fontSize: '20px' }}>UTA Copilot</span>
           </div>
           <button
-            onClick={handleLogout}
-            className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg transition-colors"
+            onClick={onLogout}
+            style={{
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              color: '#fca5a5',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
           >
             Logout
           </button>
@@ -319,37 +406,64 @@ const MainAppSimple = ({ onLogout }: { onLogout: () => void }) => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-8">
-        <div className="text-center space-y-8">
-          <div>
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Welcome to UTA Copilot
-            </h1>
-            <p className="text-xl text-blue-200">
-              Your intelligent campus companion is ready to help!
-            </p>
-          </div>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '64px 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <h1 style={{
+            fontSize: '3.5rem',
+            fontWeight: 'bold',
+            marginBottom: '24px',
+            background: 'linear-gradient(45deg, #60a5fa, #a855f7)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            Welcome to UTA Copilot
+          </h1>
+          <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+            Your intelligent campus companion is ready to help!
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-semibold mb-3">Search Campus</h3>
-              <p className="text-blue-200">Find buildings, courses, and resources across campus</p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '24px',
+          marginBottom: '48px'
+        }}>
+          {[
+            { title: 'Search Campus', desc: 'Find buildings, courses, and resources across campus' },
+            { title: 'Voice Assistant', desc: 'Ask questions using natural language' },
+            { title: 'Campus Life', desc: 'Explore dining, events, and activities' }
+          ].map((item, i) => (
+            <div key={i} style={{
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '16px',
+              padding: '24px',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '12px' }}>
+                {item.title}
+              </h3>
+              <p style={{ opacity: 0.8 }}>{item.desc}</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-semibold mb-3">Voice Assistant</h3>
-              <p className="text-blue-200">Ask questions using natural language</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-              <h3 className="text-xl font-semibold mb-3">Campus Life</h3>
-              <p className="text-blue-200">Explore dining, events, and activities</p>
-            </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="mt-12">
-            <button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105">
-              Start Exploring
-            </button>
-          </div>
+        <div style={{ textAlign: 'center' }}>
+          <button style={{
+            background: 'linear-gradient(45deg, #3b82f6, #8b5cf6)',
+            border: 'none',
+            color: 'white',
+            fontWeight: '600',
+            padding: '16px 32px',
+            borderRadius: '16px',
+            fontSize: '18px',
+            cursor: 'pointer',
+            transition: 'transform 0.3s ease'
+          }}>
+            Start Exploring
+          </button>
         </div>
       </main>
     </div>
