@@ -212,7 +212,7 @@ const Hero = () => {
         <div className="w-full max-w-4xl mb-8">
           <Card className="bg-white/10 backdrop-blur-xl border border-white/20">
             <CardContent className="p-6">
-              <div className="flex gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <div className="flex-1 relative">
                   <Input
                     type="text"
@@ -227,7 +227,7 @@ const Hero = () => {
                 
                 <Button 
                   onClick={handleSearch}
-                  className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 px-8 py-4 text-lg"
+                  className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 px-8 py-4 text-lg w-full sm:w-auto"
                 >
                   Search
                 </Button>
@@ -253,7 +253,7 @@ const Hero = () => {
           <div className="mb-6">
             <Button
               onClick={toggleVoiceAssistant}
-              className={`w-20 h-20 rounded-full transition-all duration-300 ${
+              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full transition-all duration-300 ${
                 isListening 
                   ? 'bg-green-500 hover:bg-green-600 animate-pulse' 
                   : isSpeaking
@@ -262,11 +262,11 @@ const Hero = () => {
               } transform hover:scale-110`}
             >
               {isListening ? (
-                <MicOff className="w-8 h-8 text-white" />
+                <MicOff className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               ) : isSpeaking ? (
-                <Volume2 className="w-8 h-8 text-white" />
+                <Volume2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               ) : (
-                <Mic className="w-8 h-8 text-white" />
+                <Mic className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               )}
             </Button>
           </div>
