@@ -95,7 +95,7 @@ const Stars = () => {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.08} color="#6b7280" opacity={0.9} transparent />
+      <pointsMaterial size={0.15} color="#ffffff" opacity={1} transparent={false} />
     </points>
   );
 };
@@ -302,8 +302,8 @@ const Index = () => {
         </Canvas>
       </div>
 
-      {/* Semi-transparent Overlay to allow 3D to show through */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-gray-900/20 to-black/40" />
+      {/* Black Background */}
+      <div className="absolute inset-0 bg-black" />
       
       {/* Subtle Grid Pattern */}
       <div 
