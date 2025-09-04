@@ -11,67 +11,117 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import * as THREE from 'three';
 
-// Simple 3D Components
-const FloatingCube = ({ position }: { position: [number, number, number] }) => {
+// Solar System 3D Components
+const Planet = ({ 
+  position, 
+  size, 
+  color, 
+  orbitRadius, 
+  orbitSpeed 
+}: { 
+  position: [number, number, number];
+  size: number;
+  color: string;
+  orbitRadius: number;
+  orbitSpeed: number;
+}) => {
   const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x += 0.005;
+      // Orbit around center
+      const time = state.clock.elapsedTime * orbitSpeed;
+      meshRef.current.position.x = Math.cos(time) * orbitRadius;
+      meshRef.current.position.z = Math.sin(time) * orbitRadius;
+      
+      // Self rotation
+      meshRef.current.rotation.y += 0.01;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[size, 16, 16]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  );
+};
+
+const Sun = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame(() => {
+    if (meshRef.current) {
       meshRef.current.rotation.y += 0.005;
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.2;
     }
   });
 
   return (
-    <Float speed={1} rotationIntensity={0.3} floatIntensity={0.3}>
-      <mesh ref={meshRef} position={position}>
-        <boxGeometry args={[0.8, 0.8, 0.8]} />
-        <meshStandardMaterial color="#4a5568" opacity={0.7} transparent />
-      </mesh>
-    </Float>
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      <sphereGeometry args={[0.8, 32, 32]} />
+      <meshStandardMaterial 
+        color="#3b82f6" 
+        emissive="#1e40af" 
+        emissiveIntensity={0.3}
+      />
+    </mesh>
   );
 };
 
-const FloatingSphere = ({ position }: { position: [number, number, number] }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+const Stars = () => {
+  const points = useRef<THREE.Points>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += 0.003;
-      meshRef.current.rotation.z += 0.003;
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime + 2) * 0.15;
+    if (points.current) {
+      points.current.rotation.y = state.clock.elapsedTime * 0.02;
     }
   });
 
+  const starsPosition = new Float32Array(300 * 3);
+  for (let i = 0; i < 300; i++) {
+    starsPosition[i * 3] = (Math.random() - 0.5) * 100;
+    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 100;
+    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 100;
+  }
+
   return (
-    <Float speed={0.8} rotationIntensity={0.2} floatIntensity={0.4}>
-      <mesh ref={meshRef} position={position}>
-        <sphereGeometry args={[0.6, 16, 16]} />
-        <meshStandardMaterial color="#2d3748" opacity={0.6} transparent />
-      </mesh>
-    </Float>
+    <points ref={points}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={300}
+          array={starsPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial size={0.05} color="#6b7280" opacity={0.8} transparent />
+    </points>
   );
 };
 
-const Scene3D = () => {
+const SolarSystem = () => {
   return (
     <>
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={0.6} color="#718096" />
-      <pointLight position={[-10, -10, -10]} intensity={0.4} color="#4a5568" />
+      <ambientLight intensity={0.2} />
+      <pointLight position={[0, 0, 0]} intensity={2} color="#3b82f6" />
+      <pointLight position={[10, 10, 10]} intensity={0.3} color="#6b7280" />
       
-      <FloatingCube position={[-3, 1, -2]} />
-      <FloatingCube position={[3, -1, -3]} />
-      <FloatingSphere position={[0, 2, -4]} />
-      <FloatingSphere position={[-2, -2, -1]} />
-      <FloatingCube position={[2, 0, -5]} />
+      <Stars />
+      <Sun />
+      
+      {/* Planets with different orbits and speeds */}
+      <Planet position={[0, 0, 0]} size={0.15} color="#9ca3af" orbitRadius={2} orbitSpeed={0.8} />
+      <Planet position={[0, 0, 0]} size={0.2} color="#4b5563" orbitRadius={3} orbitSpeed={0.6} />
+      <Planet position={[0, 0, 0]} size={0.25} color="#374151" orbitRadius={4.5} orbitSpeed={0.4} />
+      <Planet position={[0, 0, 0]} size={0.3} color="#1f2937" orbitRadius={6} orbitSpeed={0.3} />
+      <Planet position={[0, 0, 0]} size={0.18} color="#6b7280" orbitRadius={7.5} orbitSpeed={0.2} />
+      <Planet position={[0, 0, 0]} size={0.35} color="#374151" orbitRadius={9} orbitSpeed={0.15} />
       
       <OrbitControls 
         enableZoom={false} 
         enablePan={false} 
         autoRotate 
-        autoRotateSpeed={0.3}
+        autoRotateSpeed={0.2}
         enableDamping
         dampingFactor={0.05}
       />
@@ -188,21 +238,21 @@ const Index = () => {
     <div className="min-h-screen relative overflow-hidden">
       {/* 3D Background */}
       <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
-          <Scene3D />
+        <Canvas camera={{ position: [0, 2, 12], fov: 60 }}>
+          <SolarSystem />
         </Canvas>
       </div>
 
       {/* Muted Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-gray-800/80 to-slate-900/90" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
       
       {/* Subtle Grid Pattern */}
       <div 
         className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: '40px 40px',
           animation: 'gridMove 30s linear infinite'
@@ -211,21 +261,21 @@ const Index = () => {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md transform hover:scale-105 transition-all duration-500">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-slate-500/25 transition-all duration-500">
+          <Card className="bg-black/20 backdrop-blur-xl border border-gray-600/30 shadow-2xl hover:shadow-blue-500/20 transition-all duration-500">
             <CardHeader className="text-center pb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-slate-500/30 transition-all duration-500 relative overflow-hidden">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-800 to-black rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-blue-500/30 transition-all duration-500 relative overflow-hidden border border-blue-500/20">
                 {/* Subtle rotating ring */}
-                <div className="absolute inset-0 rounded-full border-2 border-slate-400/20 animate-spin" style={{ animationDuration: '4s' }}></div>
+                <div className="absolute inset-0 rounded-full border-2 border-blue-500/30 animate-spin" style={{ animationDuration: '4s' }}></div>
                 
                 {/* Clean graduation cap logo */}
                 <div className="relative z-10 flex items-center justify-center">
-                  <GraduationCap className="w-10 h-10 text-slate-200" />
+                  <GraduationCap className="w-10 h-10 text-blue-400" />
                 </div>
               </div>
-              <CardTitle className="text-3xl font-bold text-slate-200 mb-2">
+              <CardTitle className="text-3xl font-bold text-white mb-2">
                 UTA Copilot
               </CardTitle>
-              <CardDescription className="text-slate-400 text-base">
+              <CardDescription className="text-gray-400 text-base">
                 Your intelligent campus companion
               </CardDescription>
             </CardHeader>
@@ -236,23 +286,23 @@ const Index = () => {
                 setError(null);
                 setFormData({ email: '', password: '', displayName: '', confirmPassword: '' });
               }}>
-                <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5 backdrop-blur-sm border border-white/10">
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-gray-900/50 backdrop-blur-sm border border-gray-600/30">
                   <TabsTrigger 
                     value="login" 
-                    className="text-slate-300 data-[state=active]:bg-slate-600 data-[state=active]:text-white transition-all duration-300"
+                    className="text-gray-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all duration-300"
                   >
                     Login
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="text-slate-300 data-[state=active]:bg-slate-600 data-[state=active]:text-white transition-all duration-300"
+                    className="text-gray-300 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all duration-300"
                   >
                     Sign Up
                   </TabsTrigger>
                 </TabsList>
 
                 {error && (
-                  <Alert className="mb-6 bg-red-900/30 border-red-700/50 backdrop-blur-sm">
+                  <Alert className="mb-6 bg-red-900/50 border-red-700/50 backdrop-blur-sm">
                     <AlertDescription className="text-red-300">
                       {error}
                     </AlertDescription>
@@ -267,7 +317,7 @@ const Index = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                      className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                       required
                     />
                     <div className="relative">
@@ -277,13 +327,13 @@ const Index = () => {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 pr-12 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                        className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 pr-12 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -291,7 +341,7 @@ const Index = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-slate-500/25 disabled:opacity-50 disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:transform-none"
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
@@ -313,7 +363,7 @@ const Index = () => {
                       placeholder="Display Name"
                       value={formData.displayName}
                       onChange={handleInputChange}
-                      className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                      className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                       required
                     />
                     <Input
@@ -322,7 +372,7 @@ const Index = () => {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                      className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                       required
                     />
                     <div className="relative">
@@ -332,13 +382,13 @@ const Index = () => {
                         placeholder="Password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 pr-12 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                        className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 pr-12 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -349,13 +399,13 @@ const Index = () => {
                       placeholder="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="bg-white/5 border-white/20 text-slate-200 placeholder-slate-400 focus:border-slate-400 focus:ring-slate-400/30 transition-all duration-300 hover:bg-white/10"
+                      className="bg-gray-900/30 border-gray-600/30 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500/30 transition-all duration-300 hover:bg-gray-800/30"
                       required
                     />
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-slate-500/25 disabled:opacity-50 disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:transform-none"
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
