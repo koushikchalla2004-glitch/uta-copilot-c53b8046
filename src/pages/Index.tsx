@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import * as THREE from 'three';
 
-// Simple test scene to debug white screen
+// Simple unified color scene
 const TestScene = () => {
   return (
     <>
@@ -20,7 +20,7 @@ const TestScene = () => {
       
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="#ff0000" />
+        <meshStandardMaterial color="#6366f1" emissive="#6366f1" emissiveIntensity={0.2} />
       </mesh>
       
       <OrbitControls />
@@ -238,11 +238,11 @@ const Index = () => {
                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                        </button>
                      </div>
-                     <Button
-                       type="submit"
-                       disabled={isLoading}
-                       className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:transform-none"
-                     >
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/50 disabled:opacity-50 disabled:transform-none"
+                      >
                        {isLoading ? (
                          <div className="flex items-center justify-center">
                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -305,7 +305,7 @@ const Index = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-pink-500/50 disabled:opacity-50 disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/50 disabled:opacity-50 disabled:transform-none"
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
