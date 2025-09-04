@@ -64,48 +64,62 @@ serve(async (req) => {
         if (!db) throw new Error('Database not configured');
 
         const now = new Date();
-        const start = new Date();
-        const end = new Date();
         const lower = query.toLowerCase();
+
+        // Determine if it's a "just events" request (no extra keywords/timeframes)
+        const cleaned = lower.replace(/\b(events?|today|tomorrow|this week|next week|happening|at|in|on)\b/gi, '').trim();
+        const keyword = cleaned.split(/\s+/).filter(Boolean)[0];
+        const justEvents = /\bevents?\b/i.test(lower) && !keyword && !/(today|tomorrow|this week|next week)/i.test(lower);
+
+        // Compute time window
+        const start = new Date(now);
+        let end: Date | null = new Date(now);
+
         const toStartOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
         const toEndOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
 
         if (lower.includes('tomorrow')) {
           const t = new Date(now); t.setDate(t.getDate() + 1);
           Object.assign(start, toStartOfDay(t));
-          Object.assign(end, toEndOfDay(t));
+          end = toEndOfDay(t);
         } else if (lower.includes('today')) {
-          Object.assign(start, toStartOfDay(now));
-          Object.assign(end, toEndOfDay(now));
+          // Next 24 hours from now
+          Object.assign(start, now);
+          end = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         } else if (lower.includes('next week')) {
           const day = now.getDay();
           const daysUntilNextMon = ((8 - day) % 7) || 7;
           const nextMon = new Date(now); nextMon.setDate(now.getDate() + daysUntilNextMon);
           const nextSun = new Date(nextMon); nextSun.setDate(nextMon.getDate() + 6);
           Object.assign(start, toStartOfDay(nextMon));
-          Object.assign(end, toEndOfDay(nextSun));
+          end = toEndOfDay(nextSun);
         } else if (lower.includes('this week')) {
           const day = now.getDay();
           const monday = new Date(now); monday.setDate(now.getDate() - ((day + 6) % 7));
           const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
           Object.assign(start, toStartOfDay(monday));
-          Object.assign(end, toEndOfDay(sunday));
+          end = toEndOfDay(sunday);
+        } else if (justEvents) {
+          // "Just events" → next 15 upcoming, no upper bound
+          Object.assign(start, now);
+          end = null;
         } else {
           Object.assign(start, now);
           const in7 = new Date(now); in7.setDate(now.getDate() + 7);
-          Object.assign(end, in7);
+          end = in7;
         }
 
-        const cleaned = lower.replace(/\b(events?|today|tomorrow|this week|next week|happening|at|in|on)\b/gi, '').trim();
-        const keyword = cleaned.split(/\s+/).filter(Boolean)[0];
-
+        // Build query
         let q = db
           .from('events')
           .select('id,title,description,location,start_time,end_time,source_url,tags')
           .gte('start_time', start.toISOString())
-          .lte('start_time', end.toISOString())
           .order('start_time', { ascending: true })
-          .limit(10);
+          .limit(justEvents ? 15 : 10);
+
+        if (end) {
+          q = q.lte('start_time', end.toISOString());
+        }
 
         if (keyword) {
           q = q.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%,location.ilike.%${keyword}%`);
@@ -124,7 +138,10 @@ serve(async (req) => {
 
         const fmt = (iso?: string | null) => iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
         const lines = events.map(e => `• ${e.title} — ${fmt(e.start_time)}${e.location ? ' @ ' + e.location : ''}`);
-        const text = `Here are campus events:\n${lines.join('\n')}`;
+        const heading = lower.includes('today')
+          ? 'Here are events in the next 24 hours:'
+          : (justEvents ? 'Here are the next 15 upcoming events:' : 'Here are campus events:');
+        const text = `${heading}\n${lines.join('\n')}`;
 
         return new Response(JSON.stringify({
           response: text,
