@@ -374,13 +374,13 @@ const Index = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-6 bg-black/50 backdrop-blur-sm border-2 border-cyan-500/30">
                   <TabsTrigger 
                     value="login" 
-                    className="text-cyan-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all duration-300 hover:text-white"
+                    className="text-emerald-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-400 data-[state=active]:to-teal-500 data-[state=active]:text-white transition-all duration-300 hover:text-white"
                   >
                     Login
                   </TabsTrigger>
                   <TabsTrigger 
                     value="signup" 
-                    className="text-cyan-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-purple-500 data-[state=active]:text-white transition-all duration-300 hover:text-white"
+                    className="text-emerald-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white transition-all duration-300 hover:text-white"
                   >
                     Sign Up
                   </TabsTrigger>
