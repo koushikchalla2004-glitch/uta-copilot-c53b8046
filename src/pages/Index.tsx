@@ -302,8 +302,8 @@ const Index = () => {
         </Canvas>
       </div>
 
-      {/* Muted Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
+      {/* Semi-transparent Overlay to allow 3D to show through */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-gray-900/20 to-black/40" />
       
       {/* Subtle Grid Pattern */}
       <div 
