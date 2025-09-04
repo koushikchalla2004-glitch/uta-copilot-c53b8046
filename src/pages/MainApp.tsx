@@ -51,9 +51,7 @@ const MainApp = ({ user }: MainAppProps) => {
         onLogout={handleLogout}
         isAuthenticated={true}
       />
-      <Hero3D />
       <SearchEngine />
-      <VoiceOrb3D />
       <ExploreSection />
       <AboutSection />
       <Footer onThemeToggle={handleThemeToggle} isDark={isDark} />
