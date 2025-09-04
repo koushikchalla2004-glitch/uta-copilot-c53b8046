@@ -229,6 +229,7 @@ const StarScene = ({ isListening, isSpeaking }: { isListening: boolean; isSpeaki
 };
 
 const Hero = () => {
+  console.log('Hero component rendering...');
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -354,10 +355,12 @@ const Hero = () => {
     handleVoiceToggle();
   };
 
+  console.log('Hero about to render, voiceConnected:', voiceConnected, 'isListening:', isListening, 'isSpeaking:', isSpeaking);
+  
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Voice Visualizer */}
-      <VoiceVisualizer 
+      <VoiceVisualizer
         isListening={isListening} 
         isSpeaking={isSpeaking} 
         isConnected={voiceConnected} 
