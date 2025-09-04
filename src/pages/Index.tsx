@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, GraduationCap, Brain, Zap } from 'lucide-react';
 import * as THREE from 'three';
 
 // 3D Scene Components
@@ -256,8 +256,17 @@ const Index = () => {
         <div className="w-full max-w-md transform hover:scale-105 transition-all duration-500">
           <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-orange-500/25 transition-all duration-500">
             <CardHeader className="text-center pb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-rose-400 via-orange-500 to-amber-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-orange-500/50 transition-all duration-500 animate-pulse">
-                <span className="text-white text-3xl font-bold">UC</span>
+              <div className="w-24 h-24 bg-gradient-to-br from-rose-400 via-orange-500 to-amber-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-orange-500/50 transition-all duration-500 animate-pulse relative overflow-hidden">
+                {/* Animated background rings */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-rose-300/20 to-amber-300/20 animate-spin" style={{ animationDuration: '3s' }}></div>
+                <div className="absolute inset-2 rounded-full bg-gradient-to-l from-orange-400/30 to-rose-400/30 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
+                
+                {/* Main icon composition */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <GraduationCap className="w-8 h-8 text-white absolute -top-1 -left-1" />
+                  <Brain className="w-10 h-10 text-white/90" />
+                  <Zap className="w-6 h-6 text-yellow-200 absolute -bottom-1 -right-1" />
+                </div>
               </div>
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400 bg-clip-text text-transparent animate-pulse">
                 UTA Copilot
