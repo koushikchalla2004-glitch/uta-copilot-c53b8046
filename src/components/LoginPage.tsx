@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Alert, AlertDescription } from './ui/alert';
 import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from './ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
 
 // 3D Scene Components
