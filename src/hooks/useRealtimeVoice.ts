@@ -59,7 +59,7 @@ export const useRealtimeVoice = () => {
 
       // Connect to WebSocket
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//xihwgrnqvlxchigttrzj.supabase.co/functions/v1/realtime-voice`;
+      const wsUrl = `${protocol}//jtkrgxrutwbcjgruexuf.supabase.co/functions/v1/realtime-voice`;
       
       wsRef.current = new WebSocket(wsUrl);
 
