@@ -282,38 +282,6 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Feature Grid */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Smart Search</h3>
-              <p className="text-white/70">Find campus information, courses, and resources instantly</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mic className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Voice Assistant</h3>
-              <p className="text-white/70">Ask questions naturally and get spoken responses</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-all duration-300">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-cyan-600 to-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Personalized</h3>
-              <p className="text-white/70">Tailored assistance based on your academic needs</p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
