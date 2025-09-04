@@ -184,8 +184,7 @@ const Hero = () => {
         
         <Button 
           onClick={handleLogout}
-          variant="outline" 
-          className="border-white/30 text-white hover:bg-white/10"
+          className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 text-white"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Logout
