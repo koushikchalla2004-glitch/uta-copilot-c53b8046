@@ -45,29 +45,21 @@ const FloatingStars = () => {
 };
 
 const LetterU = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.3;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.4;
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
-      meshRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.3;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
+      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
     }
   });
 
   return (
-    <mesh ref={meshRef} position={[-8, 0, -6]}>
-      <boxGeometry args={[0.5, 4, 0.5]} />
-      <meshPhongMaterial 
-        color="#ff0080" 
-        emissive="#ff0080" 
-        emissiveIntensity={0.4}
-        transparent 
-        opacity={0.9} 
-      />
+    <group ref={groupRef} position={[-8, 0, -6]}>
       {/* Left pillar */}
-      <mesh position={[0, 0, 0]}>
+      <mesh position={[-1, 0, 0]}>
         <boxGeometry args={[0.5, 4, 0.5]} />
         <meshPhongMaterial 
           color="#ff0080" 
@@ -78,7 +70,7 @@ const LetterU = () => {
         />
       </mesh>
       {/* Right pillar */}
-      <mesh position={[2, 0, 0]}>
+      <mesh position={[1, 0, 0]}>
         <boxGeometry args={[0.5, 4, 0.5]} />
         <meshPhongMaterial 
           color="#ff0080" 
@@ -89,7 +81,7 @@ const LetterU = () => {
         />
       </mesh>
       {/* Bottom connector */}
-      <mesh position={[1, -1.75, 0]}>
+      <mesh position={[0, -1.75, 0]}>
         <boxGeometry args={[2, 0.5, 0.5]} />
         <meshPhongMaterial 
           color="#ff0080" 
@@ -99,35 +91,37 @@ const LetterU = () => {
           opacity={0.9} 
         />
       </mesh>
-    </mesh>
+    </group>
   );
 };
 
 const LetterT = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      meshRef.current.rotation.z = state.clock.elapsedTime * 0.5;
-      meshRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
-      meshRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      groupRef.current.rotation.z = state.clock.elapsedTime * 0.5;
+      groupRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
+      groupRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
     }
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0, -5]}>
+    <group ref={groupRef} position={[0, 0, -5]}>
       {/* Top horizontal bar */}
-      <boxGeometry args={[3, 0.5, 0.5]} />
-      <meshPhongMaterial 
-        color="#00ffff" 
-        emissive="#00ffff" 
-        emissiveIntensity={0.4}
-        transparent 
-        opacity={0.9} 
-      />
+      <mesh position={[0, 1.75, 0]}>
+        <boxGeometry args={[3, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#00ffff" 
+          emissive="#00ffff" 
+          emissiveIntensity={0.4}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
       {/* Vertical bar */}
-      <mesh position={[0, -1.75, 0]}>
+      <mesh position={[0, -0.25, 0]}>
         <boxGeometry args={[0.5, 3, 0.5]} />
         <meshPhongMaterial 
           color="#00ffff" 
@@ -137,24 +131,24 @@ const LetterT = () => {
           opacity={0.9} 
         />
       </mesh>
-    </mesh>
+    </group>
   );
 };
 
 const LetterA = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.4;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
-      meshRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.4;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
+      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
     }
   });
 
   return (
-    <mesh ref={meshRef} position={[8, 0, -7]}>
+    <group ref={groupRef} position={[8, 0, -7]}>
       {/* Left diagonal */}
       <mesh rotation={[0, 0, 0.3]} position={[-0.7, 0, 0]}>
         <boxGeometry args={[0.5, 4.5, 0.5]} />
@@ -188,7 +182,7 @@ const LetterA = () => {
           opacity={0.9} 
         />
       </mesh>
-    </mesh>
+    </group>
   );
 };
 
