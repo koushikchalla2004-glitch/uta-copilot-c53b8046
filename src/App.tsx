@@ -54,6 +54,14 @@ const App = () => {
           path="/" 
           element={<Navigate to={session ? "/hero" : "/auth"} replace />} 
         />
+        <Route 
+          path="/app" 
+          element={<Navigate to="/hero" replace />} 
+        />
+        <Route 
+          path="*" 
+          element={<Navigate to={session ? "/hero" : "/auth"} replace />} 
+        />
       </Routes>
       <Toaster />
     </>
