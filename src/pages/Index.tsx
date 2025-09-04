@@ -11,19 +11,204 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import * as THREE from 'three';
 
-// Simple unified color scene
-const TestScene = () => {
+// Floating stars background
+const FloatingStars = () => {
+  const starsRef = useRef<THREE.Points>(null);
+  
+  useFrame((state) => {
+    if (starsRef.current) {
+      starsRef.current.rotation.y = state.clock.elapsedTime * 0.1;
+      starsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.05) * 0.2;
+    }
+  });
+
+  const starsPosition = new Float32Array(400 * 3);
+  for (let i = 0; i < 400; i++) {
+    starsPosition[i * 3] = (Math.random() - 0.5) * 100;
+    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 100;
+    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 50;
+  }
+
+  return (
+    <points ref={starsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={400}
+          array={starsPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial size={0.2} color="#ffffff" />
+    </points>
+  );
+};
+
+// Letter U - unified indigo color
+const LetterU = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.3;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
+      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[-8, 0, -6]}>
+      {/* Left pillar */}
+      <mesh position={[-1, 0, 0]}>
+        <boxGeometry args={[0.5, 4, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Right pillar */}
+      <mesh position={[1, 0, 0]}>
+        <boxGeometry args={[0.5, 4, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Bottom connector */}
+      <mesh position={[0, -1.75, 0]}>
+        <boxGeometry args={[2, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// Letter T - unified indigo color
+const LetterT = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      groupRef.current.rotation.z = state.clock.elapsedTime * 0.5;
+      groupRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
+      groupRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0, -5]}>
+      {/* Top horizontal bar */}
+      <mesh position={[0, 1.75, 0]}>
+        <boxGeometry args={[3, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Vertical bar */}
+      <mesh position={[0, -0.25, 0]}>
+        <boxGeometry args={[0.5, 3, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// Letter A - unified indigo color
+const LetterA = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.4;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
+      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[8, 0, -7]}>
+      {/* Left diagonal */}
+      <mesh rotation={[0, 0, 0.3]} position={[-0.7, 0, 0]}>
+        <boxGeometry args={[0.5, 4.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Right diagonal */}
+      <mesh rotation={[0, 0, -0.3]} position={[0.7, 0, 0]}>
+        <boxGeometry args={[0.5, 4.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Horizontal crossbar */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1.8, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#6366f1" 
+          emissive="#6366f1" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// Main UTA scene
+const UTAScene = () => {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
+      <ambientLight intensity={0.6} />
+      <pointLight position={[15, 15, 15]} intensity={1.5} color="#ffffff" />
+      <pointLight position={[-15, -15, -15]} intensity={1} color="#6366f1" />
+      <pointLight position={[0, 20, 0]} intensity={1.2} color="#8b5cf6" />
       
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="#6366f1" emissive="#6366f1" emissiveIntensity={0.2} />
-      </mesh>
+      <FloatingStars />
+      <LetterU />
+      <LetterT />
+      <LetterA />
       
-      <OrbitControls />
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        autoRotate={true}
+        autoRotateSpeed={1.5}
+      />
     </>
   );
 };
@@ -138,7 +323,7 @@ const Index = () => {
       {/* 3D Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 2, 12], fov: 60 }}>
-          <TestScene />
+          <UTAScene />
         </Canvas>
       </div>
 
