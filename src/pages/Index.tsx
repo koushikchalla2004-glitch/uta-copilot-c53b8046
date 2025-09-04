@@ -1,12 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useEffect } from 'react';
+import { Navigation } from '@/components/Navigation';
+import { Hero3D } from '@/components/Hero3D';
+import { SearchEngine } from '@/components/SearchEngine';
+import { VoiceOrb3D } from '@/components/VoiceOrb3D';
+import { ExploreSection } from '@/components/ExploreSection';
+import { AboutSection } from '@/components/AboutSection';
+import { Footer } from '@/components/Footer';
 
 const Index = () => {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    // Set initial theme
+    document.documentElement.classList.toggle('dark', isDark);
+  }, [isDark]);
+
+  const handleThemeToggle = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('dark');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Navigation onThemeToggle={handleThemeToggle} isDark={isDark} />
+      <Hero3D />
+      <SearchEngine />
+      <VoiceOrb3D />
+      <ExploreSection />
+      <AboutSection />
+      <Footer onThemeToggle={handleThemeToggle} isDark={isDark} />
     </div>
   );
 };
