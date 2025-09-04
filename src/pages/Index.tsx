@@ -11,178 +11,92 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import * as THREE from 'three';
 
-// Solar System 3D Components
-const Planet = ({ 
-  position, 
-  size, 
-  color, 
-  orbitRadius, 
-  orbitSpeed 
-}: { 
-  position: [number, number, number];
-  size: number;
-  color: string;
-  orbitRadius: number;
-  orbitSpeed: number;
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+// Simple 3D Background Components
+const FloatingStars = () => {
+  const starsRef = useRef<THREE.Points>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      // Orbit around center
-      const time = state.clock.elapsedTime * orbitSpeed;
-      meshRef.current.position.x = Math.cos(time) * orbitRadius;
-      meshRef.current.position.z = Math.sin(time) * orbitRadius;
-      
-      // Self rotation
-      meshRef.current.rotation.y += 0.01;
+    if (starsRef.current) {
+      starsRef.current.rotation.y = state.clock.elapsedTime * 0.05;
     }
   });
 
-  return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[size, 16, 16]} />
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-};
-
-const Sun = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.005;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={[0, 0, 0]}>
-      <sphereGeometry args={[0.8, 32, 32]} />
-      <meshStandardMaterial 
-        color="#3b82f6" 
-        emissive="#1e40af" 
-        emissiveIntensity={0.3}
-      />
-    </mesh>
-  );
-};
-
-const Stars = () => {
-  const points = useRef<THREE.Points>(null);
-  
-  useFrame((state) => {
-    if (points.current) {
-      points.current.rotation.y = state.clock.elapsedTime * 0.02;
-      points.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.1;
-    }
-  });
-
-  const starsPosition = new Float32Array(500 * 3);
-  for (let i = 0; i < 500; i++) {
-    starsPosition[i * 3] = (Math.random() - 0.5) * 150;
-    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 150;
-    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 150;
+  const starsPosition = new Float32Array(300 * 3);
+  for (let i = 0; i < 300; i++) {
+    starsPosition[i * 3] = (Math.random() - 0.5) * 50;
+    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 50;
+    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 30;
   }
 
   return (
-    <points ref={points}>
+    <points ref={starsRef}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={500}
+          count={300}
           array={starsPosition}
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.15} color="#ffffff" opacity={1} transparent={false} />
+      <pointsMaterial size={0.05} color="#ffffff" />
     </points>
   );
 };
 
-const Asteroid = ({ 
-  position, 
-  size, 
-  speed,
-  orbitRadius,
-  orbitSpeed
-}: { 
-  position: [number, number, number];
-  size: number;
-  speed: number;
-  orbitRadius: number;
-  orbitSpeed: number;
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+const FloatingCube = () => {
+  const cubeRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (meshRef.current) {
-      // Irregular orbit movement
-      const time = state.clock.elapsedTime * orbitSpeed;
-      meshRef.current.position.x = Math.cos(time) * orbitRadius + Math.sin(time * 2) * 0.5;
-      meshRef.current.position.z = Math.sin(time) * orbitRadius + Math.cos(time * 1.5) * 0.3;
-      meshRef.current.position.y = Math.sin(time * 0.7) * 0.8;
-      
-      // Tumbling rotation
-      meshRef.current.rotation.x += speed * 0.02;
-      meshRef.current.rotation.y += speed * 0.015;
-      meshRef.current.rotation.z += speed * 0.01;
+    if (cubeRef.current) {
+      cubeRef.current.rotation.x = state.clock.elapsedTime * 0.3;
+      cubeRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      cubeRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.5;
     }
   });
 
   return (
-    <mesh ref={meshRef} position={position}>
-      <dodecahedronGeometry args={[size, 0]} />
-      <meshStandardMaterial color="#4b5563" roughness={0.8} metalness={0.2} />
+    <mesh ref={cubeRef} position={[-4, 0, -5]}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshPhongMaterial color="#3b82f6" transparent opacity={0.7} />
     </mesh>
   );
 };
 
-const AsteroidField = () => {
-  const asteroids = [];
+const FloatingSphere = () => {
+  const sphereRef = useRef<THREE.Mesh>(null);
   
-  for (let i = 0; i < 15; i++) {
-    asteroids.push(
-      <Asteroid
-        key={i}
-        position={[0, 0, 0]}
-        size={Math.random() * 0.15 + 0.05}
-        speed={Math.random() * 2 + 0.5}
-        orbitRadius={Math.random() * 8 + 10}
-        orbitSpeed={Math.random() * 0.3 + 0.1}
-      />
-    );
-  }
-  
-  return <>{asteroids}</>;
+  useFrame((state) => {
+    if (sphereRef.current) {
+      sphereRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      sphereRef.current.rotation.z = state.clock.elapsedTime * 0.4;
+      sphereRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 0.8;
+    }
+  });
+
+  return (
+    <mesh ref={sphereRef} position={[4, 0, -4]}>
+      <sphereGeometry args={[0.8, 16, 16]} />
+      <meshPhongMaterial color="#f59e0b" transparent opacity={0.7} />
+    </mesh>
+  );
 };
 
-const SolarSystem = () => {
+const SimpleScene3D = () => {
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <pointLight position={[0, 0, 0]} intensity={2} color="#3b82f6" />
-      <pointLight position={[10, 10, 10]} intensity={0.3} color="#6b7280" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={0.8} />
+      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#3b82f6" />
       
-      <Stars />
-      <Sun />
-      <AsteroidField />
+      <FloatingStars />
+      <FloatingCube />
+      <FloatingSphere />
       
-      {/* Planets with different orbits and speeds */}
-      <Planet position={[0, 0, 0]} size={0.15} color="#9ca3af" orbitRadius={2} orbitSpeed={0.8} />
-      <Planet position={[0, 0, 0]} size={0.2} color="#4b5563" orbitRadius={3} orbitSpeed={0.6} />
-      <Planet position={[0, 0, 0]} size={0.25} color="#374151" orbitRadius={4.5} orbitSpeed={0.4} />
-      <Planet position={[0, 0, 0]} size={0.3} color="#1f2937" orbitRadius={6} orbitSpeed={0.3} />
-      <Planet position={[0, 0, 0]} size={0.18} color="#6b7280" orbitRadius={7.5} orbitSpeed={0.2} />
-      <Planet position={[0, 0, 0]} size={0.35} color="#374151" orbitRadius={9} orbitSpeed={0.15} />
-      
-      <OrbitControls 
-        enableZoom={false} 
-        enablePan={false} 
-        autoRotate 
-        autoRotateSpeed={0.2}
-        enableDamping
-        dampingFactor={0.05}
+      <OrbitControls
+        enableZoom={false}
+        enablePan={false}
+        autoRotate={true}
+        autoRotateSpeed={1}
       />
     </>
   );
@@ -298,7 +212,7 @@ const Index = () => {
       {/* 3D Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 2, 12], fov: 60 }}>
-          <SolarSystem />
+          <SimpleScene3D />
         </Canvas>
       </div>
 
