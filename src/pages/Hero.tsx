@@ -124,19 +124,41 @@ const Hero = () => {
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     
-    // Simulate search results
-    const results = [
-      `Found information about: ${searchQuery}`,
-      "Academic calendar and important dates",
-      "Campus map and building locations",
-      "Student services and resources"
-    ];
-    setSearchResults(results);
-    
+    setSearchResults([]);
     toast({
-      title: "Search completed",
-      description: `Found ${results.length} results for "${searchQuery}"`,
+      title: "Searching...",
+      description: "AI is processing your question",
     });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-search', {
+        body: { query: searchQuery }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.response) {
+        setSearchResults([data.response]);
+        toast({
+          title: "Search completed",
+          description: "AI has found relevant information for you",
+        });
+      } else {
+        throw new Error('No response received');
+      }
+    } catch (error: any) {
+      console.error('Search error:', error);
+      setSearchResults([
+        "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance."
+      ]);
+      toast({
+        title: "Search Error",
+        description: "AI service temporarily unavailable",
+        variant: "destructive",
+      });
+    }
   };
 
   const toggleVoiceAssistant = () => {
