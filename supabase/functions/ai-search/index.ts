@@ -8,6 +8,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Fallback responses for common UTA queries
+function generateFallbackResponse(query: string): string {
+  const lowerQuery = query.toLowerCase();
+  
+  if (lowerQuery.includes('dining') || lowerQuery.includes('food') || lowerQuery.includes('eat')) {
+    return "🍽️ **UTA Dining Options:**\n\n• **Maverick Activities Center (MAC)** - Multiple restaurants and food court\n• **University Center** - Various dining venues and convenience stores\n• **Starbucks** locations across campus\n• **Chick-fil-A** in the University Center\n• **Panda Express** and other chain restaurants\n• **Residential dining halls** for students with meal plans\n\nFor current hours and menus, visit the UTA Dining Services website or call (817) 272-2665.";
+  }
+  
+  if (lowerQuery.includes('parking') || lowerQuery.includes('park')) {
+    return "🚗 **UTA Parking Information:**\n\n• **Student parking permits** required for most campus lots\n• **Visitor parking** available in designated areas\n• **Parking services office** in University Hall for permits\n• **Multiple parking garages** throughout campus\n• **Metered parking** available on some streets\n• **Shuttle services** connect remote lots to campus\n\nContact Parking Services at (817) 272-2282 or visit their office for detailed information.";
+  }
+  
+  if (lowerQuery.includes('library') || lowerQuery.includes('book') || lowerQuery.includes('study')) {
+    return "📚 **UTA Library Services:**\n\n• **Central Library** - Main campus library with extensive resources\n• **Architecture & Fine Arts Library** - Specialized collections\n• **Science & Engineering Library** - Technical resources\n• **24/7 study spaces** available during finals\n• **Computer labs** and printing services\n• **Research assistance** and tutoring support\n\nContact the Central Library at (817) 272-3000 or visit library.uta.edu for hours and services.";
+  }
+  
+  if (lowerQuery.includes('registration') || lowerQuery.includes('enroll') || lowerQuery.includes('class')) {
+    return "📝 **UTA Registration & Enrollment:**\n\n• **MyMav** student portal for registration\n• **Academic advisors** help plan your schedule\n• **Course catalogs** available online\n• **Registration dates** vary by student level\n• **Add/drop deadlines** important for refunds\n• **Waitlist options** for popular courses\n\nContact the Registrar's Office at (817) 272-2681 or visit registrar.uta.edu for detailed information.";
+  }
+  
+  if (lowerQuery.includes('location') || lowerQuery.includes('building') || lowerQuery.includes('map')) {
+    return "🗺️ **UTA Campus Information:**\n\n• **Interactive campus map** available on UTA website\n• **Visitor information center** at University Hall\n• **Campus tours** available for prospective students\n• **Major buildings** include Engineering Research Building, Business Building, Science Hall\n• **Emergency call boxes** located throughout campus\n• **Campus shuttles** connect different areas\n\nFor detailed maps and directions, visit uta.edu/maps or call (817) 272-2011.";
+  }
+  
+  // Default response for general queries
+  return `🎓 **UTA Campus Information:**\n\nI'd be happy to help you with information about the University of Texas at Arlington! Here are some key resources:\n\n• **Main website:** uta.edu\n• **Student services:** (817) 272-2011\n• **Campus tours and information:** admissions.uta.edu\n• **Emergency services:** (817) 272-3003\n\nFor specific questions about "${query}", I recommend:\n• Visiting the UTA website\n• Calling the main information line\n• Stopping by the Visitor Information Center\n\nIs there something specific about UTA you'd like to know more about?`;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -68,6 +96,20 @@ serve(async (req) => {
     if (!response.ok) {
       const error = await response.text();
       console.error('OpenAI API error:', error);
+      
+      // If quota exceeded or API issue, provide helpful fallback response
+      if (response.status === 429 || response.status >= 500) {
+        const fallbackResponse = generateFallbackResponse(query);
+        return new Response(JSON.stringify({ 
+          response: fallbackResponse,
+          query: query,
+          timestamp: new Date().toISOString(),
+          fallback: true
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
