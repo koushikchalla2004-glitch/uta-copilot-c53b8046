@@ -360,7 +360,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-black">
       {/* 3D Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 2, 12], fov: 60 }}>
