@@ -11,200 +11,19 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, GraduationCap } from 'lucide-react';
 import * as THREE from 'three';
 
-// Vibrant 3D Background Components
-const FloatingStars = () => {
-  const starsRef = useRef<THREE.Points>(null);
-  
-  useFrame((state) => {
-    if (starsRef.current) {
-      starsRef.current.rotation.y = state.clock.elapsedTime * 0.1;
-      starsRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.05) * 0.2;
-    }
-  });
-
-  const starsPosition = new Float32Array(500 * 3);
-  for (let i = 0; i < 500; i++) {
-    starsPosition[i * 3] = (Math.random() - 0.5) * 100;
-    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 100;
-    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 50;
-  }
-
-  return (
-    <points ref={starsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={500}
-          array={starsPosition}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial size={0.3} color="#ffffff" />
-    </points>
-  );
-};
-
-const LetterU = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.3;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.4;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
-      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={[-8, 0, -6]}>
-      {/* Left pillar */}
-      <mesh position={[-1, 0, 0]}>
-        <boxGeometry args={[0.5, 4, 0.5]} />
-        <meshPhongMaterial 
-          color="#ff0080" 
-          emissive="#ff0080" 
-          emissiveIntensity={0.4}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-      {/* Right pillar */}
-      <mesh position={[1, 0, 0]}>
-        <boxGeometry args={[0.5, 4, 0.5]} />
-        <meshPhongMaterial 
-          color="#ff0080" 
-          emissive="#ff0080" 
-          emissiveIntensity={0.4}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-      {/* Bottom connector */}
-      <mesh position={[0, -1.75, 0]}>
-        <boxGeometry args={[2, 0.5, 0.5]} />
-        <meshPhongMaterial 
-          color="#ff0080" 
-          emissive="#ff0080" 
-          emissiveIntensity={0.4}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-    </group>
-  );
-};
-
-const LetterT = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      groupRef.current.rotation.z = state.clock.elapsedTime * 0.5;
-      groupRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
-      groupRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={[0, 0, -5]}>
-      {/* Top horizontal bar */}
-      <mesh position={[0, 1.75, 0]}>
-        <boxGeometry args={[3, 0.5, 0.5]} />
-        <meshPhongMaterial 
-          color="#00ffff" 
-          emissive="#00ffff" 
-          emissiveIntensity={0.4}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-      {/* Vertical bar */}
-      <mesh position={[0, -0.25, 0]}>
-        <boxGeometry args={[0.5, 3, 0.5]} />
-        <meshPhongMaterial 
-          color="#00ffff" 
-          emissive="#00ffff" 
-          emissiveIntensity={0.4}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-    </group>
-  );
-};
-
-const LetterA = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.4;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
-      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={[8, 0, -7]}>
-      {/* Left diagonal */}
-      <mesh rotation={[0, 0, 0.3]} position={[-0.7, 0, 0]}>
-        <boxGeometry args={[0.5, 4.5, 0.5]} />
-        <meshPhongMaterial 
-          color="#ffff00" 
-          emissive="#ffff00" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-      {/* Right diagonal */}
-      <mesh rotation={[0, 0, -0.3]} position={[0.7, 0, 0]}>
-        <boxGeometry args={[0.5, 4.5, 0.5]} />
-        <meshPhongMaterial 
-          color="#ffff00" 
-          emissive="#ffff00" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-      {/* Horizontal crossbar */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[1.8, 0.5, 0.5]} />
-        <meshPhongMaterial 
-          color="#ffff00" 
-          emissive="#ffff00" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
-        />
-      </mesh>
-    </group>
-  );
-};
-
-const VibriantScene3D = () => {
+// Simple test scene to debug white screen
+const TestScene = () => {
   return (
     <>
-      <ambientLight intensity={0.6} />
-      <pointLight position={[15, 15, 15]} intensity={1.5} color="#ffffff" />
-      <pointLight position={[-15, -15, -15]} intensity={1} color="#ff0080" />
-      <pointLight position={[0, 20, 0]} intensity={1.2} color="#00ffff" />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={1} />
       
-      <FloatingStars />
-      <LetterU />
-      <LetterT />
-      <LetterA />
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#ff0000" />
+      </mesh>
       
-      <OrbitControls
-        enableZoom={false}
-        enablePan={false}
-        autoRotate={true}
-        autoRotateSpeed={2}
-      />
+      <OrbitControls />
     </>
   );
 };
@@ -319,7 +138,7 @@ const Index = () => {
       {/* 3D Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 2, 12], fov: 60 }}>
-          <VibriantScene3D />
+          <TestScene />
         </Canvas>
       </div>
 
