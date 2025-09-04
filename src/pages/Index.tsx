@@ -44,145 +44,185 @@ const FloatingStars = () => {
   );
 };
 
-// Letter U - unified indigo color
-const LetterU = () => {
+// Official UTA Logo 3D Recreation
+const UTALogoU = () => {
   const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.3;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.4;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
-      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.5;
     }
   });
 
   return (
-    <group ref={groupRef} position={[-8, 0, -6]}>
+    <group ref={groupRef} position={[-6, 0, -5]}>
       {/* Left pillar */}
-      <mesh position={[-1, 0, 0]}>
-        <boxGeometry args={[0.5, 4, 0.5]} />
+      <mesh position={[-1.2, 0, 0]}>
+        <boxGeometry args={[0.8, 5, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
       {/* Right pillar */}
-      <mesh position={[1, 0, 0]}>
-        <boxGeometry args={[0.5, 4, 0.5]} />
+      <mesh position={[1.2, 0, 0]}>
+        <boxGeometry args={[0.8, 5, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
       {/* Bottom connector */}
-      <mesh position={[0, -1.75, 0]}>
-        <boxGeometry args={[2, 0.5, 0.5]} />
+      <mesh position={[0, -2, 0]}>
+        <boxGeometry args={[3.2, 0.8, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
     </group>
   );
 };
 
-// Letter T - unified indigo color
-const LetterT = () => {
+const UTALogoT = () => {
   const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      groupRef.current.rotation.z = state.clock.elapsedTime * 0.5;
-      groupRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
-      groupRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5 + 1) * 0.5;
     }
   });
 
   return (
     <group ref={groupRef} position={[0, 0, -5]}>
       {/* Top horizontal bar */}
-      <mesh position={[0, 1.75, 0]}>
-        <boxGeometry args={[3, 0.5, 0.5]} />
+      <mesh position={[0, 2, 0]}>
+        <boxGeometry args={[4, 0.8, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
       {/* Vertical bar */}
-      <mesh position={[0, -0.25, 0]}>
-        <boxGeometry args={[0.5, 3, 0.5]} />
+      <mesh position={[0, -0.6, 0]}>
+        <boxGeometry args={[0.8, 4.4, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
     </group>
   );
 };
 
-// Letter A - unified indigo color
-const LetterA = () => {
+const UTALogoA = () => {
   const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.4;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
-      groupRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5 + 2) * 0.5;
     }
   });
 
   return (
-    <group ref={groupRef} position={[8, 0, -7]}>
+    <group ref={groupRef} position={[6, 0, -5]}>
       {/* Left diagonal */}
-      <mesh rotation={[0, 0, 0.3]} position={[-0.7, 0, 0]}>
-        <boxGeometry args={[0.5, 4.5, 0.5]} />
+      <mesh rotation={[0, 0, 0.2]} position={[-1, 0, 0]}>
+        <boxGeometry args={[0.8, 5.5, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
       {/* Right diagonal */}
-      <mesh rotation={[0, 0, -0.3]} position={[0.7, 0, 0]}>
-        <boxGeometry args={[0.5, 4.5, 0.5]} />
+      <mesh rotation={[0, 0, -0.2]} position={[1, 0, 0]}>
+        <boxGeometry args={[0.8, 5.5, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
         />
       </mesh>
       {/* Horizontal crossbar */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[1.8, 0.5, 0.5]} />
+      <mesh position={[0, 0.5, 0]}>
+        <boxGeometry args={[2.4, 0.8, 0.8]} />
         <meshPhongMaterial 
-          color="#6366f1" 
-          emissive="#6366f1" 
-          emissiveIntensity={0.3}
-          transparent 
-          opacity={0.9} 
+          color="#ffffff" 
+          emissive="#ffffff" 
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// UTA Logo Star Element
+const UTAStar = () => {
+  const starRef = useRef<THREE.Group>(null);
+  
+  useFrame((state) => {
+    if (starRef.current) {
+      starRef.current.rotation.z = state.clock.elapsedTime * 0.5;
+      starRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      starRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 1;
+    }
+  });
+
+  // Create star shape using multiple triangular pieces
+  return (
+    <group ref={starRef} position={[8, 2, -3]}>
+      {/* Top point */}
+      <mesh position={[0, 1.5, 0]} rotation={[0, 0, 0]}>
+        <coneGeometry args={[0.3, 1, 3]} />
+        <meshPhongMaterial 
+          color="#fbbf24" 
+          emissive="#fbbf24" 
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      {/* Bottom point */}
+      <mesh position={[0, -1.5, 0]} rotation={[0, 0, Math.PI]}>
+        <coneGeometry args={[0.3, 1, 3]} />
+        <meshPhongMaterial 
+          color="#fbbf24" 
+          emissive="#fbbf24" 
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      {/* Left point */}
+      <mesh position={[-1.5, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <coneGeometry args={[0.3, 1, 3]} />
+        <meshPhongMaterial 
+          color="#fbbf24" 
+          emissive="#fbbf24" 
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      {/* Right point */}
+      <mesh position={[1.5, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+        <coneGeometry args={[0.3, 1, 3]} />
+        <meshPhongMaterial 
+          color="#fbbf24" 
+          emissive="#fbbf24" 
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      {/* Center */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.4, 8, 8]} />
+        <meshPhongMaterial 
+          color="#fbbf24" 
+          emissive="#fbbf24" 
+          emissiveIntensity={0.4}
         />
       </mesh>
     </group>
@@ -199,9 +239,10 @@ const UTAScene = () => {
       <pointLight position={[0, 20, 0]} intensity={1.2} color="#8b5cf6" />
       
       <FloatingStars />
-      <LetterU />
-      <LetterT />
-      <LetterA />
+      <UTALogoU />
+      <UTALogoT />
+      <UTALogoA />
+      <UTAStar />
       
       <OrbitControls
         enableZoom={false}
