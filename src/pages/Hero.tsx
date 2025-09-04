@@ -4,9 +4,10 @@ import { OrbitControls } from '@react-three/drei';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot } from 'lucide-react';
+import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot, Phone, PhoneOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
 import * as THREE from 'three';
 
 interface ChatMessage {
@@ -107,19 +108,34 @@ const StarScene = ({ isListening, isSpeaking }: { isListening: boolean; isSpeaki
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+  const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Use the real-time voice hook
+  const {
+    isConnected: voiceConnected,
+    isConnecting: voiceConnecting,
+    isListening,
+    isSpeaking,
+    messages: voiceMessages,
+    connectToVoiceChat,
+    disconnectVoiceChat,
+    sendTextMessage
+  } = useRealtimeVoice();
+
+  // State for text-only chat when voice is not connected
+  const [textMessages, setTextMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: "Hi! I'm your UTA Copilot. Ask me anything about campus life, classes, dining, parking, or university services. How can I help you today?",
+      text: "Hi! I'm your UTA Copilot. Ask me anything about campus life, classes, dining, parking, or university services. You can type your questions or use voice chat for a more natural conversation!",
       isUser: false,
       timestamp: new Date()
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use voice messages if connected, otherwise use text messages
+  const chatMessages = voiceConnected ? voiceMessages : textMessages;
 
   const handleLogout = async () => {
     try {
@@ -148,71 +164,65 @@ const Hero = () => {
   const handleSendMessage = async () => {
     if (!searchQuery.trim()) return;
     
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      text: searchQuery,
-      isUser: true,
-      timestamp: new Date()
-    };
+    if (voiceConnected) {
+      // Send through voice chat
+      sendTextMessage(searchQuery);
+      setSearchQuery('');
+    } else {
+      // Send through text-only AI search
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        text: searchQuery,
+        isUser: true,
+        timestamp: new Date()
+      };
 
-    setChatMessages(prev => [...prev, userMessage]);
-    setSearchQuery('');
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-search', {
-        body: { query: userMessage.text }
-      });
+      setTextMessages(prev => [...prev, userMessage]);
+      setSearchQuery('');
+      setIsLoading(true);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke('ai-search', {
+          body: { query: userMessage.text }
+        });
 
-      if (error) {
-        throw error;
+        if (error) {
+          throw error;
+        }
+
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: data?.response || "I couldn't process your request. Please try again.",
+          isUser: false,
+          timestamp: new Date()
+        };
+
+        setTextMessages(prev => [...prev, aiMessage]);
+      } catch (error: any) {
+        console.error('Search error:', error);
+        const errorMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          text: "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance.",
+          isUser: false,
+          timestamp: new Date()
+        };
+        setTextMessages(prev => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
       }
+    }
+  };
 
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        text: data?.response || "I couldn't process your request. Please try again.",
-        isUser: false,
-        timestamp: new Date()
-      };
-
-      setChatMessages(prev => [...prev, aiMessage]);
-    } catch (error: any) {
-      console.error('Search error:', error);
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        text: "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      setChatMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
+  const handleVoiceToggle = () => {
+    if (voiceConnected) {
+      disconnectVoiceChat();
+    } else {
+      connectToVoiceChat();
     }
   };
 
   const toggleVoiceAssistant = () => {
-    if (isListening) {
-      setIsListening(false);
-      toast({
-        title: "Voice Assistant",
-        description: "Stopped listening",
-      });
-    } else {
-      setIsListening(true);
-      toast({
-        title: "Voice Assistant",
-        description: "Now listening... Speak your question",
-      });
-      
-      // Simulate voice interaction
-      setTimeout(() => {
-        setIsListening(false);
-        setIsSpeaking(true);
-        setTimeout(() => {
-          setIsSpeaking(false);
-        }, 3000);
-      }, 2000);
-    }
+    handleVoiceToggle();
   };
 
   return (
@@ -299,7 +309,7 @@ const Hero = () => {
               ))}
               
               {/* Loading Indicator */}
-              {isLoading && (
+              {(isLoading || voiceConnecting) && (
                 <div className="flex justify-start">
                   <div className="flex gap-3 max-w-[80%]">
                     <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
@@ -321,55 +331,74 @@ const Hero = () => {
 
             {/* Input Area */}
             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 mb-4">
+              {/* Voice Status Indicator */}
+              {voiceConnected && (
+                <div className="mb-3 text-center">
+                  {isListening ? (
+                    <div className="flex items-center justify-center gap-2 text-green-400">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium">🎤 Listening...</span>
+                    </div>
+                  ) : isSpeaking ? (
+                    <div className="flex items-center justify-center gap-2 text-blue-400">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium">🔊 UTA Copilot is speaking...</span>
+                    </div>
+                  ) : (
+                    <div className="text-white/60 text-sm">
+                      ✅ Voice chat active - Speak naturally or type below
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <div className="flex-1 relative">
                   <Input
                     type="text"
-                    placeholder="Ask me anything about UTA..."
+                    placeholder={voiceConnected ? "Voice chat active - speak or type..." : "Ask me anything about UTA..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                    disabled={isLoading}
+                    disabled={isLoading || voiceConnecting}
                     className="bg-transparent border-none text-white placeholder-white/60 text-base py-3 px-4 focus:ring-0 focus:border-none"
                   />
                 </div>
                 
                 <Button 
                   onClick={handleSendMessage}
-                  disabled={isLoading || !searchQuery.trim()}
+                  disabled={isLoading || voiceConnecting || !searchQuery.trim()}
                   className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 p-3 rounded-xl transition-all duration-300 disabled:opacity-50"
                 >
                   <Send className="w-5 h-5" />
                 </Button>
                 
+                {/* Voice Chat Toggle */}
                 <Button
-                  onClick={toggleVoiceAssistant}
+                  onClick={handleVoiceToggle}
+                  disabled={voiceConnecting}
                   className={`p-3 rounded-xl transition-all duration-300 ${
-                    isListening 
-                      ? 'bg-green-500 hover:bg-green-600 animate-pulse' 
-                      : isSpeaking
-                      ? 'bg-blue-500 hover:bg-blue-600 animate-pulse'
+                    voiceConnected
+                      ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                      : voiceConnecting
+                      ? 'bg-yellow-500 animate-pulse'
                       : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700'
                   }`}
                 >
-                  {isListening ? (
-                    <MicOff className="w-5 h-5 text-white" />
-                  ) : isSpeaking ? (
-                    <Volume2 className="w-5 h-5 text-white" />
+                  {voiceConnecting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : voiceConnected ? (
+                    <PhoneOff className="w-5 h-5 text-white" />
                   ) : (
-                    <Mic className="w-5 h-5 text-white" />
+                    <Phone className="w-5 h-5 text-white" />
                   )}
                 </Button>
               </div>
               
-              {/* Voice Status */}
-              {(isListening || isSpeaking) && (
-                <div className="mt-2 text-center">
-                  {isListening ? (
-                    <p className="text-sm text-green-400">🎤 Listening...</p>
-                  ) : (
-                    <p className="text-sm text-blue-400">🔊 Speaking...</p>
-                  )}
+              {/* Instructions */}
+              {!voiceConnected && (
+                <div className="mt-3 text-center text-white/60 text-sm">
+                  💡 Click the phone icon to start voice chat for a more natural conversation!
                 </div>
               )}
             </div>
