@@ -8,6 +8,7 @@ import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot, Phone, PhoneOff 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
+import VoiceVisualizer from '@/components/VoiceVisualizer';
 import * as THREE from 'three';
 
 interface ChatMessage {
@@ -57,32 +58,151 @@ const MovingStars = () => {
   );
 };
 
-// Voice Assistant Animation
+// Enhanced Voice Assistant Animation with Particles
 const VoiceAssistantOrb = ({ isListening, isSpeaking }: { isListening: boolean; isSpeaking: boolean }) => {
   const orbRef = useRef<THREE.Mesh>(null);
+  const particlesRef = useRef<THREE.Points>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  
+  // Create particles for voice visualization
+  const particleCount = 200;
+  const particlePositions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount; i++) {
+    const angle = (i / particleCount) * Math.PI * 2;
+    const radius = 2 + Math.random() * 3;
+    particlePositions[i * 3] = Math.cos(angle) * radius;
+    particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 4;
+    particlePositions[i * 3 + 2] = Math.sin(angle) * radius;
+  }
   
   useFrame((state) => {
     if (orbRef.current) {
       const material = orbRef.current.material as THREE.MeshPhongMaterial;
+      const time = state.clock.elapsedTime;
+      
       if (isListening) {
-        orbRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 8) * 0.2);
+        // Listening animation - green pulsing with particles
+        const pulse = 1 + Math.sin(time * 8) * 0.3;
+        orbRef.current.scale.setScalar(pulse);
         material.color.setHex(0x00ff88);
+        material.emissive.setHex(0x002211);
+        
+        // Animate particles outward
+        if (particlesRef.current) {
+          const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+          for (let i = 0; i < particleCount; i++) {
+            const angle = (i / particleCount) * Math.PI * 2 + time;
+            const radius = 2 + Math.sin(time * 4 + i * 0.1) * 1.5;
+            positions[i * 3] = Math.cos(angle) * radius;
+            positions[i * 3 + 1] = Math.sin(time * 3 + i * 0.05) * 2;
+            positions[i * 3 + 2] = Math.sin(angle) * radius;
+          }
+          particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        }
+        
       } else if (isSpeaking) {
-        orbRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 12) * 0.3);
+        // Speaking animation - blue with dynamic scaling and particles
+        const speak = 1 + Math.sin(time * 12) * 0.4 + Math.sin(time * 20) * 0.2;
+        orbRef.current.scale.setScalar(speak);
         material.color.setHex(0x0088ff);
+        material.emissive.setHex(0x001122);
+        
+        // Animate particles in wave pattern
+        if (particlesRef.current) {
+          const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+          for (let i = 0; i < particleCount; i++) {
+            const wave = Math.sin(time * 6 + i * 0.2) * 2;
+            const angle = (i / particleCount) * Math.PI * 2 + time * 0.5;
+            const radius = 3 + wave;
+            positions[i * 3] = Math.cos(angle) * radius;
+            positions[i * 3 + 1] = wave;
+            positions[i * 3 + 2] = Math.sin(angle) * radius;
+          }
+          particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        }
+        
       } else {
-        orbRef.current.scale.setScalar(1);
+        // Idle animation - purple gentle float
+        const idle = 1 + Math.sin(time * 2) * 0.1;
+        orbRef.current.scale.setScalar(idle);
         material.color.setHex(0x6366f1);
+        material.emissive.setHex(0x111122);
+        
+        // Gentle particle movement
+        if (particlesRef.current) {
+          const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+          for (let i = 0; i < particleCount; i++) {
+            const angle = (i / particleCount) * Math.PI * 2 + time * 0.2;
+            const radius = 2.5 + Math.sin(time + i * 0.1) * 0.5;
+            positions[i * 3] = Math.cos(angle) * radius;
+            positions[i * 3 + 1] = Math.sin(time * 0.5 + i * 0.1) * 1;
+            positions[i * 3 + 2] = Math.sin(angle) * radius;
+          }
+          particlesRef.current.geometry.attributes.position.needsUpdate = true;
+        }
       }
-      orbRef.current.rotation.y = state.clock.elapsedTime * 0.5;
+      
+      // Continuous rotation
+      orbRef.current.rotation.y = time * 0.5;
+      orbRef.current.rotation.x = Math.sin(time * 0.3) * 0.2;
+    }
+    
+    // Animate glow effect
+    if (glowRef.current) {
+      const glowMaterial = glowRef.current.material as THREE.MeshBasicMaterial;
+      const time = state.clock.elapsedTime;
+      
+      if (isListening) {
+        const glowIntensity = 0.3 + Math.sin(time * 8) * 0.2;
+        glowRef.current.scale.setScalar(2 + glowIntensity);
+        glowMaterial.opacity = glowIntensity;
+        glowMaterial.color.setHex(0x00ff88);
+      } else if (isSpeaking) {
+        const glowIntensity = 0.4 + Math.sin(time * 12) * 0.3;
+        glowRef.current.scale.setScalar(2.5 + glowIntensity);
+        glowMaterial.opacity = glowIntensity;
+        glowMaterial.color.setHex(0x0088ff);
+      } else {
+        const glowIntensity = 0.1 + Math.sin(time * 2) * 0.05;
+        glowRef.current.scale.setScalar(1.8 + glowIntensity);
+        glowMaterial.opacity = glowIntensity;
+        glowMaterial.color.setHex(0x6366f1);
+      }
     }
   });
 
   return (
-    <mesh ref={orbRef} position={[0, 0, 0]}>
-      <sphereGeometry args={[1, 32, 32]} />
-      <meshPhongMaterial transparent opacity={0.8} />
-    </mesh>
+    <group position={[0, 0, 0]}>
+      {/* Main Orb */}
+      <mesh ref={orbRef}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshPhongMaterial transparent opacity={0.9} />
+      </mesh>
+      
+      {/* Glow Effect */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[1.2, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0.2} />
+      </mesh>
+      
+      {/* Particles */}
+      <points ref={particlesRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={particleCount}
+            array={particlePositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial 
+          size={isListening ? 0.1 : isSpeaking ? 0.15 : 0.05} 
+          color={isListening ? "#00ff88" : isSpeaking ? "#0088ff" : "#6366f1"} 
+          transparent 
+          opacity={0.8} 
+        />
+      </points>
+    </group>
   );
 };
 
@@ -227,6 +347,13 @@ const Hero = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
+      {/* Voice Visualizer */}
+      <VoiceVisualizer 
+        isListening={isListening} 
+        isSpeaking={isSpeaking} 
+        isConnected={voiceConnected} 
+      />
+      
       {/* 3D Stars Background */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
@@ -335,17 +462,37 @@ const Hero = () => {
               {voiceConnected && (
                 <div className="mb-3 text-center">
                   {isListening ? (
-                    <div className="flex items-center justify-center gap-2 text-green-400">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">🎤 Listening...</span>
+                    <div className="flex items-center justify-center gap-2 text-green-400 animate-pulse">
+                      <div className="relative">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                        <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      </div>
+                      <span className="text-sm font-medium animate-bounce">🎤 Listening...</span>
+                      <div className="flex gap-1">
+                        <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
+                        <div className="w-1 h-6 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-1 h-5 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                      </div>
                     </div>
                   ) : isSpeaking ? (
                     <div className="flex items-center justify-center gap-2 text-blue-400">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">🔊 UTA Copilot is speaking...</span>
+                      <div className="relative">
+                        <div className="w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
+                        <div className="absolute inset-0 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                      </div>
+                      <span className="text-sm font-medium animate-bounce">🔊 UTA Copilot is speaking...</span>
+                      <div className="flex gap-1">
+                        <div className="w-1 h-6 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-1 h-8 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-1 h-5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                        <div className="w-1 h-7 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-white/60 text-sm">
+                    <div className="text-white/60 text-sm flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                       ✅ Voice chat active - Speak naturally or type below
                     </div>
                   )}
@@ -377,20 +524,28 @@ const Hero = () => {
                 <Button
                   onClick={handleVoiceToggle}
                   disabled={voiceConnecting}
-                  className={`p-3 rounded-xl transition-all duration-300 ${
+                  className={`p-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
                     voiceConnected
-                      ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+                      ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30'
                       : voiceConnecting
-                      ? 'bg-yellow-500 animate-pulse'
-                      : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700'
-                  }`}
+                      ? 'bg-yellow-500 shadow-lg shadow-yellow-500/30'
+                      : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 shadow-lg shadow-emerald-500/30'
+                  } ${voiceConnected || voiceConnecting ? 'animate-pulse' : ''}`}
                 >
+                  {/* Ripple effect for active states */}
+                  {(voiceConnected || voiceConnecting) && (
+                    <div className="absolute inset-0 bg-white/20 rounded-xl animate-ping"></div>
+                  )}
+                  
                   {voiceConnecting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : voiceConnected ? (
-                    <PhoneOff className="w-5 h-5 text-white" />
+                    <div className="relative">
+                      <PhoneOff className="w-5 h-5 text-white animate-bounce" />
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping"></div>
+                    </div>
                   ) : (
-                    <Phone className="w-5 h-5 text-white" />
+                    <Phone className="w-5 h-5 text-white hover:scale-110 transition-transform" />
                   )}
                 </Button>
               </div>
