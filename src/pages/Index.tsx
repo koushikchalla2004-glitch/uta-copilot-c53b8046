@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Float, MeshDistortMaterial } from '@react-three/drei';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -6,7 +8,111 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import * as THREE from 'three';
+
+// 3D Scene Components
+const FloatingShape = ({ position, geometry, color, speed = 1 }: any) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.01 * speed;
+      meshRef.current.rotation.y += 0.01 * speed;
+      meshRef.current.position.y += Math.sin(state.clock.elapsedTime * speed) * 0.002;
+    }
+  });
+
+  return (
+    <Float speed={speed} rotationIntensity={0.5} floatIntensity={0.5}>
+      <mesh ref={meshRef} position={position}>
+        {geometry}
+        <MeshDistortMaterial
+          color={color}
+          attach="material"
+          distort={0.4}
+          speed={2}
+          roughness={0.1}
+          metalness={0.8}
+        />
+      </mesh>
+    </Float>
+  );
+};
+
+const ParticleField = () => {
+  const points = useRef<THREE.Points>(null);
+  
+  useFrame((state) => {
+    if (points.current) {
+      points.current.rotation.x = state.clock.elapsedTime * 0.05;
+      points.current.rotation.y = state.clock.elapsedTime * 0.1;
+    }
+  });
+
+  const particlesPosition = new Float32Array(200 * 3);
+  for (let i = 0; i < 200; i++) {
+    particlesPosition[i * 3] = (Math.random() - 0.5) * 20;
+    particlesPosition[i * 3 + 1] = (Math.random() - 0.5) * 20;
+    particlesPosition[i * 3 + 2] = (Math.random() - 0.5) * 20;
+  }
+
+  return (
+    <points ref={points}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={200}
+          array={particlesPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial size={0.1} color="#60a5fa" opacity={0.6} transparent />
+    </points>
+  );
+};
+
+const Scene3D = () => {
+  return (
+    <>
+      <ambientLight intensity={0.3} />
+      <pointLight position={[10, 10, 10]} intensity={1} color="#60a5fa" />
+      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#a855f7" />
+      
+      <ParticleField />
+      
+      <FloatingShape
+        position={[-4, 2, -3]}
+        geometry={<boxGeometry args={[1, 1, 1]} />}
+        color="#3b82f6"
+        speed={0.8}
+      />
+      
+      <FloatingShape
+        position={[4, -2, -2]}
+        geometry={<sphereGeometry args={[0.8, 32, 32]} />}
+        color="#8b5cf6"
+        speed={1.2}
+      />
+      
+      <FloatingShape
+        position={[0, 3, -4]}
+        geometry={<torusGeometry args={[1, 0.4, 16, 100]} />}
+        color="#06b6d4"
+        speed={1.5}
+      />
+      
+      <FloatingShape
+        position={[-3, -3, -1]}
+        geometry={<cylinderGeometry args={[0.5, 0.5, 2, 8]} />}
+        color="#f59e0b"
+        speed={0.6}
+      />
+      
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+    </>
+  );
+};
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -114,165 +220,195 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* Animated background particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-blue-400/30 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${3 + Math.random() * 4}s`
-            }}
-          />
-        ))}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* 3D Background */}
+      <div className="absolute inset-0">
+        <Canvas camera={{ position: [0, 0, 8], fov: 60 }}>
+          <Scene3D />
+        </Canvas>
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 shadow-2xl">
-          <CardHeader className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">UC</span>
-            </div>
-            <CardTitle className="text-2xl font-bold text-white">UTA Copilot</CardTitle>
-            <CardDescription className="text-gray-300">
-              Your intelligent campus companion
-            </CardDescription>
-          </CardHeader>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-purple-900/60 to-blue-900/80" />
+      
+      {/* Animated Grid Pattern */}
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          animation: 'gridMove 20s linear infinite'
+        }}
+      />
 
-          <CardContent>
-            <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => {
-              setIsLogin(value === "login");
-              setError(null);
-              setFormData({ email: '', password: '', displayName: '', confirmPassword: '' });
-            }}>
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5">
-                <TabsTrigger value="login" className="text-white data-[state=active]:bg-white/20">
-                  Login
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white/20">
-                  Sign Up
-                </TabsTrigger>
-              </TabsList>
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md transform hover:scale-105 transition-all duration-500">
+          <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-blue-500/25 transition-all duration-500">
+            <CardHeader className="text-center pb-6">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-400 via-purple-500 to-cyan-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-blue-500/50 transition-all duration-500 animate-pulse">
+                <span className="text-white text-3xl font-bold">UC</span>
+              </div>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse">
+                UTA Copilot
+              </CardTitle>
+              <CardDescription className="text-gray-300 text-lg mt-2">
+                Your intelligent campus companion
+              </CardDescription>
+            </CardHeader>
 
-              {error && (
-                <Alert className="mb-4 bg-red-500/20 border-red-500/50">
-                  <AlertDescription className="text-red-200">
-                    {error}
-                  </AlertDescription>
-                </Alert>
-              )}
+            <CardContent className="space-y-6">
+              <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => {
+                setIsLogin(value === "login");
+                setError(null);
+                setFormData({ email: '', password: '', displayName: '', confirmPassword: '' });
+              }}>
+                <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/10 backdrop-blur-sm border border-white/20">
+                  <TabsTrigger 
+                    value="login" 
+                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="signup" 
+                    className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
+                {error && (
+                  <Alert className="mb-6 bg-red-500/20 border-red-500/50 backdrop-blur-sm animate-pulse">
+                    <AlertDescription className="text-red-200">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <Input
                       type="email"
                       name="email"
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-cyan-500 hover:from-blue-600 hover:via-purple-700 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:transform-none"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    {isLoading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </form>
-              </TabsContent>
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                          Logging in...
+                        </div>
+                      ) : (
+                        'Login'
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div>
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignup} className="space-y-4">
                     <Input
                       type="text"
                       name="displayName"
                       placeholder="Display Name"
                       value={formData.displayName}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
-                  </div>
-                  <div>
                     <Input
                       type="email"
                       name="email"
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400 pr-10"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  <div>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="bg-white/10 border-white/30 text-white placeholder-gray-400 pr-12 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                     <Input
                       type="password"
                       name="confirmPassword"
                       placeholder="Confirm Password"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                      className="bg-white/10 border-white/30 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/50 transition-all duration-300 hover:bg-white/15"
                       required
                     />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                  >
-                    {isLoading ? 'Creating account...' : 'Create Account'}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-blue-500 via-purple-600 to-cyan-500 hover:from-blue-600 hover:via-purple-700 hover:to-cyan-600 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:transform-none"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                          Creating account...
+                        </div>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+      
+      <style>{`
+        @keyframes gridMove {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(50px, 50px); }
+        }
+      `}</style>
     </div>
   );
 };
