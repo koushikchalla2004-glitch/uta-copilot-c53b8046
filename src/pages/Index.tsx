@@ -44,80 +44,150 @@ const FloatingStars = () => {
   );
 };
 
-const GlowingCube = () => {
-  const cubeRef = useRef<THREE.Mesh>(null);
+const LetterU = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (cubeRef.current) {
-      cubeRef.current.rotation.x = state.clock.elapsedTime * 0.5;
-      cubeRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-      cubeRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
-      cubeRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2;
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.3;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 1.5;
+      meshRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.7) * 2 - 8;
     }
   });
 
   return (
-    <mesh ref={cubeRef} position={[-6, 0, -8]}>
-      <boxGeometry args={[2, 2, 2]} />
+    <mesh ref={meshRef} position={[-8, 0, -6]}>
+      <boxGeometry args={[0.5, 4, 0.5]} />
       <meshPhongMaterial 
         color="#ff0080" 
         emissive="#ff0080" 
-        emissiveIntensity={0.3}
+        emissiveIntensity={0.4}
         transparent 
         opacity={0.9} 
       />
+      {/* Left pillar */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[0.5, 4, 0.5]} />
+        <meshPhongMaterial 
+          color="#ff0080" 
+          emissive="#ff0080" 
+          emissiveIntensity={0.4}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Right pillar */}
+      <mesh position={[2, 0, 0]}>
+        <boxGeometry args={[0.5, 4, 0.5]} />
+        <meshPhongMaterial 
+          color="#ff0080" 
+          emissive="#ff0080" 
+          emissiveIntensity={0.4}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Bottom connector */}
+      <mesh position={[1, -1.75, 0]}>
+        <boxGeometry args={[2, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#ff0080" 
+          emissive="#ff0080" 
+          emissiveIntensity={0.4}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
     </mesh>
   );
 };
 
-const GlowingSphere = () => {
-  const sphereRef = useRef<THREE.Mesh>(null);
+const LetterT = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (sphereRef.current) {
-      sphereRef.current.rotation.x = state.clock.elapsedTime * 0.4;
-      sphereRef.current.rotation.z = state.clock.elapsedTime * 0.6;
-      sphereRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
-      sphereRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 3;
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.z = state.clock.elapsedTime * 0.5;
+      meshRef.current.position.y = Math.cos(state.clock.elapsedTime * 1.2) * 1.8;
+      meshRef.current.position.x = Math.sin(state.clock.elapsedTime * 0.8) * 2;
     }
   });
 
   return (
-    <mesh ref={sphereRef} position={[6, 0, -6]}>
-      <sphereGeometry args={[1.5, 32, 32]} />
+    <mesh ref={meshRef} position={[0, 0, -5]}>
+      {/* Top horizontal bar */}
+      <boxGeometry args={[3, 0.5, 0.5]} />
       <meshPhongMaterial 
         color="#00ffff" 
         emissive="#00ffff" 
         emissiveIntensity={0.4}
         transparent 
-        opacity={0.8} 
+        opacity={0.9} 
       />
+      {/* Vertical bar */}
+      <mesh position={[0, -1.75, 0]}>
+        <boxGeometry args={[0.5, 3, 0.5]} />
+        <meshPhongMaterial 
+          color="#00ffff" 
+          emissive="#00ffff" 
+          emissiveIntensity={0.4}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
     </mesh>
   );
 };
 
-const FloatingTorus = () => {
-  const torusRef = useRef<THREE.Mesh>(null);
+const LetterA = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
-    if (torusRef.current) {
-      torusRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      torusRef.current.rotation.y = state.clock.elapsedTime * 0.8;
-      torusRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
-      torusRef.current.position.z = Math.cos(state.clock.elapsedTime * 0.3) * 4 - 10;
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.4;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 2;
+      meshRef.current.position.x = Math.cos(state.clock.elapsedTime * 0.3) * 3 + 8;
     }
   });
 
   return (
-    <mesh ref={torusRef} position={[0, 0, -10]}>
-      <torusGeometry args={[3, 0.8, 16, 100]} />
-      <meshPhongMaterial 
-        color="#ffff00" 
-        emissive="#ffff00" 
-        emissiveIntensity={0.2}
-        transparent 
-        opacity={0.7} 
-      />
+    <mesh ref={meshRef} position={[8, 0, -7]}>
+      {/* Left diagonal */}
+      <mesh rotation={[0, 0, 0.3]} position={[-0.7, 0, 0]}>
+        <boxGeometry args={[0.5, 4.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#ffff00" 
+          emissive="#ffff00" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Right diagonal */}
+      <mesh rotation={[0, 0, -0.3]} position={[0.7, 0, 0]}>
+        <boxGeometry args={[0.5, 4.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#ffff00" 
+          emissive="#ffff00" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
+      {/* Horizontal crossbar */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1.8, 0.5, 0.5]} />
+        <meshPhongMaterial 
+          color="#ffff00" 
+          emissive="#ffff00" 
+          emissiveIntensity={0.3}
+          transparent 
+          opacity={0.9} 
+        />
+      </mesh>
     </mesh>
   );
 };
@@ -131,9 +201,9 @@ const VibriantScene3D = () => {
       <pointLight position={[0, 20, 0]} intensity={1.2} color="#00ffff" />
       
       <FloatingStars />
-      <GlowingCube />
-      <GlowingSphere />
-      <FloatingTorus />
+      <LetterU />
+      <LetterT />
+      <LetterA />
       
       <OrbitControls
         enableZoom={false}
