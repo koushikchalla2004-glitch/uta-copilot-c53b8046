@@ -74,14 +74,15 @@ const Stars = () => {
   useFrame((state) => {
     if (points.current) {
       points.current.rotation.y = state.clock.elapsedTime * 0.02;
+      points.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.1;
     }
   });
 
-  const starsPosition = new Float32Array(300 * 3);
-  for (let i = 0; i < 300; i++) {
-    starsPosition[i * 3] = (Math.random() - 0.5) * 100;
-    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 100;
-    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 100;
+  const starsPosition = new Float32Array(500 * 3);
+  for (let i = 0; i < 500; i++) {
+    starsPosition[i * 3] = (Math.random() - 0.5) * 150;
+    starsPosition[i * 3 + 1] = (Math.random() - 0.5) * 150;
+    starsPosition[i * 3 + 2] = (Math.random() - 0.5) * 150;
   }
 
   return (
@@ -89,14 +90,71 @@ const Stars = () => {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={300}
+          count={500}
           array={starsPosition}
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.05} color="#6b7280" opacity={0.8} transparent />
+      <pointsMaterial size={0.08} color="#6b7280" opacity={0.9} transparent />
     </points>
   );
+};
+
+const Asteroid = ({ 
+  position, 
+  size, 
+  speed,
+  orbitRadius,
+  orbitSpeed
+}: { 
+  position: [number, number, number];
+  size: number;
+  speed: number;
+  orbitRadius: number;
+  orbitSpeed: number;
+}) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      // Irregular orbit movement
+      const time = state.clock.elapsedTime * orbitSpeed;
+      meshRef.current.position.x = Math.cos(time) * orbitRadius + Math.sin(time * 2) * 0.5;
+      meshRef.current.position.z = Math.sin(time) * orbitRadius + Math.cos(time * 1.5) * 0.3;
+      meshRef.current.position.y = Math.sin(time * 0.7) * 0.8;
+      
+      // Tumbling rotation
+      meshRef.current.rotation.x += speed * 0.02;
+      meshRef.current.rotation.y += speed * 0.015;
+      meshRef.current.rotation.z += speed * 0.01;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={position}>
+      <dodecahedronGeometry args={[size, 0]} />
+      <meshStandardMaterial color="#4b5563" roughness={0.8} metalness={0.2} />
+    </mesh>
+  );
+};
+
+const AsteroidField = () => {
+  const asteroids = [];
+  
+  for (let i = 0; i < 15; i++) {
+    asteroids.push(
+      <Asteroid
+        key={i}
+        position={[0, 0, 0]}
+        size={Math.random() * 0.15 + 0.05}
+        speed={Math.random() * 2 + 0.5}
+        orbitRadius={Math.random() * 8 + 10}
+        orbitSpeed={Math.random() * 0.3 + 0.1}
+      />
+    );
+  }
+  
+  return <>{asteroids}</>;
 };
 
 const SolarSystem = () => {
@@ -108,6 +166,7 @@ const SolarSystem = () => {
       
       <Stars />
       <Sun />
+      <AsteroidField />
       
       {/* Planets with different orbits and speeds */}
       <Planet position={[0, 0, 0]} size={0.15} color="#9ca3af" orbitRadius={2} orbitSpeed={0.8} />
