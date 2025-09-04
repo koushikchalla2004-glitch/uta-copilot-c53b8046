@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { Button } from './ui/button';
-import appSymbol from '@/assets/app-symbol.png';
+import utaCopilotLogo from '@/assets/uta-copilot-logo.png';
 
 interface NavigationProps {
   onThemeToggle: () => void;
   isDark: boolean;
+  onLogout?: () => void;
+  isAuthenticated?: boolean;
 }
 
-export const Navigation = ({ onThemeToggle, isDark }: NavigationProps) => {
+export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }: NavigationProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -65,8 +67,8 @@ export const Navigation = ({ onThemeToggle, isDark }: NavigationProps) => {
             whileHover={{ scale: 1.05 }}
             className="flex items-center space-x-3"
           >
-            <img src={appSymbol} alt="UTA Companion" className="w-8 h-8" />
-            <span className="font-inter-tight font-bold text-lg">UTA Companion</span>
+            <img src={utaCopilotLogo} alt="UTA Copilot" className="w-8 h-8" />
+            <span className="font-inter-tight font-bold text-lg">UTA Copilot</span>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -95,9 +97,19 @@ export const Navigation = ({ onThemeToggle, isDark }: NavigationProps) => {
             </Button>
 
             {/* CTA Button */}
-            <Button className="btn-hero hidden sm:flex">
-              Open App
-            </Button>
+            {isAuthenticated ? (
+              <Button 
+                variant="outline" 
+                onClick={onLogout}
+                className="hidden sm:flex"
+              >
+                Logout
+              </Button>
+            ) : (
+              <Button className="btn-hero hidden sm:flex">
+                Open App
+              </Button>
+            )}
 
             {/* Mobile menu toggle */}
             <Button
@@ -131,9 +143,19 @@ export const Navigation = ({ onThemeToggle, isDark }: NavigationProps) => {
                   {item.label}
                 </button>
               ))}
-              <Button className="btn-hero w-full mt-4">
-                Open App
-              </Button>
+              {isAuthenticated ? (
+                <Button 
+                  variant="outline" 
+                  onClick={onLogout}
+                  className="w-full mt-4"
+                >
+                  Logout
+                </Button>
+              ) : (
+                <Button className="btn-hero w-full mt-4">
+                  Open App
+                </Button>
+              )}
             </div>
           </motion.div>
         )}

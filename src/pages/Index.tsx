@@ -1,36 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { Navigation } from '@/components/Navigation';
-import { Hero3D } from '@/components/Hero3D';
-import { SearchEngine } from '@/components/SearchEngine';
-import { VoiceOrb3D } from '@/components/VoiceOrb3D';
-import { ExploreSection } from '@/components/ExploreSection';
-import { AboutSection } from '@/components/AboutSection';
-import { Footer } from '@/components/Footer';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { StartPage } from '@/components/StartPage';
+import { LoginPage } from '@/components/LoginPage';
+import MainApp from './MainApp';
+
+type AppState = 'start' | 'login' | 'main';
 
 const Index = () => {
-  const [isDark, setIsDark] = useState(true);
+  const [appState, setAppState] = useState<AppState>('start');
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set initial theme
-    document.documentElement.classList.toggle('dark', isDark);
-  }, [isDark]);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setAppState('main');
+        } else if (appState === 'main') {
+          setAppState('login');
+        }
+      }
+    );
 
-  const handleThemeToggle = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        setAppState('main');
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [appState]);
+
+  const handleStartComplete = () => {
+    setAppState('login');
   };
 
-  return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <Navigation onThemeToggle={handleThemeToggle} isDark={isDark} />
-      <Hero3D />
-      <SearchEngine />
-      <VoiceOrb3D />
-      <ExploreSection />
-      <AboutSection />
-      <Footer onThemeToggle={handleThemeToggle} isDark={isDark} />
-    </div>
-  );
+  const handleLoginSuccess = () => {
+    setAppState('main');
+  };
+
+  const handleLogout = () => {
+    setAppState('login');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (appState === 'start') {
+    return <StartPage onComplete={handleStartComplete} />;
+  }
+
+  if (appState === 'login') {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  return <MainApp onLogout={handleLogout} />;
 };
 
 export default Index;

@@ -14,7 +14,632 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      benefits: {
+        Row: {
+          category: string | null
+          id: number
+          source_url: string | null
+          summary: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      bookmarks: {
+        Row: {
+          created_at: string | null
+          id: number
+          kind: string | null
+          ref_id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          kind?: string | null
+          ref_id: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          kind?: string | null
+          ref_id?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buildings: {
+        Row: {
+          category: string | null
+          code: string | null
+          hours: Json | null
+          id: number
+          lat: number | null
+          lng: number | null
+          name: string
+        }
+        Insert: {
+          category?: string | null
+          code?: string | null
+          hours?: Json | null
+          id?: number
+          lat?: number | null
+          lng?: number | null
+          name: string
+        }
+        Update: {
+          category?: string | null
+          code?: string | null
+          hours?: Json | null
+          id?: number
+          lat?: number | null
+          lng?: number | null
+          name?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          catalog_url: string | null
+          code: string | null
+          credits: number | null
+          description: string | null
+          id: number
+          prereqs: string | null
+          title: string | null
+        }
+        Insert: {
+          catalog_url?: string | null
+          code?: string | null
+          credits?: number | null
+          description?: string | null
+          id?: number
+          prereqs?: string | null
+          title?: string | null
+        }
+        Update: {
+          catalog_url?: string | null
+          code?: string | null
+          credits?: number | null
+          description?: string | null
+          id?: number
+          prereqs?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      deadlines: {
+        Row: {
+          end_time: string | null
+          id: number
+          name: string
+          source_url: string | null
+          start_time: string | null
+          type: string | null
+        }
+        Insert: {
+          end_time?: string | null
+          id?: number
+          name: string
+          source_url?: string | null
+          start_time?: string | null
+          type?: string | null
+        }
+        Update: {
+          end_time?: string | null
+          id?: number
+          name?: string
+          source_url?: string | null
+          start_time?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      dining_locations: {
+        Row: {
+          campus_area: string | null
+          hours: Json | null
+          id: number
+          is_open: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          campus_area?: string | null
+          hours?: Json | null
+          id?: number
+          is_open?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          campus_area?: string | null
+          hours?: Json | null
+          id?: number
+          is_open?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_time: string | null
+          id: number
+          location: string | null
+          search_tsv: unknown | null
+          source_url: string | null
+          start_time: string
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          search_tsv?: unknown | null
+          source_url?: string | null
+          start_time: string
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string | null
+          id?: number
+          location?: string | null
+          search_tsv?: unknown | null
+          source_url?: string | null
+          start_time?: string
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      faculty: {
+        Row: {
+          dept: string | null
+          email: string | null
+          id: number
+          name: string
+          office: string | null
+          office_hours: string | null
+          phone: string | null
+          profile_url: string | null
+          research_areas: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          dept?: string | null
+          email?: string | null
+          id?: number
+          name: string
+          office?: string | null
+          office_hours?: string | null
+          phone?: string | null
+          profile_url?: string | null
+          research_areas?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          dept?: string | null
+          email?: string | null
+          id?: number
+          name?: string
+          office?: string | null
+          office_hours?: string | null
+          phone?: string | null
+          profile_url?: string | null
+          research_areas?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      health_info: {
+        Row: {
+          category: string | null
+          id: number
+          source_url: string | null
+          summary: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      housing_places: {
+        Row: {
+          address: string | null
+          id: number
+          last_seen: string | null
+          lat: number | null
+          lng: number | null
+          name: string | null
+          phone: string | null
+          source: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          id?: number
+          last_seen?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          id?: number
+          last_seen?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          apply_url: string | null
+          dept: string | null
+          id: number
+          location: string | null
+          posted_at: string | null
+          source: string | null
+          title: string | null
+          type: string | null
+        }
+        Insert: {
+          apply_url?: string | null
+          dept?: string | null
+          id?: number
+          location?: string | null
+          posted_at?: string | null
+          source?: string | null
+          title?: string | null
+          type?: string | null
+        }
+        Update: {
+          apply_url?: string | null
+          dept?: string | null
+          id?: number
+          location?: string | null
+          posted_at?: string | null
+          source?: string | null
+          title?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      menus: {
+        Row: {
+          created_at: string | null
+          id: number
+          items: Json
+          location_id: number | null
+          menu_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          items: Json
+          location_id?: number | null
+          menu_date: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          items?: Json
+          location_id?: number | null
+          menu_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menus_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "dining_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news: {
+        Row: {
+          category: string | null
+          id: number
+          published_at: string | null
+          source_url: string | null
+          summary: string | null
+          title: string | null
+        }
+        Insert: {
+          category?: string | null
+          id?: number
+          published_at?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Update: {
+          category?: string | null
+          id?: number
+          published_at?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      organizations: {
+        Row: {
+          category: string | null
+          contact_url: string | null
+          description: string | null
+          id: number
+          name: string | null
+        }
+        Insert: {
+          category?: string | null
+          contact_url?: string | null
+          description?: string | null
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          category?: string | null
+          contact_url?: string | null
+          description?: string | null
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
+      policies: {
+        Row: {
+          category: string | null
+          id: number
+          source_url: string | null
+          summary: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          id?: number
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string
+          prefs: Json | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+          prefs?: Json | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          prefs?: Json | null
+          role?: string | null
+        }
+        Relationships: []
+      }
+      programs: {
+        Row: {
+          catalog_url: string | null
+          dept: string | null
+          id: number
+          level: string | null
+          name: string
+          overview: string | null
+        }
+        Insert: {
+          catalog_url?: string | null
+          dept?: string | null
+          id?: number
+          level?: string | null
+          name: string
+          overview?: string | null
+        }
+        Update: {
+          catalog_url?: string | null
+          dept?: string | null
+          id?: number
+          level?: string | null
+          name?: string
+          overview?: string | null
+        }
+        Relationships: []
+      }
+      rec_schedules: {
+        Row: {
+          classes: Json | null
+          facility: string | null
+          hours: Json | null
+          id: number
+          source_url: string | null
+        }
+        Insert: {
+          classes?: Json | null
+          facility?: string | null
+          hours?: Json | null
+          id?: number
+          source_url?: string | null
+        }
+        Update: {
+          classes?: Json | null
+          facility?: string | null
+          hours?: Json | null
+          id?: number
+          source_url?: string | null
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          building_id: number | null
+          capacity: number | null
+          features: string[] | null
+          id: number
+          room_number: string | null
+        }
+        Insert: {
+          building_id?: number | null
+          capacity?: number | null
+          features?: string[] | null
+          id?: number
+          room_number?: string | null
+        }
+        Update: {
+          building_id?: number | null
+          capacity?: number | null
+          features?: string[] | null
+          id?: number
+          room_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tuition: {
+        Row: {
+          effective_term: string | null
+          fees: Json | null
+          flat_rate: number | null
+          id: number
+          per_credit: number | null
+          program: string | null
+          residency: string | null
+          source_url: string | null
+        }
+        Insert: {
+          effective_term?: string | null
+          fees?: Json | null
+          flat_rate?: number | null
+          id?: number
+          per_credit?: number | null
+          program?: string | null
+          residency?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          effective_term?: string | null
+          fees?: Json | null
+          flat_rate?: number | null
+          id?: number
+          per_credit?: number | null
+          program?: string | null
+          residency?: string | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
+      user_plans: {
+        Row: {
+          created_at: string | null
+          day: string
+          id: number
+          items: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day: string
+          id?: number
+          items?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day?: string
+          id?: number
+          items?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
