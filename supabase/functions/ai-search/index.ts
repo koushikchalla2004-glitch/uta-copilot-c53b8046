@@ -1,7 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SERVICE_ROLE_KEY');
+const db = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,6 +57,85 @@ serve(async (req) => {
     }
 
     console.log('AI Search query:', query);
+
+    // If the user asks about events, answer directly from Supabase
+    if (/\bevents?\b/i.test(query)) {
+      try {
+        if (!db) throw new Error('Database not configured');
+
+        const now = new Date();
+        const start = new Date();
+        const end = new Date();
+        const lower = query.toLowerCase();
+        const toStartOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const toEndOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+
+        if (lower.includes('tomorrow')) {
+          const t = new Date(now); t.setDate(t.getDate() + 1);
+          Object.assign(start, toStartOfDay(t));
+          Object.assign(end, toEndOfDay(t));
+        } else if (lower.includes('today')) {
+          Object.assign(start, toStartOfDay(now));
+          Object.assign(end, toEndOfDay(now));
+        } else if (lower.includes('next week')) {
+          const day = now.getDay();
+          const daysUntilNextMon = ((8 - day) % 7) || 7;
+          const nextMon = new Date(now); nextMon.setDate(now.getDate() + daysUntilNextMon);
+          const nextSun = new Date(nextMon); nextSun.setDate(nextMon.getDate() + 6);
+          Object.assign(start, toStartOfDay(nextMon));
+          Object.assign(end, toEndOfDay(nextSun));
+        } else if (lower.includes('this week')) {
+          const day = now.getDay();
+          const monday = new Date(now); monday.setDate(now.getDate() - ((day + 6) % 7));
+          const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+          Object.assign(start, toStartOfDay(monday));
+          Object.assign(end, toEndOfDay(sunday));
+        } else {
+          Object.assign(start, now);
+          const in7 = new Date(now); in7.setDate(now.getDate() + 7);
+          Object.assign(end, in7);
+        }
+
+        const cleaned = lower.replace(/\b(events?|today|tomorrow|this week|next week|happening|at|in|on)\b/gi, '').trim();
+        const keyword = cleaned.split(/\s+/).filter(Boolean)[0];
+
+        let q = db
+          .from('events')
+          .select('id,title,description,location,start_time,end_time,source_url,tags')
+          .gte('start_time', start.toISOString())
+          .lte('start_time', end.toISOString())
+          .order('start_time', { ascending: true })
+          .limit(10);
+
+        if (keyword) {
+          q = q.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%,location.ilike.%${keyword}%`);
+        }
+
+        const { data: events, error: eventsError } = await q;
+        if (eventsError) throw eventsError;
+
+        if (!events || events.length === 0) {
+          return new Response(JSON.stringify({
+            response: `No campus events found for that time range. Try asking for events today, tomorrow, or this week.`,
+            query,
+            timestamp: new Date().toISOString()
+          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
+        const fmt = (iso?: string | null) => iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+        const lines = events.map(e => `• ${e.title} — ${fmt(e.start_time)}${e.location ? ' @ ' + e.location : ''}`);
+        const text = `Here are campus events:\n${lines.join('\n')}`;
+
+        return new Response(JSON.stringify({
+          response: text,
+          query,
+          timestamp: new Date().toISOString()
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      } catch (err) {
+        console.error('Events fetch failed:', err);
+        // Fall through to OpenAI fallback below
+      }
+    }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

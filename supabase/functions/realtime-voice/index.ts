@@ -1,9 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Supabase client for server-side data access
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SERVICE_ROLE_KEY');
+const db = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 serve(async (req) => {
   const { headers } = req;
@@ -15,7 +22,7 @@ serve(async (req) => {
 
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
-    return new Response("OpenAI API key not configured", { status: 500 });
+    return new Response("OpenAI API key not configured", { status: 500, headers: corsHeaders });
   }
 
   const { socket, response } = Deno.upgradeWebSocket(req);
@@ -43,7 +50,7 @@ serve(async (req) => {
       console.log("Connected to OpenAI Realtime API");
     };
 
-    openAISocket.onmessage = (event) => {
+    openAISocket.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       console.log("OpenAI message:", data.type);
 
@@ -135,7 +142,93 @@ Keep responses conversational and not too long since this is voice interaction.`
             campusInfo = `UTA's campus features major buildings including the Engineering Research Building, Business Building, Science Hall, and University Hall. An interactive campus map is available on the UTA website. The Visitor Information Center at University Hall can provide directions and campus tours. Call (817) 272-2011 for general campus information.`;
             break;
           case "events":
-            campusInfo = `Campus events are posted on the UTA website and MyMav portal. The University Center and Maverick Activities Center host many student activities. Follow UTA social media for updates on lectures, sports, and cultural events. Student organizations also host regular events throughout the semester.`;
+            try {
+              if (!db) {
+                campusInfo = `I'm unable to access campus events right now.`;
+                break;
+              }
+              const q: string = (args.query || '').toString();
+
+              // Determine date range from query
+              const now = new Date();
+              const start = new Date();
+              const end = new Date();
+              const lower = q.toLowerCase();
+
+              const toStartOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+              const toEndOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+
+              if (lower.includes('tomorrow')) {
+                const t = new Date(now);
+                t.setDate(t.getDate() + 1);
+                Object.assign(start, toStartOfDay(t));
+                Object.assign(end, toEndOfDay(t));
+              } else if (lower.includes('today')) {
+                Object.assign(start, toStartOfDay(now));
+                Object.assign(end, toEndOfDay(now));
+              } else if (lower.includes('next week')) {
+                const day = now.getDay();
+                const daysUntilNextMon = ((8 - day) % 7) || 7;
+                const nextMon = new Date(now);
+                nextMon.setDate(now.getDate() + daysUntilNextMon);
+                const nextSun = new Date(nextMon);
+                nextSun.setDate(nextMon.getDate() + 6);
+                Object.assign(start, toStartOfDay(nextMon));
+                Object.assign(end, toEndOfDay(nextSun));
+              } else if (lower.includes('this week')) {
+                const day = now.getDay();
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - ((day + 6) % 7));
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                Object.assign(start, toStartOfDay(monday));
+                Object.assign(end, toEndOfDay(sunday));
+              } else {
+                // Default: upcoming 7 days
+                Object.assign(start, now);
+                const in7 = new Date(now);
+                in7.setDate(now.getDate() + 7);
+                Object.assign(end, in7);
+              }
+
+              // Extract a simple keyword
+              const cleaned = q.replace(/\b(events?|today|tomorrow|this week|next week|happening|at|in|on)\b/gi, '').trim();
+              const keyword = cleaned.split(/\s+/).filter(Boolean)[0];
+
+              let queryBuilder = db
+                .from('events')
+                .select('id,title,description,location,start_time,end_time,source_url,tags')
+                .gte('start_time', start.toISOString())
+                .lte('start_time', end.toISOString())
+                .order('start_time', { ascending: true })
+                .limit(8);
+
+              if (keyword) {
+                queryBuilder = queryBuilder.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%,location.ilike.%${keyword}%`);
+              }
+
+              const { data: eventsData, error: eventsError } = await queryBuilder;
+              if (eventsError) {
+                console.error('Events query error:', eventsError);
+                campusInfo = `I couldn't fetch events due to a server issue.`;
+                break;
+              }
+
+              if (!eventsData || eventsData.length === 0) {
+                campusInfo = `No campus events found for that time range. Try asking for events today, tomorrow, or this week.`;
+                break;
+              }
+
+              const fmt = (iso?: string | null) => iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+
+              const lines = eventsData.map(e => `• ${e.title} — ${fmt(e.start_time)}${e.location ? ' @ ' + e.location : ''}`);
+              campusInfo = `Here are campus events:
+${lines.join('\n')}
+${eventsData[0].source_url ? `\nFor details, open the event link in the app.` : ''}`;
+            } catch (err) {
+              console.error('Error building events response:', err);
+              campusInfo = `Sorry, I had trouble retrieving events just now.`;
+            }
             break;
           case "emergency":
             campusInfo = `For emergencies, call UTA Police at (817) 272-3003. Emergency call boxes are located throughout campus. The UTA Emergency Management website has safety procedures and alert information. Non-emergency campus services can be reached at (817) 272-2011.`;
