@@ -4,10 +4,17 @@ import { OrbitControls } from '@react-three/drei';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Mic, MicOff, Volume2, User, LogOut } from 'lucide-react';
+import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import * as THREE from 'three';
+
+interface ChatMessage {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+}
 
 // Moving 3D Stars Background
 const MovingStars = () => {
@@ -102,8 +109,17 @@ const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      text: "Hi! I'm your UTA Copilot. Ask me anything about campus life, classes, dining, parking, or university services. How can I help you today?",
+      isUser: false,
+      timestamp: new Date()
+    }
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -121,43 +137,56 @@ const Hero = () => {
     }
   };
 
-  const handleSearch = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages]);
+
+  const handleSendMessage = async () => {
     if (!searchQuery.trim()) return;
     
-    setSearchResults([]);
-    toast({
-      title: "Searching...",
-      description: "AI is processing your question",
-    });
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      text: searchQuery,
+      isUser: true,
+      timestamp: new Date()
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setSearchQuery('');
+    setIsLoading(true);
     
     try {
       const { data, error } = await supabase.functions.invoke('ai-search', {
-        body: { query: searchQuery }
+        body: { query: userMessage.text }
       });
 
       if (error) {
         throw error;
       }
 
-      if (data?.response) {
-        setSearchResults([data.response]);
-        toast({
-          title: "Search completed",
-          description: "AI has found relevant information for you",
-        });
-      } else {
-        throw new Error('No response received');
-      }
+      const aiMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: data?.response || "I couldn't process your request. Please try again.",
+        isUser: false,
+        timestamp: new Date()
+      };
+
+      setChatMessages(prev => [...prev, aiMessage]);
     } catch (error: any) {
       console.error('Search error:', error);
-      setSearchResults([
-        "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance."
-      ]);
-      toast({
-        title: "Search Error",
-        description: "AI service temporarily unavailable",
-        variant: "destructive",
-      });
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact campus support for immediate assistance.",
+        isUser: false,
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -213,96 +242,139 @@ const Hero = () => {
         </Button>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Welcome to
-            <br />
+      {/* Chat Interface */}
+      <div className="relative z-10 flex flex-col h-screen">
+        {/* Header */}
+        <div className="text-center py-8 px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             <span className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
               UTA Copilot
             </span>
           </h2>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Your intelligent campus companion powered by AI. Ask questions, get directions, 
-            and navigate university life with ease.
+          <p className="text-lg text-white/80 max-w-2xl mx-auto">
+            Your intelligent campus companion powered by AI
           </p>
         </div>
 
-        {/* Search Engine */}
-        <div className="w-full max-w-4xl mb-8">
-          <Card className="bg-white/10 backdrop-blur-xl border border-white/20">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-hidden px-4 md:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+              {chatMessages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`flex gap-3 max-w-[80%] ${message.isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {/* Avatar */}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.isUser 
+                        ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600' 
+                        : 'bg-purple-600'
+                    }`}>
+                      {message.isUser ? (
+                        <User className="w-4 h-4 text-white" />
+                      ) : (
+                        <Bot className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    
+                    {/* Message Bubble */}
+                    <div className={`rounded-2xl px-4 py-3 ${
+                      message.isUser
+                        ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white'
+                        : 'bg-white/10 backdrop-blur-xl border border-white/20 text-white'
+                    }`}>
+                      <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                        {message.text}
+                      </p>
+                      <p className={`text-xs mt-1 ${
+                        message.isUser ? 'text-white/70' : 'text-white/50'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Loading Indicator */}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="flex gap-3 max-w-[80%]">
+                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-3">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Area */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 mb-4">
+              <div className="flex gap-3">
                 <div className="flex-1 relative">
                   <Input
                     type="text"
                     placeholder="Ask me anything about UTA..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="bg-white/10 border-white/30 text-white placeholder-white/60 text-lg py-4 pl-12 pr-4"
+                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                    disabled={isLoading}
+                    className="bg-transparent border-none text-white placeholder-white/60 text-base py-3 px-4 focus:ring-0 focus:border-none"
                   />
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" />
                 </div>
                 
                 <Button 
-                  onClick={handleSearch}
-                  className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 px-8 py-4 text-lg w-full sm:w-auto"
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !searchQuery.trim()}
+                  className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 p-3 rounded-xl transition-all duration-300 disabled:opacity-50"
                 >
-                  Search
+                  <Send className="w-5 h-5" />
+                </Button>
+                
+                <Button
+                  onClick={toggleVoiceAssistant}
+                  className={`p-3 rounded-xl transition-all duration-300 ${
+                    isListening 
+                      ? 'bg-green-500 hover:bg-green-600 animate-pulse' 
+                      : isSpeaking
+                      ? 'bg-blue-500 hover:bg-blue-600 animate-pulse'
+                      : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700'
+                  }`}
+                >
+                  {isListening ? (
+                    <MicOff className="w-5 h-5 text-white" />
+                  ) : isSpeaking ? (
+                    <Volume2 className="w-5 h-5 text-white" />
+                  ) : (
+                    <Mic className="w-5 h-5 text-white" />
+                  )}
                 </Button>
               </div>
-
-              {/* Search Results */}
-              {searchResults.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-semibold text-lg">Search Results:</h3>
-                  {searchResults.map((result, index) => (
-                    <div key={index} className="bg-white/5 border border-white/10 rounded-lg p-4">
-                      <p className="text-white/90">{result}</p>
-                    </div>
-                  ))}
+              
+              {/* Voice Status */}
+              {(isListening || isSpeaking) && (
+                <div className="mt-2 text-center">
+                  {isListening ? (
+                    <p className="text-sm text-green-400">🎤 Listening...</p>
+                  ) : (
+                    <p className="text-sm text-blue-400">🔊 Speaking...</p>
+                  )}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Voice Assistant */}
-        <div className="text-center">
-          <div className="mb-6">
-            <Button
-              onClick={toggleVoiceAssistant}
-              className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full transition-all duration-300 ${
-                isListening 
-                  ? 'bg-green-500 hover:bg-green-600 animate-pulse' 
-                  : isSpeaking
-                  ? 'bg-blue-500 hover:bg-blue-600 animate-pulse'
-                  : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700'
-              } transform hover:scale-110`}
-            >
-              {isListening ? (
-                <MicOff className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-              ) : isSpeaking ? (
-                <Volume2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-              ) : (
-                <Mic className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-              )}
-            </Button>
-          </div>
-          
-          <div className="text-white/80">
-            {isListening ? (
-              <p className="text-lg font-semibold text-green-400">🎤 Listening...</p>
-            ) : isSpeaking ? (
-              <p className="text-lg font-semibold text-blue-400">🔊 Speaking...</p>
-            ) : (
-              <p className="text-lg">Click to ask about campus, classes, or services</p>
-            )}
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );
