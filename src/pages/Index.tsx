@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 type AppState = 'start' | 'login' | 'main';
 
 const Index = () => {
-  const [appState, setAppState] = useState<AppState>('start');
+  const [appState, setAppState] = useState<AppState>('login');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
