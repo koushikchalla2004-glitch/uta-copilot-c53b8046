@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import Index from '@/pages/Index';
 import Hero from '@/pages/Hero';
+import DiningPage from '@/pages/DiningPage';
 import { Toaster } from '@/components/ui/toaster';
 
 const App = () => {
@@ -53,6 +54,10 @@ const App = () => {
         <Route 
           path="/" 
           element={<Navigate to={session ? "/hero" : "/auth"} replace />} 
+        />
+        <Route 
+          path="/dining" 
+          element={session ? <DiningPage /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="/app" 
