@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import Index from '@/pages/Index';
-import MainApp from '@/pages/MainApp';
 import Hero from '@/pages/Hero';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -46,10 +45,6 @@ const App = () => {
         <Route 
           path="/auth" 
           element={!session ? <Index /> : <Navigate to="/hero" replace />} 
-        />
-        <Route 
-          path="/app" 
-          element={session ? <MainApp user={user} /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="/hero" 
