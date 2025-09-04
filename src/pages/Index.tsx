@@ -67,7 +67,7 @@ const ParticleField = () => {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.1} color="#60a5fa" opacity={0.6} transparent />
+      <pointsMaterial size={0.15} color="#ff6b6b" opacity={0.8} transparent />
     </points>
   );
 };
@@ -75,41 +75,49 @@ const ParticleField = () => {
 const Scene3D = () => {
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={1} color="#60a5fa" />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color="#a855f7" />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[10, 10, 10]} intensity={1.5} color="#ff6b6b" />
+      <pointLight position={[-10, -10, -10]} intensity={1} color="#4ecdc4" />
+      <pointLight position={[0, 10, -5]} intensity={0.8} color="#ffe66d" />
       
       <ParticleField />
       
       <FloatingShape
         position={[-4, 2, -3]}
-        geometry={<boxGeometry args={[1, 1, 1]} />}
-        color="#3b82f6"
-        speed={0.8}
+        geometry={<octahedronGeometry args={[1.2]} />}
+        color="#ff6b6b"
+        speed={1.1}
       />
       
       <FloatingShape
         position={[4, -2, -2]}
-        geometry={<sphereGeometry args={[0.8, 32, 32]} />}
-        color="#8b5cf6"
-        speed={1.2}
+        geometry={<icosahedronGeometry args={[1]} />}
+        color="#4ecdc4"
+        speed={0.9}
       />
       
       <FloatingShape
         position={[0, 3, -4]}
-        geometry={<torusGeometry args={[1, 0.4, 16, 100]} />}
-        color="#06b6d4"
-        speed={1.5}
+        geometry={<dodecahedronGeometry args={[1]} />}
+        color="#ffe66d"
+        speed={1.3}
       />
       
       <FloatingShape
         position={[-3, -3, -1]}
-        geometry={<cylinderGeometry args={[0.5, 0.5, 2, 8]} />}
-        color="#f59e0b"
-        speed={0.6}
+        geometry={<coneGeometry args={[0.8, 2, 8]} />}
+        color="#ff8a65"
+        speed={0.7}
       />
       
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+      <FloatingShape
+        position={[3, 1, -5]}
+        geometry={<tetrahedronGeometry args={[1]} />}
+        color="#ba68c8"
+        speed={1.4}
+      />
+      
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.8} />
     </>
   );
 };
@@ -229,15 +237,15 @@ const Index = () => {
       </div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-purple-900/60 to-blue-900/80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-900/80 via-orange-900/60 to-amber-900/80" />
       
       {/* Animated Grid Pattern */}
       <div 
         className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(255, 107, 107, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 107, 107, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
           animation: 'gridMove 20s linear infinite'
@@ -246,12 +254,12 @@ const Index = () => {
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md transform hover:scale-105 transition-all duration-500">
-          <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-blue-500/25 transition-all duration-500">
+          <Card className="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl hover:shadow-orange-500/25 transition-all duration-500">
             <CardHeader className="text-center pb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-400 via-purple-500 to-cyan-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-blue-500/50 transition-all duration-500 animate-pulse">
+              <div className="w-24 h-24 bg-gradient-to-br from-rose-400 via-orange-500 to-amber-400 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg hover:shadow-orange-500/50 transition-all duration-500 animate-pulse">
                 <span className="text-white text-3xl font-bold">UC</span>
               </div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400 bg-clip-text text-transparent animate-pulse">
                 UTA Copilot
               </CardTitle>
               <CardDescription className="text-gray-300 text-lg mt-2">
