@@ -277,7 +277,7 @@ const Hero = () => {
             ) : isSpeaking ? (
               <p className="text-lg font-semibold text-blue-400">🔊 Speaking...</p>
             ) : (
-              <p className="text-lg">Click to activate voice assistant</p>
+              <p className="text-lg">Click to ask about campus, classes, or services</p>
             )}
           </div>
         </div>
