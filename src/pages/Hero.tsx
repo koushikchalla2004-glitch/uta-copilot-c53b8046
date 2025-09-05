@@ -18,7 +18,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
+    <div className="relative h-screen bg-background overflow-hidden flex flex-col">
       {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 1] }}>
@@ -70,14 +70,14 @@ const Hero = () => {
 
       {/* Professional Header */}
       <motion.header
-        className="relative z-20 p-8"
+        className="relative z-20 p-6"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto">
           {/* Logo and Title Section */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-center mb-6">
             <motion.div 
               className="flex items-center space-x-4"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -93,32 +93,6 @@ const Hero = () => {
                 <p className="text-lg text-muted-foreground font-medium">Your Intelligent Campus Assistant</p>
               </div>
             </motion.div>
-            
-            {/* Professional Stats Cards */}
-            <motion.div 
-              className="hidden lg:flex items-center space-x-6"
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              {[
-                { value: "24/7", label: "Available", icon: "⚡" },
-                { value: "AI", label: "Powered", icon: "🧠" },
-                { value: "Smart", label: "Responses", icon: "💡" }
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  className="text-center glass-card p-4 min-w-[80px] presentation-hover"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                >
-                  <div className="text-2xl mb-1">{stat.icon}</div>
-                  <div className="text-xl font-bold text-foreground">{stat.value}</div>
-                  <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
           </div>
 
           {/* Professional Subtitle */}
@@ -128,7 +102,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <h2 className="text-2xl text-muted-foreground font-light mb-4">
+            <h2 className="text-xl text-muted-foreground font-light mb-4">
               Elevating Your Campus Experience with <span className="font-semibold text-foreground">Artificial Intelligence</span>
             </h2>
             <div className="w-24 h-1 bg-primary rounded-full mx-auto"></div>
@@ -140,43 +114,9 @@ const Hero = () => {
       <UniqueMenu onThemeToggle={handleThemeToggle} isDark={isDark} />
       
       {/* Main Content */}
-      <div className="relative z-10 h-screen pt-16">
+      <div className="relative z-10 flex-1">
         <ChatInterface />
       </div>
-
-      {/* Professional Features Showcase */}
-      <motion.div
-        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.2 }}
-      >
-        <div className="glass-card p-6 presentation-hover">
-          <div className="flex items-center space-x-8">
-            {[
-              { icon: MessageSquare, label: "Intelligent Chat", color: "text-blue-600" },
-              { icon: Zap, label: "Voice Commands", color: "text-amber-600" },
-              { icon: Users, label: "Multi-Agent AI", color: "text-green-600" }
-            ].map((feature, index) => (
-              <motion.div
-                key={feature.label}
-                className="flex items-center space-x-3 group cursor-pointer"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.4 + index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className={`p-2 rounded-lg bg-background/50 ${feature.color} group-hover:bg-background transition-all`}>
-                  <feature.icon className="w-5 h-5" />
-                </div>
-                <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                  {feature.label}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
     </div>
   );
 };
