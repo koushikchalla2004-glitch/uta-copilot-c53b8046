@@ -65,7 +65,10 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
       >
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
           className="relative w-16 h-16 rounded-full bg-gradient-to-r from-primary via-primary-glow to-primary shadow-2xl hover:shadow-3xl transition-all duration-300 group border-2 border-background/20"
           size="icon"
         >
@@ -77,10 +80,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                 animate={{ rotate: 0, opacity: 1 }}
                 exit={{ rotate: 180, opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsOpen(false);
-                }}
+                className="cursor-pointer"
               >
                 <X className="w-6 h-6 text-white" />
               </motion.div>
