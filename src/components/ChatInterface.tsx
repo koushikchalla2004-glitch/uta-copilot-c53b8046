@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
 import { useVoiceInterface } from './VoiceInterface';
 import { LiveCaptions } from './LiveCaptions';
-import VoiceVisualizer from './VoiceVisualizer';
+import { SiriVoiceAnimation } from './SiriVoiceAnimation';
 
 interface Message {
   id: string;
@@ -113,11 +113,10 @@ export const ChatInterface = () => {
   const voice = useVoiceInterface({
     onTranscription: (text) => {
       setInputValue(text);
-      // Auto-send voice input
-      setTimeout(() => {
-        const event = new Event('voice-submit');
+      // Show confirmation before searching
+      if (window.confirm(`Search for: "${text}"?`)) {
         handleSendMessage();
-      }, 100);
+      }
     },
     onSpeakingChange: setIsSpeaking
   });
@@ -248,6 +247,14 @@ export const ChatInterface = () => {
 
   return (
     <>
+      {/* Siri Voice Animation */}
+      <SiriVoiceAnimation
+        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
+        isListening={voice.isRecording}
+        isSpeaking={voice.isSpeaking}
+        isProcessing={voice.isProcessing}
+      />
+
       {/* Live Captions */}
       <LiveCaptions
         isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
@@ -255,13 +262,6 @@ export const ChatInterface = () => {
         isListening={voice.isRecording}
         isSpeaking={voice.isSpeaking}
         isProcessing={voice.isProcessing}
-      />
-
-      {/* Voice Visualizer */}
-      <VoiceVisualizer
-        isListening={voice.isRecording}
-        isSpeaking={voice.isSpeaking}
-        isConnected={voice.audioEnabled}
       />
 
       <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
@@ -352,10 +352,6 @@ export const ChatInterface = () => {
 
       {/* Input Area */}
       <div className="flex-shrink-0 p-4 border-t border-border/40 bg-background/50 backdrop-blur-sm rounded-b-lg">
-        {/* Voice Controls */}
-        <div className="flex justify-center mb-3">
-          <voice.VoiceControls />
-        </div>
         
         <div className="flex gap-2">
           <Input
@@ -366,6 +362,7 @@ export const ChatInterface = () => {
             className="flex-1 resize-none min-h-[44px] rounded-xl"
             disabled={isTyping || voice.isRecording}
           />
+          <voice.MicButton />
           <Button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isTyping}

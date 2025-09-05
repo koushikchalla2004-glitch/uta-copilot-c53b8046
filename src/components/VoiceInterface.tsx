@@ -20,6 +20,7 @@ export const useVoiceInterface = ({
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [currentSpeechText, setCurrentSpeechText] = useState('');
   const [liveCaptionText, setLiveCaptionText] = useState('');
+  const [silenceTimer, setSilenceTimer] = useState<NodeJS.Timeout | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -50,8 +51,24 @@ export const useVoiceInterface = ({
           }
         }
 
-        setCurrentTranscript(finalTranscript || interimTranscript);
-        setLiveCaptionText(finalTranscript || interimTranscript);
+        const currentText = finalTranscript || interimTranscript;
+        setCurrentTranscript(currentText);
+        setLiveCaptionText(currentText);
+
+        // Reset silence timer when speech is detected
+        if (silenceTimer) {
+          clearTimeout(silenceTimer);
+        }
+
+        // Set new silence timer (2.5 seconds)
+        if (currentText.trim()) {
+          const timer = setTimeout(() => {
+            if (isRecording) {
+              stopRecording();
+            }
+          }, 2500);
+          setSilenceTimer(timer);
+        }
       };
     }
   }, []);
@@ -101,18 +118,9 @@ export const useVoiceInterface = ({
 
             if (data.text && data.text.trim()) {
               onTranscription(data.text);
-              toast({
-                title: "Voice Input",
-                description: `Heard: "${data.text}"`,
-              });
             }
           } catch (error) {
             console.error('Transcription error:', error);
-            toast({
-              title: "Voice Error",
-              description: "Failed to process voice input",
-              variant: "destructive",
-            });
           } finally {
             setIsProcessing(false);
           }
@@ -133,11 +141,6 @@ export const useVoiceInterface = ({
         speechRecognitionRef.current.start();
       }
 
-      toast({
-        title: "Listening",
-        description: "Speak your question...",
-      });
-
     } catch (error) {
       console.error('Error starting recording:', error);
       toast({
@@ -155,12 +158,18 @@ export const useVoiceInterface = ({
       setIsRecording(false);
       setLiveCaptionText('');
       
+      // Clear silence timer
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        setSilenceTimer(null);
+      }
+      
       // Stop speech recognition
       if (speechRecognitionRef.current) {
         speechRecognitionRef.current.stop();
       }
     }
-  }, [isRecording]);
+  }, [isRecording, silenceTimer]);
 
   // Speak text using TTS
   const speakText = useCallback(async (text: string, voice: string = 'alloy') => {
@@ -207,20 +216,10 @@ export const useVoiceInterface = ({
 
       await audio.play();
 
-      toast({
-        title: "Speaking",
-        description: `Using ${data.provider || 'TTS'} voice`,
-      });
-
     } catch (error) {
       console.error('TTS error:', error);
       setIsSpeaking(false);
       onSpeakingChange(false);
-      toast({
-        title: "Speech Error",
-        description: "Failed to generate speech",
-        variant: "destructive",
-      });
     }
   }, [audioEnabled, onSpeakingChange, toast]);
 
@@ -255,56 +254,25 @@ export const useVoiceInterface = ({
     speakText,
     stopSpeaking,
     toggleAudio,
-    // UI Component
-    VoiceControls: () => (
-      <div className="flex items-center gap-2">
-        {/* Microphone Button */}
-        <Button
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isProcessing}
-          variant={isRecording ? "destructive" : "default"}
-          size="icon"
-          className={`w-12 h-12 rounded-full transition-all ${
-            isRecording 
-              ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
-              : 'bg-primary hover:bg-primary/90'
-          }`}
-        >
-          {isProcessing ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : isRecording ? (
-            <MicOff className="w-5 h-5" />
-          ) : (
-            <Mic className="w-5 h-5" />
-          )}
-        </Button>
-
-        {/* Audio Toggle Button */}
-        <Button
-          onClick={toggleAudio}
-          variant="outline"
-          size="icon"
-          className="w-10 h-10"
-        >
-          {audioEnabled ? (
-            <Volume2 className="w-4 h-4" />
-          ) : (
-            <VolumeX className="w-4 h-4" />
-          )}
-        </Button>
-
-        {/* Speaking Indicator */}
-        {isSpeaking && (
-          <Button
-            onClick={stopSpeaking}
-            variant="secondary"
-            size="sm"
-            className="animate-pulse"
-          >
-            Speaking...
-          </Button>
+    // Simple mic button component for search engine
+    MicButton: () => (
+      <Button
+        onClick={isRecording ? stopRecording : startRecording}
+        disabled={isProcessing}
+        variant="ghost"
+        size="icon"
+        className={`transition-all ${
+          isRecording 
+            ? 'text-red-500 animate-pulse' 
+            : 'text-muted-foreground hover:text-primary'
+        }`}
+      >
+        {isProcessing ? (
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <Mic className="w-4 h-4" />
         )}
-      </div>
+      </Button>
     )
   };
 };

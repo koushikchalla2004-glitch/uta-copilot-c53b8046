@@ -347,6 +347,8 @@ export const SearchEngine = () => {
                 onKeyDown={handleKeyDown}
                 className="flex-1 border-none bg-transparent focus:ring-0 focus:outline-none text-lg placeholder:text-muted-foreground"
               />
+              {/* Mic Button placeholder - will be replaced by parent */}
+              <div id="voice-mic-placeholder" className="mr-2" />
               <Button
                 type="button"
                 variant="ghost"
