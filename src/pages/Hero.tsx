@@ -19,7 +19,7 @@ const Hero = () => {
 
   return (
     <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* 3D Stars Background */}
+      {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 1] }}>
           <Stars 
@@ -27,7 +27,7 @@ const Hero = () => {
             depth={50} 
             count={2000} 
             factor={4} 
-            saturation={0} 
+            saturation={0.2}
             fade 
             speed={1}
           />
@@ -38,7 +38,8 @@ const Hero = () => {
             autoRotate={true}
             autoRotateSpeed={0.2}
           />
-          <ambientLight intensity={0.1} />
+          <ambientLight intensity={0.3} />
+          <pointLight position={[10, 10, 10]} intensity={0.5} color="#000000" />
         </Canvas>
       </div>
 
@@ -47,7 +48,7 @@ const Hero = () => {
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-primary/30 rounded-full"
+            className="absolute w-2 h-2 bg-foreground/20 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,

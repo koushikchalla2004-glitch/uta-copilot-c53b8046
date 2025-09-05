@@ -588,7 +588,7 @@ export const ChatInterface = () => {
         </motion.div>
 
         {/* Modern Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-background/50 to-background/80">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-muted/20 to-background">
           {messages.map((message) => (
             <ModernChatBubble
               key={message.id}
