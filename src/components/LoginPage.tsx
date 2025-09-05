@@ -198,46 +198,25 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* 3D Background */}
-      <div className="absolute inset-0 opacity-30">
-        <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
-          <Scene3D />
-        </Canvas>
-      </div>
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/80 via-background/90 to-background/80 backdrop-blur-sm" />
-
+    <div className="min-h-screen flex items-center justify-center bg-background">
       {/* Login Form */}
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-md mx-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-sm mx-4"
       >
-        <Card className="glass-card border-[var(--glass-border)]">
-          <CardHeader className="text-center space-y-2">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <CardTitle className="text-3xl font-inter-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                UTA Copilot
-              </CardTitle>
-              <p className="text-muted-foreground">
-                Your intelligent campus companion
-              </p>
-            </motion.div>
-          </CardHeader>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-foreground mb-2">
+            Welcome to UTA Copilot
+          </h1>
+        </div>
 
-          <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2 glass-card">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login" className="text-sm">Log in</TabsTrigger>
+            <TabsTrigger value="signup" className="text-sm">Sign up</TabsTrigger>
+          </TabsList>
 
               <AnimatePresence mode="wait">
                 {error && (
@@ -253,156 +232,106 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                 )}
               </AnimatePresence>
 
-              <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
+          <TabsContent value="login" className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  id="login-email"
+                  type="email"
+                  placeholder="Email address"
+                  value={loginData.email}
+                  onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                  className="h-12"
+                  required
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="login-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                        className="pl-10 pr-10"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Input
+                  id="login-password"
+                  type="password"
+                  placeholder="Password"
+                  value={loginData.password}
+                  onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                  className="h-12"
+                  required
+                />
+              </div>
 
-                  <Button 
-                    type="submit" 
-                    className="btn-hero w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      'Sign In'
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-primary hover:bg-primary/90" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Continue'
+                )}
+              </Button>
+            </form>
+          </TabsContent>
 
-              <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={signupData.fullName}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
+          <TabsContent value="signup" className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="Email address"
+                  value={signupData.email}
+                  onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
+                  className="h-12"
+                  required
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={signupData.email}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
+              <div className="space-y-2">
+                <Input
+                  id="signup-password"
+                  type="password"
+                  placeholder="Password"
+                  value={signupData.password}
+                  onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
+                  className="h-12"
+                  required
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="signup-password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                        className="pl-10 pr-10"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-primary hover:bg-primary/90" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  'Continue'
+                )}
+              </Button>
+            </form>
+          </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        placeholder="Confirm your password"
-                        value={signupData.confirmPassword}
-                        onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="btn-hero w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      'Create Account'
-                    )}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Tabs>
       </motion.div>
     </div>
   );
