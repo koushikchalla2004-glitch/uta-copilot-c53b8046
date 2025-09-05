@@ -49,13 +49,27 @@ async function getLiveCampusContext(): Promise<string> {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
-    const [diningRes, todayEventsRes, nextEventsRes] = await Promise.all([
+    const [diningRes, todayEventsRes, nextEventsRes, newsRes] = await Promise.all([
       db.from('dining_locations').select('name,is_open,campus_area').order('name'),
       db.from('events').select('title,start_time,location').gte('start_time', todayStart.toISOString()).lte('start_time', todayEnd.toISOString()).order('start_time').limit(3),
-      db.from('events').select('title,start_time,location').gt('start_time', now.toISOString()).order('start_time').limit(3)
+      db.from('events').select('title,start_time,location').gt('start_time', now.toISOString()).order('start_time').limit(3),
+      db.from('news').select('title,category,published_at').order('published_at', { ascending: false }).limit(3)
     ]);
 
     let liveContext = '';
+
+    // Recent news/alerts (highest priority)
+    if (newsRes.data && newsRes.data.length > 0) {
+      const recent = newsRes.data.filter((n: any) => {
+        const pubDate = new Date(n.published_at);
+        const hoursSince = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
+        return hoursSince < 48; // Last 48 hours
+      });
+      
+      if (recent.length > 0) {
+        liveContext += `Recent campus alerts: ${recent.map((n: any) => `${n.title} (${n.category})`).join(', ')}\n`;
+      }
+    }
 
     // Current dining status
     if (diningRes.data && diningRes.data.length > 0) {

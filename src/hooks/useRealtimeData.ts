@@ -21,19 +21,39 @@ interface Event {
   tags: string[];
 }
 
+interface NewsAlert {
+  id: number;
+  title: string;
+  summary: string;
+  category: string;
+  published_at: string;
+  source_url: string;
+}
+
+interface Building {
+  id: number;
+  name: string;
+  code: string;
+  category: string;
+  hours: any;
+}
+
 export const useRealtimeData = () => {
   const [diningLocations, setDiningLocations] = useState<DiningLocation[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [newsAlerts, setNewsAlerts] = useState<NewsAlert[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let diningChannel: any;
     let eventsChannel: any;
+    let newsChannel: any;
 
     const setupRealtimeSubscriptions = async () => {
       try {
         // Initial data fetch
-        const [diningRes, eventsRes] = await Promise.all([
+        const [diningRes, eventsRes, newsRes, buildingsRes] = await Promise.all([
           supabase
             .from('dining_locations')
             .select('*')
@@ -43,11 +63,22 @@ export const useRealtimeData = () => {
             .select('*')
             .gte('start_time', new Date().toISOString())
             .order('start_time')
-            .limit(10)
+            .limit(10),
+          supabase
+            .from('news')
+            .select('*')
+            .order('published_at', { ascending: false })
+            .limit(5),
+          supabase
+            .from('buildings')
+            .select('*')
+            .order('name')
         ]);
 
         if (diningRes.data) setDiningLocations(diningRes.data);
         if (eventsRes.data) setUpcomingEvents(eventsRes.data);
+        if (newsRes.data) setNewsAlerts(newsRes.data);
+        if (buildingsRes.data) setBuildings(buildingsRes.data);
 
         // Set up realtime subscriptions
         diningChannel = supabase
@@ -113,6 +144,38 @@ export const useRealtimeData = () => {
           )
           .subscribe();
 
+        newsChannel = supabase
+          .channel('news-updates')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'news'
+            },
+            (payload) => {
+              console.log('News update:', payload);
+              
+              if (payload.eventType === 'INSERT') {
+                setNewsAlerts(prev => {
+                  const updated = [payload.new as NewsAlert, ...prev]
+                    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime())
+                    .slice(0, 5);
+                  return updated;
+                });
+              } else if (payload.eventType === 'UPDATE') {
+                setNewsAlerts(prev => 
+                  prev.map(alert => 
+                    alert.id === payload.new.id 
+                      ? { ...alert, ...payload.new }
+                      : alert
+                  )
+                );
+              }
+            }
+          )
+          .subscribe();
+
         setIsLoading(false);
       } catch (error) {
         console.error('Error setting up realtime subscriptions:', error);
@@ -125,6 +188,7 @@ export const useRealtimeData = () => {
     return () => {
       if (diningChannel) supabase.removeChannel(diningChannel);
       if (eventsChannel) supabase.removeChannel(eventsChannel);
+      if (newsChannel) supabase.removeChannel(newsChannel);
     };
   }, []);
 
@@ -151,12 +215,28 @@ export const useRealtimeData = () => {
     });
   };
 
+  const getRecentAlerts = (limit = 3) => {
+    return newsAlerts.slice(0, limit);
+  };
+
+  const getBuildingHours = (buildingName: string) => {
+    const building = buildings.find(b => 
+      b.name.toLowerCase().includes(buildingName.toLowerCase()) ||
+      (b.code && b.code.toLowerCase().includes(buildingName.toLowerCase()))
+    );
+    return building?.hours || null;
+  };
+
   return {
     diningLocations,
     upcomingEvents,
+    newsAlerts,
+    buildings,
     isLoading,
     getOpenDiningLocations,
     getNextEvents,
-    getTodaysEvents
+    getTodaysEvents,
+    getRecentAlerts,
+    getBuildingHours
   };
 };
