@@ -84,12 +84,12 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
             animate={{ scale: 1 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 25 }}
           >
-            {/* Content with typing animation */}
+            {/* Content with proper typing animation */}
             {isTyping ? (
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
-                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
-                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
+                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0ms'}} />
+                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}} />
+                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}} />
               </div>
             ) : (
               <div className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -109,7 +109,7 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
                   size="sm"
                   variant="ghost"
                   onClick={copyToClipboard}
-                  className="h-6 w-6 p-0"
+                  className="h-6 w-6 p-0 text-white/60 hover:text-white"
                 >
                   <Copy className="w-3 h-3" />
                 </Button>
@@ -118,7 +118,7 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
                     size="sm"
                     variant="ghost"
                     onClick={onRegenerate}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 text-white/60 hover:text-white"
                   >
                     <RefreshCw className="w-3 h-3" />
                   </Button>

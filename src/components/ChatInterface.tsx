@@ -184,16 +184,20 @@ export const ChatInterface = () => {
 
   // Helper function to trigger TTS after message is complete
   const triggerTTSForMessage = (content: string) => {
-    // Clean content for TTS (remove prefixes and markdown)
-    const cleanContent = content
-      .replace(/^[⚡💨🎯🧠]\s*/, '') // Remove optimization prefixes
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-      .replace(/__(.*?)__/g, '$1') // Remove underline markdown
-      .trim();
+    try {
+      // Clean content for TTS (remove prefixes and markdown)
+      const cleanContent = content
+        .replace(/^[⚡💨🎯🧠]\s*/, '') // Remove optimization prefixes
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        .trim();
 
-    if (cleanContent.length > 10) { // Only speak substantial content
-      tts.speakText(cleanContent, tts.settings.autoPlay);
+      if (cleanContent.length > 10 && tts.settings.autoPlay) { // Only speak substantial content
+        tts.speakText(cleanContent, true);
+      }
+    } catch (error) {
+      console.log('TTS not available or failed:', error);
     }
   };
 
@@ -410,28 +414,17 @@ export const ChatInterface = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      {message.isTyping && message.type === 'assistant' ? (
-                        <TypingAnimation
-                          text={message.content}
-                          onComplete={() => {
-                            // Will be handled by the timeout in handleSendMessage
-                          }}
-                          speed={25}
-                          className="mb-4"
-                        />
-                      ) : (
-                        <ModernChatBubble
-                          type={message.type}
-                          content={message.content}
-                          timestamp={message.timestamp}
-                          isTyping={false}
-                          onRegenerate={() => {
-                            if (message.type === 'assistant') {
-                              triggerTTSForMessage(message.content);
-                            }
-                          }}
-                        />
-                      )}
+                      <ModernChatBubble
+                        type={message.type}
+                        content={message.content}
+                        timestamp={message.timestamp}
+                        isTyping={message.isTyping || false}
+                        onRegenerate={() => {
+                          if (message.type === 'assistant') {
+                            triggerTTSForMessage(message.content);
+                          }
+                        }}
+                      />
                     </motion.div>
                   ))}
                   
@@ -451,9 +444,17 @@ export const ChatInterface = () => {
             </div>
           </div>
 
-          {/* Fixed Input Section at Bottom - Darker Theme */}
+          {/* Fixed Input Section at Bottom - Better Gradient Blending */}
           <motion.div
-            className="sticky bottom-0 bg-gradient-to-t from-black/95 via-black/80 to-black/40 backdrop-blur-xl border-t border-white/10"
+            className="sticky bottom-0 bg-gradient-to-t from-[#000000] via-[#1a1a1a]/90 to-[#333333]/60 backdrop-blur-xl border-t border-white/5"
+            style={{
+              background: `linear-gradient(to top, 
+                #000000 0%, 
+                #1a1a1a 20%, 
+                rgba(51, 51, 51, 0.8) 40%, 
+                rgba(102, 102, 102, 0.4) 70%, 
+                transparent 100%)`
+            }}
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
