@@ -248,27 +248,114 @@ export const ChatInterface = () => {
         isProcessing={voiceInterface.isProcessing}
       />
 
-      <div className="h-full flex flex-col">
-        {/* Chat Messages Container */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-4 md:px-6">
-            {/* Welcome Section - Only show when no user messages */}
-            {!hasUserMessages && (
-              <div className="min-h-[60vh] flex items-center justify-center">
-                <div className="text-center">
-                  <motion.h1 
-                    className="text-4xl font-normal text-foreground mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    How can I help you today?
-                  </motion.h1>
-                </div>
-              </div>
-            )}
+      {/* Welcome State - Centered Input */}
+      {!hasUserMessages && (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-6">
+          <motion.div
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl font-normal text-white mb-4">
+              How can I help you today?
+            </h1>
+            <p className="text-white/70 text-lg mb-8">
+              Ask me anything about UTA campus, events, dining, or academics
+            </p>
+          </motion.div>
 
-            {/* Chat Messages - Show all messages from top */}
-            {hasUserMessages && (
+          {/* Centered Input */}
+          <motion.div
+            className="w-full max-w-2xl"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <Card className="p-3 glass-card backdrop-blur-lg bg-white/10 border-white/20">
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-3">
+                <div className="flex-1 relative">
+                  <Input
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Message UTA Copilot..."
+                    className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70 text-lg py-4"
+                    disabled={isTyping}
+                  />
+                  
+                  {/* Voice Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 border-2 transition-all duration-200 ${
+                      voiceInterface.isRecording 
+                        ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
+                        : isSpeaking 
+                          ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
+                          : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 shadow-sm'
+                    }`}
+                    onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
+                    disabled={isTyping || isSpeaking}
+                  >
+                    {voiceInterface.isRecording ? (
+                      <div className="flex items-center justify-center gap-0.5">
+                        <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
+                        <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
+                        <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
+                        <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
+                        <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-0.5">
+                        <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                        <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                        <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
+                        <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                        <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
+                
+                {inputValue.trim() && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Button 
+                      type="submit" 
+                      disabled={!inputValue.trim() || isTyping}
+                      size="lg"
+                      className="bg-white text-black hover:bg-white/90 h-12 w-12 p-0 rounded-xl"
+                    >
+                      {isTyping ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
+              </form>
+            </Card>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Chat State - Full ChatGPT Layout */}
+      {hasUserMessages && (
+        <motion.div
+          className="flex-1 flex flex-col h-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Chat Messages Container */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-4xl mx-auto px-4 md:px-6">
               <div className="py-6 space-y-6">
                 <AnimatePresence>
                   {messages.map((message) => (
@@ -295,109 +382,114 @@ export const ChatInterface = () => {
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Fixed Input Section at Bottom */}
-        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm border-t border-border/50">
-          <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
-            {/* Follow-up suggestions */}
-            {followUpSuggestions.length > 0 && (
-              <motion.div
-                className="flex flex-wrap gap-2 justify-center mb-4"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                {followUpSuggestions.map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setInputValue(suggestion);
-                      handleSendMessage(suggestion);
-                      setFollowUpSuggestions([]);
-                    }}
-                    className="text-xs glass-card hover:glass-card-hover"
-                  >
-                    <Lightbulb className="w-3 h-3 mr-1" />
-                    {suggestion}
-                  </Button>
-                ))}
-              </motion.div>
-            )}
-
-            {/* Search Input Section */}
-            <div className="w-full max-w-3xl mx-auto">
-              <Card className="p-2 glass-card">
-                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
-                  <div className="flex-1 relative">
-                    <Input
-                      ref={inputRef}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Message UTA Copilot..."
-                      className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70"
-                      disabled={isTyping}
-                    />
-                    
-                    {/* Voice Button - integrated in search bar */}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 border-2 transition-all duration-200 ${
-                        voiceInterface.isRecording 
-                          ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
-                          : isSpeaking 
-                            ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
-                            : 'bg-white text-foreground border-border hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm'
-                      }`}
-                      onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
-                      disabled={isTyping || isSpeaking}
-                    >
-                      {voiceInterface.isRecording ? (
-                        <div className="flex items-center justify-center gap-0.5">
-                          <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
-                          <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
-                          <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
-                          <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
-                          <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-0.5">
-                          <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
-                          <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
-                          <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
-                          <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
-                          <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-                  
-                  {inputValue.trim() && (
-                    <Button 
-                      type="submit" 
-                      disabled={!inputValue.trim() || isTyping}
-                      size="sm"
-                      className="bg-foreground text-background hover:bg-foreground/90 h-8 w-8 p-0"
-                    >
-                      {isTyping ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <Send className="w-3 h-3" />
-                      )}
-                    </Button>
-                  )}
-                </form>
-              </Card>
             </div>
           </div>
-        </div>
-      </div>
+
+          {/* Fixed Input Section at Bottom */}
+          <motion.div
+            className="sticky bottom-0 bg-background/90 backdrop-blur-sm border-t border-white/10"
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
+              {/* Follow-up suggestions */}
+              {followUpSuggestions.length > 0 && (
+                <motion.div
+                  className="flex flex-wrap gap-2 justify-center mb-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  {followUpSuggestions.map((suggestion, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setInputValue(suggestion);
+                        handleSendMessage(suggestion);
+                        setFollowUpSuggestions([]);
+                      }}
+                      className="text-xs glass-card hover:glass-card-hover border-white/20 text-white/80 hover:text-white"
+                    >
+                      <Lightbulb className="w-3 h-3 mr-1" />
+                      {suggestion}
+                    </Button>
+                  ))}
+                </motion.div>
+              )}
+
+              {/* Search Input Section */}
+              <div className="w-full max-w-3xl mx-auto">
+                <Card className="p-2 glass-card backdrop-blur-lg bg-white/10 border-white/20">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <Input
+                        ref={inputRef}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder="Message UTA Copilot..."
+                        className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70"
+                        disabled={isTyping}
+                      />
+                      
+                      {/* Voice Button */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 border-2 transition-all duration-200 ${
+                          voiceInterface.isRecording 
+                            ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
+                            : isSpeaking 
+                              ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
+                              : 'bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 shadow-sm'
+                        }`}
+                        onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
+                        disabled={isTyping || isSpeaking}
+                      >
+                        {voiceInterface.isRecording ? (
+                          <div className="flex items-center justify-center gap-0.5">
+                            <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
+                            <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
+                            <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
+                            <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
+                            <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-0.5">
+                            <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                            <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                            <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
+                            <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                            <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                          </div>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    {inputValue.trim() && (
+                      <Button 
+                        type="submit" 
+                        disabled={!inputValue.trim() || isTyping}
+                        size="sm"
+                        className="bg-white text-black hover:bg-white/90 h-8 w-8 p-0"
+                      >
+                        {isTyping ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3" />
+                        )}
+                      </Button>
+                    )}
+                  </form>
+                </Card>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
 
       <ModernCommandPalette
         isOpen={isCommandPaletteOpen}

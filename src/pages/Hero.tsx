@@ -182,8 +182,8 @@ const Hero = () => {
 
 
       
-      {/* Main Content */}
-      <div className="relative z-10 flex-1">
+      {/* Main Content - Integrated ChatInterface */}
+      <div className="relative z-10 flex-1 flex flex-col">
         <ChatInterface />
       </div>
     </div>
