@@ -198,7 +198,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       {/* Login Form */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -207,15 +207,15 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
         className="w-full max-w-sm mx-4"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-foreground mb-2">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Welcome to UTA Copilot
           </h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login" className="text-sm">Log in</TabsTrigger>
-            <TabsTrigger value="signup" className="text-sm">Sign up</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg p-1">
+            <TabsTrigger value="login" className="text-sm text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">Log in</TabsTrigger>
+            <TabsTrigger value="signup" className="text-sm text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm">Sign up</TabsTrigger>
           </TabsList>
 
               <AnimatePresence mode="wait">
@@ -241,7 +241,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                   placeholder="Email address"
                   value={loginData.email}
                   onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                  className="h-12"
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
                 />
               </div>
@@ -253,14 +253,14 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                   placeholder="Password"
                   value={loginData.password}
                   onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                  className="h-12"
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
                 />
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-primary hover:bg-primary/90" 
+                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" 
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -284,7 +284,7 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                   placeholder="Email address"
                   value={signupData.email}
                   onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
-                  className="h-12"
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
                 />
               </div>
@@ -296,14 +296,14 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
                   placeholder="Password"
                   value={signupData.password}
                   onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
-                  className="h-12"
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
                 />
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-primary hover:bg-primary/90" 
+                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" 
                 disabled={isLoading}
               >
                 {isLoading ? (
