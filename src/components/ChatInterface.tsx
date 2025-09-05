@@ -17,6 +17,7 @@ import { LiveCaptions } from './LiveCaptions';
 import { useResponseOptimization } from '@/hooks/useResponseOptimization';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useSentiment } from '@/hooks/useSentiment';
 import { TTSControls } from './TTSControls';
 import { MultiAgentDashboard } from './MultiAgentDashboard';
 
@@ -119,6 +120,9 @@ export const ChatInterface = () => {
   // TTS for voice responses
   const tts = useTextToSpeech();
 
+  // Sentiment analysis
+  const sentiment = useSentiment();
+
   // Voice interface for chat
   const voiceInterface = useVoiceInterface({
     onTranscription: async (text) => {
@@ -175,9 +179,16 @@ export const ChatInterface = () => {
     if (!userMessage) return;
     
     setInputValue('');
+
+    // Analyze user sentiment
+    const userSentimentResult = sentiment.analyze(userMessage);
+    const userSentimentLabel = sentiment.labelFromScore(userSentimentResult.score);
     
-    // Add user message to conversation memory
-    await conversationMemory.addMessage('user', userMessage);
+    // Add user message to conversation memory with sentiment metadata
+    await conversationMemory.addMessage('user', userMessage, {
+      sentiment: userSentimentLabel,
+      sentimentScore: userSentimentResult.score,
+    });
     
     // Add user message to UI
     addMessage('user', userMessage);
@@ -206,6 +217,9 @@ export const ChatInterface = () => {
 
       // Enhanced AI response
       responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
+
+      // Humanize assistant response based on user's sentiment
+      responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
       
       const messageId = addMessage('assistant', responseText, true);
       
