@@ -248,139 +248,155 @@ export const ChatInterface = () => {
         isProcessing={voiceInterface.isProcessing}
       />
 
-      <div className="h-full max-w-4xl mx-auto p-4 md:p-6 flex flex-col justify-center">
-        {/* Welcome Section - Only show when no user messages */}
-        {!hasUserMessages && (
-          <div className="text-center mb-8">
-            <motion.h1 
-              className="text-4xl font-normal text-foreground mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              How can I help you today?
-            </motion.h1>
-          </div>
-        )}
-
-        {/* Chat Messages - Only show if there are user messages */}
-        {hasUserMessages && (
-          <div className="flex-1 overflow-hidden mb-6">
-            <div className="h-full overflow-y-auto pr-2">
-              <AnimatePresence>
-                {messages.map((message) => (
-                  <ModernChatBubble
-                    key={message.id}
-                    type={message.type}
-                    content={message.content}
-                    timestamp={message.timestamp}
-                    isTyping={message.isTyping}
-                    onRegenerate={() => {
-                      updateMessageTyping(message.id, false);
-                      if (message.type === 'assistant') {
-                        triggerTTSForMessage(message.content);
-                      }
-                    }}
-                  />
-                ))}
-              </AnimatePresence>
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
-        )}
-
-        {/* Search Input Section */}
-        <div className="w-full max-w-3xl mx-auto">
-          <Card className="p-2 glass-card">
-            <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
-              <div className="flex-1 relative">
-                <Input
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Message UTA Copilot..."
-                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70"
-                  disabled={isTyping}
-                />
-                
-                {/* Voice Button - integrated in search bar */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 border-2 transition-all duration-200 ${
-                    voiceInterface.isRecording 
-                      ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
-                      : isSpeaking 
-                        ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
-                        : 'bg-white text-foreground border-border hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm'
-                  }`}
-                  onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
-                  disabled={isTyping || isSpeaking}
-                >
-                  {voiceInterface.isRecording ? (
-                    <div className="flex items-center justify-center gap-0.5">
-                      <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
-                      <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
-                      <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
-                      <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
-                      <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-0.5">
-                      <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
-                      <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
-                      <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
-                      <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
-                      <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
-                    </div>
-                  )}
-                </Button>
+      <div className="h-full flex flex-col">
+        {/* Chat Messages Container */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto px-4 md:px-6">
+            {/* Welcome Section - Only show when no user messages */}
+            {!hasUserMessages && (
+              <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="text-center">
+                  <motion.h1 
+                    className="text-4xl font-normal text-foreground mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    How can I help you today?
+                  </motion.h1>
+                </div>
               </div>
-              
-              {inputValue.trim() && (
-                <Button 
-                  type="submit" 
-                  disabled={!inputValue.trim() || isTyping}
-                  size="sm"
-                  className="bg-foreground text-background hover:bg-foreground/90 h-8 w-8 p-0"
-                >
-                  {isTyping ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <Send className="w-3 h-3" />
-                  )}
-                </Button>
-              )}
-            </form>
-          </Card>
+            )}
+
+            {/* Chat Messages - Show all messages from top */}
+            {hasUserMessages && (
+              <div className="py-6 space-y-6">
+                <AnimatePresence>
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ModernChatBubble
+                        type={message.type}
+                        content={message.content}
+                        timestamp={message.timestamp}
+                        isTyping={message.isTyping}
+                        onRegenerate={() => {
+                          updateMessageTyping(message.id, false);
+                          if (message.type === 'assistant') {
+                            triggerTTSForMessage(message.content);
+                          }
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Follow-up suggestions */}
-        {followUpSuggestions.length > 0 && (
-          <motion.div
-            className="flex flex-wrap gap-2 justify-center mt-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            {followUpSuggestions.map((suggestion, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setInputValue(suggestion);
-                  handleSendMessage(suggestion);
-                  setFollowUpSuggestions([]);
-                }}
-                className="text-xs glass-card hover:glass-card-hover"
+        {/* Fixed Input Section at Bottom */}
+        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm border-t border-border/50">
+          <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
+            {/* Follow-up suggestions */}
+            {followUpSuggestions.length > 0 && (
+              <motion.div
+                className="flex flex-wrap gap-2 justify-center mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
               >
-                <Lightbulb className="w-3 h-3 mr-1" />
-                {suggestion}
-              </Button>
-            ))}
-          </motion.div>
-        )}
+                {followUpSuggestions.map((suggestion, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setInputValue(suggestion);
+                      handleSendMessage(suggestion);
+                      setFollowUpSuggestions([]);
+                    }}
+                    className="text-xs glass-card hover:glass-card-hover"
+                  >
+                    <Lightbulb className="w-3 h-3 mr-1" />
+                    {suggestion}
+                  </Button>
+                ))}
+              </motion.div>
+            )}
+
+            {/* Search Input Section */}
+            <div className="w-full max-w-3xl mx-auto">
+              <Card className="p-2 glass-card">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <Input
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Message UTA Copilot..."
+                      className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70"
+                      disabled={isTyping}
+                    />
+                    
+                    {/* Voice Button - integrated in search bar */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 border-2 transition-all duration-200 ${
+                        voiceInterface.isRecording 
+                          ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
+                          : isSpeaking 
+                            ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
+                            : 'bg-white text-foreground border-border hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm'
+                      }`}
+                      onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
+                      disabled={isTyping || isSpeaking}
+                    >
+                      {voiceInterface.isRecording ? (
+                        <div className="flex items-center justify-center gap-0.5">
+                          <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
+                          <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
+                          <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
+                          <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
+                          <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-0.5">
+                          <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                          <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                          <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
+                          <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                          <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {inputValue.trim() && (
+                    <Button 
+                      type="submit" 
+                      disabled={!inputValue.trim() || isTyping}
+                      size="sm"
+                      className="bg-foreground text-background hover:bg-foreground/90 h-8 w-8 p-0"
+                    >
+                      {isTyping ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Send className="w-3 h-3" />
+                      )}
+                    </Button>
+                  )}
+                </form>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
 
       <ModernCommandPalette
