@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -15,6 +15,35 @@ interface Message {
   timestamp: Date;
   isTyping?: boolean;
 }
+
+// Helper function to detect and format links in text
+const formatMessageWithLinks = (text: string) => {
+  // URL regex pattern for various protocols and domain patterns
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
+  
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (urlRegex.test(part)) {
+      // Ensure URL has protocol
+      const url = part.startsWith('http') ? part : `https://${part}`;
+      return (
+        <a
+          key={index}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:text-primary/80 underline inline-flex items-center gap-1 transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+          <ExternalLink className="w-3 h-3" />
+        </a>
+      );
+    }
+    return part;
+  });
+};
 
 // Typing animation component
 const TypewriterText = ({ text, onComplete }: { text: string; onComplete: () => void }) => {
@@ -34,7 +63,7 @@ const TypewriterText = ({ text, onComplete }: { text: string; onComplete: () => 
     }
   }, [currentIndex, text, onComplete]);
 
-  return <span>{displayedText}</span>;
+  return <span>{formatMessageWithLinks(displayedText)}</span>;
 };
 
 export const ChatInterface = () => {
@@ -170,9 +199,9 @@ export const ChatInterface = () => {
                         text={message.content} 
                         onComplete={() => updateMessageTyping(message.id, false)}
                       />
-                    ) : (
-                      message.content
-                    )}
+                     ) : (
+                       <span>{formatMessageWithLinks(message.content)}</span>
+                     )}
                   </p>
                   <p className={`text-xs mt-2 opacity-70 ${
                     message.type === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
