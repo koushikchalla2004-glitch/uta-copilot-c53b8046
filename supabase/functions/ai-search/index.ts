@@ -327,20 +327,30 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are UTA Copilot, a campus assistant for the University of Texas at Arlington.
+            content: `You are UTA Copilot, a warm and friendly campus assistant for the University of Texas at Arlington. You're like a knowledgeable friend who genuinely cares about helping students succeed.
 
-            Guidelines:
-            - Give DIRECT answers using live campus data when available.
-            - Be concise and helpful. Use 1-2 sentences when possible.
-            - Only provide links/sources when you're uncertain or need more details.
-            - When you have live data (dining open/closed, current events, etc.), state it directly.
-            - Use conversation context to understand follow-up questions.
-            - If unsure about specific details like exact hours, then suggest checking official sources.
+            Personality & Tone:
+            - Be warm, supportive, and encouraging like a close friend
+            - Use sentiment analysis to detect if the user seems stressed, excited, confused, or frustrated
+            - Adapt your tone accordingly - be more reassuring if they're stressed, share their excitement, etc.
+            - Use natural, conversational language - avoid robotic or overly formal responses
+            - Show empathy and understanding for student challenges
+            - Be genuinely helpful and never dismissive
+
+            Response Guidelines:
+            - NEVER say "technical difficulties" or similar robotic phrases
+            - If you don't know something, say things like "I wish I could help with that specific detail" or "That's a bit beyond what I know right now"
+            - Always try to offer alternative help or suggest who they could contact
+            - Give DIRECT answers using live campus data when available
+            - Be conversational but still informative
+            - Use encouraging language and show you care about their success
             
             Special Actions Available:
             - For DIRECTIONS/NAVIGATION queries: Call the navigation function
             - For REMINDER/ALARM requests: Call the reminder function
-            - These will trigger automatic actions in the app`
+            - These will trigger automatic actions in the app
+            
+            Remember: You're not just providing information - you're supporting a fellow student's journey at UTA. Be the friend they need!`
           },
           ...(rag.contextText ? [{ role: 'system', content: `Campus context (use if relevant):\n${rag.contextText}` }] : []),
           ...(liveContext ? [{ role: 'system', content: `Live campus status:\n${liveContext}` }] : []),
@@ -433,12 +443,63 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in ai-search function:', error);
+    
+    // Generate a more human, empathetic fallback response
+    const fallbackResponse = await generateHumanFallbackResponse(query);
+    
     return new Response(JSON.stringify({ 
-      error: 'Failed to process search query',
-      details: error.message 
+      response: fallbackResponse,
+      query,
+      timestamp: new Date().toISOString(),
+      fallback: true
     }), {
-      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
+
+// Generate human-like fallback responses with sentiment analysis
+async function generateHumanFallbackResponse(query: string): Promise<string> {
+  const lowerQuery = query.toLowerCase();
+  
+  // Basic sentiment analysis
+  const stressWords = ['help', 'urgent', 'emergency', 'confused', 'lost', 'deadline', 'problem', 'issue', 'wrong'];
+  const excitementWords = ['excited', 'amazing', 'great', 'awesome', 'love', 'fantastic', 'perfect'];
+  const questionWords = ['how', 'what', 'where', 'when', 'why', 'can you', 'could you'];
+  
+  const hasStress = stressWords.some(word => lowerQuery.includes(word));
+  const hasExcitement = excitementWords.some(word => lowerQuery.includes(word));
+  const isQuestion = questionWords.some(word => lowerQuery.includes(word));
+  
+  let response = "";
+  
+  if (hasStress) {
+    response = "Hey, I can sense this might be a bit stressful for you right now. ";
+  } else if (hasExcitement) {
+    response = "I love your enthusiasm! ";
+  } else if (isQuestion) {
+    response = "That's a great question! ";
+  } else {
+    response = "I hear you! ";
+  }
+  
+  // Add specific guidance based on query type
+  if (lowerQuery.includes('dining') || lowerQuery.includes('food')) {
+    return response + "I wish I could give you the exact dining info right now, but I'm having trouble accessing that data. For the most up-to-date dining hours and menus, I'd suggest checking the UTA Dining website or giving them a call at (817) 272-2665. They'll have all the current info you need! 🍽️";
+  }
+  
+  if (lowerQuery.includes('class') || lowerQuery.includes('registration') || lowerQuery.includes('course')) {
+    return response + "Course and registration questions can be tricky, and I want to make sure you get the right information. Your best bet would be to reach out to your academic advisor or the Registrar's Office at (817) 272-2681. They're the experts and can give you personalized guidance for your specific situation! 📚";
+  }
+  
+  if (lowerQuery.includes('parking')) {
+    return response + "Parking is always a hot topic on campus! While I can't access the exact parking details right now, Parking Services at (817) 272-2282 will have all the current info about permits, available spots, and rates. They're super helpful! 🚗";
+  }
+  
+  if (lowerQuery.includes('event') || lowerQuery.includes('activity')) {
+    return response + "I love that you're looking to get involved on campus! While I can't pull up the exact events right now, the Student Activities office and the UTA events calendar online will have all the latest happenings. There's always something fun going on at UTA! 🎉";
+  }
+  
+  // Default empathetic response
+  return response + "I really wish I could help you with that specific question right now, but I'm having a bit of trouble accessing that information. Don't worry though - the UTA main information line at (817) 272-2011 is fantastic and they can connect you with exactly the right person to help. You've got this! 💪";
+}

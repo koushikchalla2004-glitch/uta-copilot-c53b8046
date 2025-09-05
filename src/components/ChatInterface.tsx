@@ -220,8 +220,9 @@ export const ChatInterface = () => {
         }
       }
 
-      // Add AI response with typing animation
-      const messageId = addMessage('assistant', data.response || "I apologize, but I am unable to process your request at this time. Please try again momentarily.", true);
+      // Add the AI response to messages (no fallback message)
+      const responseText = data.response || data.error || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
+      const messageId = addMessage('assistant', responseText, true);
       setTimeout(() => {
         updateMessageTyping(messageId, false);
         // Note: Voice responses will be handled by FloatingVoiceButton component
