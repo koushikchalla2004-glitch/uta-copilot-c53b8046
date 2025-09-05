@@ -55,7 +55,7 @@ const App = () => {
         />
         <Route 
           path="/hero" 
-          element={session ? <MapDemo /> : <Navigate to="/auth" replace />} 
+          element={session ? <Hero /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="/" 
@@ -76,6 +76,10 @@ const App = () => {
         <Route 
           path="/app" 
           element={<Navigate to="/hero" replace />} 
+        />
+        <Route 
+          path="/demo" 
+          element={session ? <MapDemo /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="*" 
