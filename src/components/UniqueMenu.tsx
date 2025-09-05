@@ -107,15 +107,15 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             />
 
             {/* Center Content */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-8 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Header */}
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -165,8 +165,8 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                     Sign out
                   </Button>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
