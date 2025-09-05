@@ -16,8 +16,13 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
   onSpeakingChange = () => {},
   className = ''
 }) => {
+  console.log('FloatingVoiceButton rendering');
+  
   const voice = useVoiceInterface({
-    onTranscription,
+    onTranscription: (text) => {
+      console.log('FloatingVoiceButton received transcription:', text);
+      onTranscription(text);
+    },
     onSpeakingChange
   });
 
@@ -28,6 +33,13 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
   };
 
   const buttonState = getButtonState();
+  
+  console.log('Voice state:', {
+    isRecording: voice.isRecording,
+    isProcessing: voice.isProcessing,
+    isSpeaking: voice.isSpeaking,
+    buttonState
+  });
 
   return (
     <>
@@ -72,7 +84,16 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={voice.isRecording ? voice.stopRecording : voice.startRecording}
+          onClick={() => {
+            console.log('Floating mic button clicked, current state:', buttonState);
+            if (voice.isRecording) {
+              console.log('Stopping recording...');
+              voice.stopRecording();
+            } else {
+              console.log('Starting recording...');
+              voice.startRecording();
+            }
+          }}
           disabled={voice.isProcessing}
           className={`w-16 h-16 rounded-full shadow-xl backdrop-blur-sm transition-all duration-300 ${
             buttonState === 'recording' 

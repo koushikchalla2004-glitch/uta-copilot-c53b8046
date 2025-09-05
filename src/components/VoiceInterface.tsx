@@ -93,9 +93,11 @@ export const useVoiceInterface = ({
         }
       };
     }
+  }, []); // Remove dependencies to avoid re-creating speech recognition
 
+  // Cleanup effect
+  useEffect(() => {
     return () => {
-      // Cleanup on unmount
       if (silenceTimer) {
         clearTimeout(silenceTimer);
       }
@@ -103,7 +105,7 @@ export const useVoiceInterface = ({
         speechRecognitionRef.current.stop();
       }
     };
-  }, [isRecording, silenceTimer]);
+  }, [silenceTimer]);
 
   // Start voice recording
   const startRecording = useCallback(async () => {
