@@ -103,6 +103,39 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_history: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
+          message_index: number
+          metadata: Json | null
+          role: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: number
+          message_index: number
+          metadata?: Json | null
+          role: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: number
+          message_index?: number
+          metadata?: Json | null
+          role?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           catalog_url: string | null
@@ -268,6 +301,36 @@ export type Database = {
           research_areas?: string[] | null
           search_tsv?: unknown | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      faq_templates: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          id: number
+          keywords: string[]
+          priority: number | null
+          question: string
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          id?: number
+          keywords: string[]
+          priority?: number | null
+          question: string
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          id?: number
+          keywords?: string[]
+          priority?: number | null
+          question?: string
         }
         Relationships: []
       }
@@ -555,6 +618,36 @@ export type Database = {
         }
         Relationships: []
       }
+      response_cache: {
+        Row: {
+          category: string | null
+          created_at: string
+          expires_at: string
+          hit_count: number | null
+          id: number
+          query_key: string
+          response_data: Json
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          expires_at: string
+          hit_count?: number | null
+          id?: number
+          query_key: string
+          response_data: Json
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          expires_at?: string
+          hit_count?: number | null
+          id?: number
+          query_key?: string
+          response_data?: Json
+        }
+        Relationships: []
+      }
       rooms: {
         Row: {
           building_id: number | null
@@ -657,7 +750,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      clean_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
