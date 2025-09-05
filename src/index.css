@@ -5,31 +5,28 @@
 /* Import custom fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600;700;800&display=swap');
 
-/* Professional Light Theme - Sky Blue Palette */
+/* Simple White & Sky Blue Theme */
 :root {
   /* Core Colors */
-  --background: 248 250 252; /* slate-50 */
-  --foreground: 15 23 42; /* slate-900 */
+  --background: 255 255 255; /* white */
+  --foreground: 30 41 59; /* dark text */
   --card: 255 255 255; /* white */
-  --card-foreground: 15 23 42; /* slate-900 */
+  --card-foreground: 30 41 59; /* dark text */
   --popover: 255 255 255; /* white */
-  --popover-foreground: 15 23 42; /* slate-900 */
+  --popover-foreground: 30 41 59; /* dark text */
   
-  /* Primary Sky Blue Palette */
-  --primary: 2 132 199; /* sky-600 */
-  --primary-glow: 14 165 233; /* sky-500 */
-  --primary-light: 56 189 248; /* sky-400 */
-  --primary-lighter: 125 211 252; /* sky-300 */
-  --primary-lightest: 186 230 253; /* sky-200 */
+  /* Sky Blue Palette */
+  --primary: 14 165 233; /* sky-500 */
+  --primary-light: 204 65 95; /* #EBF4FA - your specified light blue */
   --primary-foreground: 255 255 255; /* white */
   
-  /* Secondary Colors */
-  --secondary: 226 232 240; /* slate-200 */
-  --secondary-foreground: 30 41 59; /* slate-800 */
-  --muted: 241 245 249; /* slate-100 */
-  --muted-foreground: 100 116 139; /* slate-500 */
-  --accent: 186 230 253; /* sky-200 */
-  --accent-foreground: 7 89 133; /* sky-900 */
+  /* Simple Secondary Colors */
+  --secondary: 204 65 95; /* light blue #EBF4FA */
+  --secondary-foreground: 30 41 59; /* dark text */
+  --muted: 204 65 95; /* light blue #EBF4FA */
+  --muted-foreground: 71 85 105; /* gray text */
+  --accent: 204 65 95; /* light blue #EBF4FA */
+  --accent-foreground: 30 41 59; /* dark text */
   
   /* Status Colors */
   --destructive: 239 68 68; /* red-500 */
