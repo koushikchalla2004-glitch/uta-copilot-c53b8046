@@ -240,7 +240,7 @@ const Index = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" 
+                className="w-full h-12 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-all duration-300 hover-scale animate-fade-in disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:transform-none shadow-sm hover:shadow-md" 
                 disabled={isLoading}
               >
                 {isLoading ? 'Creating account...' : 'Continue'}
