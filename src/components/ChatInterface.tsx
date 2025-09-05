@@ -244,6 +244,8 @@ export const ChatInterface = () => {
 
       // Humanize assistant response based on user's sentiment
       responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
+      // Make it concise and human-like
+      responseText = optimization.makeConcise(responseText);
       
       // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);

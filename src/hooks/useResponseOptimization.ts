@@ -205,6 +205,16 @@ export const useResponseOptimization = () => {
     return suggestions.slice(0, 3);
   }, []);
 
+  const makeConcise = useCallback((text: string): string => {
+    if (!text) return text as any;
+    const cleaned = text.replace(/\s+/g, ' ').trim();
+    const withoutPreface = cleaned.replace(/^(here(’|'|)s what i found:?|according to [^,]+,?\s*)/i, '').trim();
+    const sentences = withoutPreface.split(/(?<=[.!?])\s+/);
+    const firstTwo = sentences.slice(0, 2).join(' ');
+    const clipped = firstTwo.length > 280 ? firstTwo.slice(0, 280).replace(/\s+\S*$/, '') + '…' : firstTwo;
+    return clipped;
+  }, []);
+
   return {
     isLoading,
     setIsLoading,
@@ -212,6 +222,7 @@ export const useResponseOptimization = () => {
     checkCache,
     storeInCache,
     searchLocalData,
-    generateFollowUpSuggestions
+    generateFollowUpSuggestions,
+    makeConcise,
   };
 };

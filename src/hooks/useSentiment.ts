@@ -22,17 +22,24 @@ export const useSentiment = () => {
     if (!safeText) return safeText;
 
     const lower = safeText.toLowerCase();
-    const startsFriendly = lower.startsWith('great') || lower.startsWith('sure') || lower.startsWith("i'm sorry") || lower.startsWith("i am sorry") || lower.startsWith("here's what i found") || lower.startsWith('here is');
+    const startsFriendly =
+      lower.startsWith('great') ||
+      lower.startsWith('sure') ||
+      lower.startsWith("i'm sorry") ||
+      lower.startsWith('sorry') ||
+      lower.startsWith('great question') ||
+      lower.startsWith('here is') ||
+      lower.startsWith("here's what i found");
 
     if (startsFriendly) return safeText; // avoid double prefix
 
     let prefix = '';
     if (userLabel === 'negative') {
-      prefix = "I'm sorry you're dealing with that — let me help. ";
+      prefix = "Sorry — that's frustrating. ";
     } else if (userLabel === 'positive') {
-      prefix = 'Great question! ';
+      prefix = 'Great question — ';
     } else {
-      prefix = "Here's what I found: ";
+      prefix = '';
     }
 
     return `${prefix}${safeText}`;
