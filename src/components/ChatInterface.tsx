@@ -185,7 +185,7 @@ export const ChatInterface = () => {
   // Helper function to trigger TTS after message is complete
   const triggerTTSForMessage = (content: string) => {
     try {
-      // Clean content for TTS (remove prefixes and markdown)
+      // Clean content for TTS and make professional
       const cleanContent = content
         .replace(/^[⚡💨🎯🧠]\s*/, '') // Remove optimization prefixes
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
@@ -275,6 +275,14 @@ export const ChatInterface = () => {
         });
       }
 
+      // Clean response text from markdown formatting for professional appearance
+      responseText = responseText
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        .replace(/^[⚡💨🎯🧠]\s*/, '') // Remove optimization prefixes
+        .trim();
+      
       // Humanize assistant response based on user's sentiment
       responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
       // Make it concise and human-like
