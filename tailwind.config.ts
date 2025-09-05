@@ -66,7 +66,7 @@ export default {
 				'soft-white': 'hsl(var(--soft-white))',
 			},
 			backgroundImage: {
-				'gradient-hero': 'linear-gradient(to top, hsl(0, 0%, 5%) 0%, hsl(0, 0%, 15%) 30%, hsl(220, 14%, 85%) 70%, hsl(220, 14%, 92%) 100%)',
+				'gradient-hero': 'linear-gradient(to top, #000000 0%, #1a1a1a 20%, #333333 40%, #666666 60%, #999999 80%, #cccccc 100%)',
 				'gradient-card': 'var(--gradient-card)',
 				'gradient-orb': 'var(--gradient-orb)',
 			},
