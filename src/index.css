@@ -39,13 +39,18 @@
   --destructive: 0 62% 50%; /* red for destructive actions HSL */
   --destructive-foreground: 0 0% 100%; /* white text on red HSL */
   
-  /* Additional Theme Colors */
+  /* Additional Theme Colors - Dark backgrounds need white text */
   --card-glass: 0 0% 100% / 0.8; /* semi-transparent white HSL */
   --carbon: 0 0% 15%; /* dark carbon color HSL */
+  --carbon-foreground: 0 0% 100%; /* white text on dark carbon HSL */
   --electric-blue: 217 91% 60%; /* bright blue HSL */
+  --electric-blue-foreground: 0 0% 100%; /* white text on blue HSL */
   --neon-mint: 159 68% 65%; /* mint green HSL */
+  --neon-mint-foreground: 0 0% 0%; /* black text on mint HSL */
   --slate: 210 40% 50%; /* slate blue HSL */
+  --slate-foreground: 0 0% 100%; /* white text on slate HSL */
   --soft-white: 0 0% 98%; /* slightly off-white HSL */
+  --soft-white-foreground: 0 0% 0%; /* black text on soft white HSL */
   --radius: 0.5rem;
   
   /* Professional Shadows */

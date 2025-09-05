@@ -59,11 +59,26 @@ export default {
 					foreground: 'hsl(var(--card-foreground))',
 					glass: 'hsl(var(--card-glass))'
 				},
-				carbon: 'hsl(var(--carbon))',
-				'electric-blue': 'hsl(var(--electric-blue))',
-				'neon-mint': 'hsl(var(--neon-mint))',
-				slate: 'hsl(var(--slate))',
-				'soft-white': 'hsl(var(--soft-white))',
+				carbon: {
+					DEFAULT: 'hsl(var(--carbon))',
+					foreground: 'hsl(var(--carbon-foreground))'
+				},
+				'electric-blue': {
+					DEFAULT: 'hsl(var(--electric-blue))',
+					foreground: 'hsl(var(--electric-blue-foreground))'
+				},
+				'neon-mint': {
+					DEFAULT: 'hsl(var(--neon-mint))',
+					foreground: 'hsl(var(--neon-mint-foreground))'
+				},
+				slate: {
+					DEFAULT: 'hsl(var(--slate))',
+					foreground: 'hsl(var(--slate-foreground))'
+				},
+				'soft-white': {
+					DEFAULT: 'hsl(var(--soft-white))',
+					foreground: 'hsl(var(--soft-white-foreground))'
+				},
 			},
 			backgroundImage: {
 				'gradient-hero': 'linear-gradient(to top, #000000 0%, #1a1a1a 20%, #333333 40%, #666666 60%, #999999 80%, #cccccc 100%)',
