@@ -14,13 +14,21 @@ export class NavigationAgent {
       const origin = destination || 'current location';
       
       // Format building name for maps query
-      const formattedBuilding = `${building} University of Texas at Arlington`;
+      const formattedBuilding = `${building} University of Texas at Arlington, TX`;
       
       // Create Google Maps URL
       const mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(formattedBuilding)}`;
       
-      // Open in new tab
-      window.open(mapsUrl, '_blank');
+      // Try different approaches to avoid popup blockers
+      const link = document.createElement('a');
+      link.href = mapsUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Temporarily add to DOM and click
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       
       return {
         success: true,
@@ -28,9 +36,10 @@ export class NavigationAgent {
         action: 'navigation_opened'
       };
     } catch (error) {
+      console.error('Navigation error:', error);
       return {
         success: false,
-        message: `Unable to open directions to ${building}`,
+        message: `Unable to open directions to ${building}. Please try manually searching "${building} UTA" in Google Maps.`,
       };
     }
   }
