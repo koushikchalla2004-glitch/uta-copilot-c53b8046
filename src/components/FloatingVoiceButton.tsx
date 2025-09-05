@@ -2,7 +2,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { useVoiceInterface } from './VoiceInterface';
-import { SiriVoiceAnimation } from './SiriVoiceAnimation';
 import { LiveCaptions } from './LiveCaptions';
 
 interface FloatingVoiceButtonProps {
@@ -43,14 +42,6 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
 
   return (
     <>
-      {/* Siri Voice Animation */}
-      <SiriVoiceAnimation
-        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
-        isListening={voice.isRecording}
-        isSpeaking={voice.isSpeaking}
-        isProcessing={voice.isProcessing}
-      />
-
       {/* Live Captions */}
       <LiveCaptions
         isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}

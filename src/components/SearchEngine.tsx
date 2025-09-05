@@ -24,6 +24,8 @@ import { Badge } from './ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { FloatingVoiceButton } from './FloatingVoiceButton';
+import { LiveCaptions } from './LiveCaptions';
+import { useVoiceInterface } from './VoiceInterface';
 
 interface SearchResult {
   id: string;
@@ -75,6 +77,16 @@ const mockResults: SearchResult[] = [
 export const SearchEngine = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Voice interface for search
+  const voice = useVoiceInterface({
+    onTranscription: async (text) => {
+      console.log('Voice transcription received in SearchEngine:', text);
+      setSearchQuery(text);
+      performSearch(text);
+    },
+    onSpeakingChange: () => {}
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [facets, setFacets] = useState<Facet[]>([
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, active: false },
@@ -290,18 +302,15 @@ export const SearchEngine = () => {
     }
   }, [selectedResult, showResults]);
 
-  const handleVoiceTranscription = async (text: string) => {
-    console.log('Voice transcription received in SearchEngine:', text);
-    setSearchQuery(text);
-    performSearch(text);
-  };
-
   return (
     <>
-      {/* Floating Voice Button */}
-      <FloatingVoiceButton
-        onTranscription={handleVoiceTranscription}
-        className="bottom-6 right-6"
+      {/* Live Captions for Search */}
+      <LiveCaptions
+        isVisible={voice.isRecording || voice.isProcessing}
+        currentText={voice.liveCaptionText}
+        isListening={voice.isRecording}
+        isSpeaking={false}
+        isProcessing={voice.isProcessing}
       />
 
     <section id="search" className="py-20 px-4 relative overflow-hidden">
@@ -361,6 +370,8 @@ export const SearchEngine = () => {
                 onKeyDown={handleKeyDown}
                 className="flex-1 border-none bg-transparent focus:ring-0 focus:outline-none text-lg placeholder:text-muted-foreground"
               />
+              {/* Voice Mic Button */}
+              <voice.MicButton />
               <Button
                 type="button"
                 variant="ghost"
