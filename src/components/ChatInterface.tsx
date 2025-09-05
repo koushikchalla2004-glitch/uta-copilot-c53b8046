@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
+import { useVoiceInterface } from './VoiceInterface';
 
 interface Message {
   id: string;
@@ -101,9 +102,23 @@ export const ChatInterface = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Voice interface integration
+  const voice = useVoiceInterface({
+    onTranscription: (text) => {
+      setInputValue(text);
+      // Auto-send voice input
+      setTimeout(() => {
+        const event = new Event('voice-submit');
+        handleSendMessage();
+      }, 100);
+    },
+    onSpeakingChange: setIsSpeaking
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -205,7 +220,13 @@ export const ChatInterface = () => {
 
       // Add AI response with typing animation
       const messageId = addMessage('assistant', data.response || "I apologize, but I am unable to process your request at this time. Please try again momentarily.", true);
-      setTimeout(() => updateMessageTyping(messageId, false), data.response ? data.response.length * 25 : 2000);
+      setTimeout(() => {
+        updateMessageTyping(messageId, false);
+        // Auto-speak AI responses if voice is enabled
+        if (voice.audioEnabled && data.response) {
+          voice.speakText(data.response);
+        }
+      }, data.response ? data.response.length * 25 : 2000);
 
     } catch (error: any) {
       console.error('Chat error:', error);
@@ -312,14 +333,19 @@ export const ChatInterface = () => {
 
       {/* Input Area */}
       <div className="flex-shrink-0 p-4 border-t border-border/40 bg-background/50 backdrop-blur-sm rounded-b-lg">
+        {/* Voice Controls */}
+        <div className="flex justify-center mb-3">
+          <voice.VoiceControls />
+        </div>
+        
         <div className="flex gap-2">
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask me anything about UTA campus..."
+            placeholder={voice.isRecording ? "Listening..." : "Ask me anything about UTA campus..."}
             className="flex-1 resize-none min-h-[44px] rounded-xl"
-            disabled={isTyping}
+            disabled={isTyping || voice.isRecording}
           />
           <Button
             onClick={handleSendMessage}
