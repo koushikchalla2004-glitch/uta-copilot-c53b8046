@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from './ui/button';
@@ -38,6 +39,7 @@ interface DirectionsResult {
 }
 
 export const CampusMap = () => {
+  const location = useLocation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -56,7 +58,22 @@ export const CampusMap = () => {
   useEffect(() => {
     initializeData();
     getUserLocation();
-  }, []);
+    
+    // Handle navigation from search engine
+    if (location.state) {
+      const { selectedBuilding: navBuilding, selectedBuildingId, searchQuery: navQuery } = location.state as any;
+      
+      if (navBuilding) {
+        setSelectedBuilding(navBuilding);
+        setSearchQuery(navQuery || '');
+      } else if (selectedBuildingId) {
+        // Load building by ID
+        loadBuildingById(selectedBuildingId);
+      } else if (navQuery) {
+        setSearchQuery(navQuery);
+      }
+    }
+  }, [location.state]);
 
   const initializeData = async () => {
     setIsLoading(true);
@@ -96,6 +113,47 @@ export const CampusMap = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadBuildingById = async (buildingId: string) => {
+    try {
+      const id = parseInt(buildingId.replace('building-', ''));
+      const { data, error } = await supabase
+        .from('buildings')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error loading building:', error);
+        return;
+      }
+
+      if (data) {
+        setSelectedBuilding(data);
+        // Focus on building when map loads
+        if (map.current && mapLoaded) {
+          focusOnBuilding(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading building by ID:', error);
+    }
+  };
+
+  const focusOnBuilding = (building: Building) => {
+    if (!map.current || !building.lat || !building.lng) return;
+    
+    map.current.flyTo({
+      center: [building.lng, building.lat],
+      zoom: 18,
+      essential: true
+    });
+
+    toast({
+      title: "Building Found",
+      description: `Showing ${building.name} on the map`,
+    });
   };
 
   const loadBuildings = async () => {
@@ -191,6 +249,12 @@ export const CampusMap = () => {
       map.current.on('load', () => {
         setMapLoaded(true);
         addBuildingMarkers();
+        
+        // Handle building selection from navigation
+        if (selectedBuilding && selectedBuilding.lat && selectedBuilding.lng) {
+          setTimeout(() => focusOnBuilding(selectedBuilding), 1000);
+        }
+        
         toast({
           title: "Map Loaded",
           description: "Campus map is ready to use",

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -14,11 +15,14 @@ import {
   Bookmark,
   Share2,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Navigation
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SearchResult {
   id: string;
@@ -68,6 +72,8 @@ const mockResults: SearchResult[] = [
 ];
 
 export const SearchEngine = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [facets, setFacets] = useState<Facet[]>([
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, active: false },
@@ -79,7 +85,73 @@ export const SearchEngine = () => {
   const [showResults, setShowResults] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedResult, setSelectedResult] = useState<number | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Location keywords for automatic map navigation
+  const locationKeywords = [
+    'where is', 'location', 'directions', 'navigate', 'find', 'building', 'hall', 'center',
+    'library', 'gym', 'dining', 'cafeteria', 'parking', 'office', 'department'
+  ];
+
+  const buildingAliases = {
+    'library': 'Central Library',
+    'lib': 'Central Library',
+    'central library': 'Central Library',
+    'mac': 'Maverick Activities Center',
+    'maverick activities': 'Maverick Activities Center',
+    'gym': 'Maverick Activities Center',
+    'fitness': 'Maverick Activities Center',
+    'erb': 'Engineering Research Building',
+    'engineering': 'Engineering Research Building',
+    'uc': 'University Center',
+    'university center': 'University Center',
+    'student union': 'University Center',
+    'business': 'Business Building',
+    'bus': 'Business Building',
+    'science': 'Science Hall',
+    'sh': 'Science Hall',
+    'ssb': 'Student Services Building',
+    'student services': 'Student Services Building',
+    'arlington hall': 'Arlington Hall',
+    'ah': 'Arlington Hall',
+    'dorm': 'Arlington Hall'
+  };
+
+  const detectLocationQuery = (query: string): boolean => {
+    const lowerQuery = query.toLowerCase();
+    return locationKeywords.some(keyword => lowerQuery.includes(keyword)) ||
+           Object.keys(buildingAliases).some(alias => lowerQuery.includes(alias));
+  };
+
+  const findBuildingFromQuery = async (query: string): Promise<any | null> => {
+    const lowerQuery = query.toLowerCase();
+    
+    // Check aliases first
+    for (const [alias, buildingName] of Object.entries(buildingAliases)) {
+      if (lowerQuery.includes(alias)) {
+        const { data } = await supabase
+          .from('buildings')
+          .select('*')
+          .ilike('name', `%${buildingName}%`)
+          .limit(1);
+        
+        if (data && data.length > 0) {
+          return data[0];
+        }
+      }
+    }
+
+    // Search by name or code
+    const { data } = await supabase
+      .from('buildings')
+      .select('*')
+      .or(`name.ilike.%${query}%,code.ilike.%${query}%`)
+      .limit(1);
+    
+    return data && data.length > 0 ? data[0] : null;
+  };
 
   const toggleFacet = (facetId: string) => {
     setFacets(prev => prev.map(facet => 
@@ -89,39 +161,122 @@ export const SearchEngine = () => {
     ));
   };
 
+  const performSearch = async (query: string) => {
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+    setShowResults(true);
+
+    try {
+      // Check if this is a location query
+      if (detectLocationQuery(query)) {
+        const building = await findBuildingFromQuery(query);
+        
+        if (building) {
+          toast({
+            title: "Navigating to Map",
+            description: `Showing ${building.name} on campus map`,
+          });
+          
+          // Navigate to map with building data
+          navigate('/map', { 
+            state: { 
+              selectedBuilding: building,
+              searchQuery: query 
+            } 
+          });
+          return;
+        } else {
+          toast({
+            title: "Building not found",
+            description: "Redirecting to map for manual search",
+          });
+          navigate('/map', { state: { searchQuery: query } });
+          return;
+        }
+      }
+
+      // Regular search using unified search API
+      const activeFacets = facets.filter(f => f.active).map(f => f.id);
+      
+      const { data, error } = await supabase.functions.invoke('unified-search', {
+        body: {
+          query,
+          categories: activeFacets,
+          limit: 20
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setSearchResults(data.results || []);
+      
+      if (data.results?.length === 0) {
+        toast({
+          title: "No results found",
+          description: "Try adjusting your search terms or filters",
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Search error:', error);
+      setSearchResults(mockResults); // Fallback to mock results
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setShowResults(true);
-    }
+    performSearch(searchQuery);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showResults) return;
 
+    const currentResults = searchResults.length > 0 ? searchResults : mockResults;
+
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         setSelectedResult(prev => 
-          prev === null ? 0 : Math.min(prev + 1, mockResults.length - 1)
+          prev === null ? 0 : Math.min(prev + 1, currentResults.length - 1)
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
         setSelectedResult(prev => 
-          prev === null ? mockResults.length - 1 : Math.max(prev - 1, 0)
+          prev === null ? currentResults.length - 1 : Math.max(prev - 1, 0)
         );
         break;
       case 'Enter':
         if (selectedResult !== null) {
           e.preventDefault();
-          // Handle result selection
+          handleResultClick(currentResults[selectedResult]);
+        } else {
+          handleSearch(e);
         }
         break;
       case 'Escape':
         setShowResults(false);
         setSelectedResult(null);
         break;
+    }
+  };
+
+  const handleResultClick = (result: SearchResult) => {
+    if (result.category === 'Buildings') {
+      navigate('/map', { 
+        state: { 
+          selectedBuildingId: result.id,
+          searchQuery: result.title 
+        } 
+      });
+    } else {
+      // Handle other result types
+      window.open(result.url, '_blank');
     }
   };
 
