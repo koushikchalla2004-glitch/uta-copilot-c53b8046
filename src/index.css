@@ -19,10 +19,12 @@
   --primary: 203 60% 95%; /* light blue HSL */
   --primary-hover: 203 60% 90%; /* slightly darker on hover HSL */
   --primary-foreground: 0 0% 0%; /* black text on light blue HSL */
+  --primary-glow: 203 60% 85%; /* lighter blue for glow effects HSL */
   
   /* Professional Grays */
   --secondary: 0 0% 96%; /* very light gray HSL */
   --secondary-foreground: 0 0% 0%; /* black text HSL */
+  --secondary-glow: 0 0% 90%; /* slightly darker gray for glow effects HSL */
   --muted: 0 0% 96%; /* very light gray HSL */
   --muted-foreground: 0 0% 45%; /* medium gray text HSL */
   --accent: 203 60% 95%; /* light blue HSL */
@@ -32,6 +34,18 @@
   --border: 0 0% 90%; /* light gray borders HSL */
   --input: 0 0% 90%; /* light gray input borders HSL */
   --ring: 203 60% 95%; /* light blue focus ring HSL */
+  
+  /* Destructive Colors */
+  --destructive: 0 62% 50%; /* red for destructive actions HSL */
+  --destructive-foreground: 0 0% 100%; /* white text on red HSL */
+  
+  /* Additional Theme Colors */
+  --card-glass: 0 0% 100% / 0.8; /* semi-transparent white HSL */
+  --carbon: 0 0% 15%; /* dark carbon color HSL */
+  --electric-blue: 217 91% 60%; /* bright blue HSL */
+  --neon-mint: 159 68% 65%; /* mint green HSL */
+  --slate: 210 40% 50%; /* slate blue HSL */
+  --soft-white: 0 0% 98%; /* slightly off-white HSL */
   --radius: 0.5rem;
   
   /* Professional Shadows */
