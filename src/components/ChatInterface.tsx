@@ -93,7 +93,7 @@ export const ChatInterface = () => {
     {
       id: '1',
       type: 'assistant',
-      content: "Good day. I am UTA Copilot, your professional virtual assistant for the University of Texas at Arlington. I am here to provide comprehensive assistance with academic programs, student services, campus resources, and any other university-related inquiries. How may I assist you today?",
+      content: "Hi! I'm UTA Copilot. Ask me anything about campus - dining, events, courses, buildings, or student services.",
       timestamp: new Date(),
       isTyping: false
     }
