@@ -62,9 +62,9 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
 
   return (
     <>
-      {/* Top-Left Menu Button */}
+      {/* Top-Left Menu Button - ChatGPT Style */}
       <motion.div
-        className="fixed top-6 left-6 z-50"
+        className="fixed top-4 left-4 z-50"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
@@ -74,25 +74,25 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             e.stopPropagation();
             if (!isOpen) setIsOpen(true);
           }}
-          className="relative w-16 h-16 rounded-2xl professional-gradient shadow-xl hover:shadow-2xl transition-all duration-300 group border border-border btn-presentation"
+          variant="ghost"
+          className="w-10 h-10 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
           size="icon"
         >
           <motion.div
             key="menu"
-            initial={{ rotate: 180, opacity: 0 }}
+            initial={{ rotate: 0, opacity: 1 }}
             animate={{ rotate: 0, opacity: 1 }}
-            exit={{ rotate: -180, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col space-y-1"
           >
-            <Menu className="w-6 h-6 text-foreground" />
+            <div className="w-4 h-0.5 bg-gray-700 rounded-full" />
+            <div className="w-4 h-0.5 bg-gray-700 rounded-full" />
+            <div className="w-4 h-0.5 bg-gray-700 rounded-full" />
           </motion.div>
-          
-          {/* Professional glow effect */}
-          <div className="absolute inset-0 rounded-2xl border border-white/40 animate-pulse-professional" />
         </Button>
       </motion.div>
 
-      {/* Top-Right Close Button (when menu is open) */}
+      {/* Top-Right Close Button (when menu is open) - ChatGPT Style */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -100,17 +100,18 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-6 right-6 z-[60]"
+            className="fixed top-4 right-4 z-[60]"
           >
             <Button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(false);
               }}
-              className="w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200 hover:bg-white shadow-lg transition-all duration-300 hover:scale-105 btn-outline-professional"
+              variant="ghost"
+              className="w-10 h-10 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
               size="icon"
             >
-              <X className="w-6 h-6 text-slate-700" />
+              <X className="w-5 h-5 text-gray-700" />
             </Button>
           </motion.div>
         )}
