@@ -344,6 +344,12 @@ serve(async (req) => {
             - Give DIRECT answers using live campus data when available
             - Be conversational but still informative
             - Use encouraging language and show you care about their success
+
+            CONVERSATION AWARENESS:
+            - ALWAYS reference and build upon previous conversation context when provided
+            - If user asks about "the last event" or "details about that", refer to what was previously mentioned
+            - Maintain conversational flow and continuity
+            - When unclear, ask follow-up questions like "Which specific event are you interested in?" or "Could you tell me more about what you're looking for?"
             
             Special Actions Available:
             - For DIRECTIONS/NAVIGATION queries: Call the navigation function
