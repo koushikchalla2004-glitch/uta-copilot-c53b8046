@@ -40,6 +40,56 @@ function generateFallbackResponse(query: string): string {
   return `🎓 **UTA Campus Information:**\n\nI'd be happy to help you with information about the University of Texas at Arlington! Here are some key resources:\n\n• **Main website:** uta.edu\n• **Student services:** (817) 272-2011\n• **Campus tours and information:** admissions.uta.edu\n• **Emergency services:** (817) 272-3003\n\nFor specific questions about "${query}", I recommend:\n• Visiting the UTA website\n• Calling the main information line\n• Stopping by the Visitor Information Center\n\nIs there something specific about UTA you'd like to know more about?`;
 }
 
+// Get live campus status for real-time context
+async function getLiveCampusContext(): Promise<string> {
+  try {
+    if (!db) return '';
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+    const [diningRes, todayEventsRes, nextEventsRes] = await Promise.all([
+      db.from('dining_locations').select('name,is_open,campus_area').order('name'),
+      db.from('events').select('title,start_time,location').gte('start_time', todayStart.toISOString()).lte('start_time', todayEnd.toISOString()).order('start_time').limit(3),
+      db.from('events').select('title,start_time,location').gt('start_time', now.toISOString()).order('start_time').limit(3)
+    ]);
+
+    let liveContext = '';
+
+    // Current dining status
+    if (diningRes.data && diningRes.data.length > 0) {
+      const open = diningRes.data.filter((d: any) => d.is_open);
+      const closed = diningRes.data.filter((d: any) => !d.is_open);
+      
+      if (open.length > 0) {
+        liveContext += `Currently open dining: ${open.map((d: any) => d.name).join(', ')}\n`;
+      }
+      if (closed.length > 0) {
+        liveContext += `Currently closed dining: ${closed.map((d: any) => d.name).join(', ')}\n`;
+      }
+    }
+
+    // Today's remaining events
+    if (todayEventsRes.data && todayEventsRes.data.length > 0) {
+      const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      liveContext += `Today's events: ${todayEventsRes.data.map((e: any) => `${e.title} at ${fmt(e.start_time)}`).join(', ')}\n`;
+    }
+
+    // Next upcoming events
+    if (nextEventsRes.data && nextEventsRes.data.length > 0) {
+      const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      liveContext += `Next events: ${nextEventsRes.data.map((e: any) => `${e.title} — ${fmt(e.start_time)}`).join(', ')}\n`;
+    }
+
+    return liveContext.trim();
+  } catch (err) {
+    console.error('Live context fetch failed:', err);
+    return '';
+  }
+}
+
+
 // Build lightweight retrieval-augmented context from Supabase tables
 async function getRagContext(query: string): Promise<{ contextText: string; sources: Array<{ category: string; title: string; snippet?: string; url?: string }> }> {
   try {
@@ -245,6 +295,9 @@ serve(async (req) => {
       }
     }
 
+    // Get live campus data for enhanced context
+    const liveContext = await getLiveCampusContext();
+    
     // Build retrieval context from Supabase
     const rag = await getRagContext(query);
     console.log('RAG context ready', { items: rag.sources.length, len: rag.contextText.length });
@@ -274,6 +327,7 @@ serve(async (req) => {
             - Include links to official UTA resources when useful.`
           },
           ...(rag.contextText ? [{ role: 'system', content: `Campus context (use if relevant):\n${rag.contextText}` }] : []),
+          ...(liveContext ? [{ role: 'system', content: `Live campus status:\n${liveContext}` }] : []),
           ...history,
           { role: 'user', content: query }
         ],
