@@ -121,95 +121,74 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Professional Background Overlay */}
+            {/* Background Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
             {/* Center Content */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-6"
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-8"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="text-center max-w-md w-full">
-                {/* App Logo */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 25 }}
-                  className="mb-8"
-                >
-                  <div className="w-24 h-24 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl mx-auto mb-4 border border-white/20">
-                    <Sparkles className="w-12 h-12 text-white" />
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent animate-pulse-professional" />
+              <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold text-slate-900 mb-2">UTA Copilot</h2>
-                  <p className="text-slate-600">Your Campus Assistant</p>
-                </motion.div>
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-1">UTA Copilot</h2>
+                  <p className="text-gray-600 text-sm">Your intelligent campus assistant</p>
+                </div>
 
-                {/* Menu Options in Center */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-                  className="grid grid-cols-2 gap-4 mb-8"
-                >
+                {/* Menu Options */}
+                <div className="space-y-2 mb-8">
                   {menuItems.map((item, index) => (
-                    <motion.div
+                    <motion.button
                       key={item.label}
-                      initial={{ scale: 0, opacity: 0, y: 20 }}
-                      animate={{ scale: 1, opacity: 1, y: 0 }}
-                      transition={{ 
-                        delay: 0.3 + index * 0.1,
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25
-                      }}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
                       onClick={() => handleNavigation(item.path)}
-                      className="group cursor-pointer p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/50 hover:bg-white/95 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg animate-fade-in-up"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
                     >
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} p-3 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                          <item.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-700 group-hover:text-sky-700 transition-colors duration-200">
-                          {item.label}
-                        </span>
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                        <item.icon className="w-4 h-4 text-gray-600" />
                       </div>
-                    </motion.div>
+                      <span className="text-gray-700 font-medium">{item.label}</span>
+                    </motion.button>
                   ))}
-                </motion.div>
+                </div>
 
-                {/* Action Buttons in Center */}
-                <motion.div
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.7, type: "spring", stiffness: 300, damping: 25 }}
-                  className="flex gap-3 w-full"
-                >
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
                   <Button
                     onClick={onThemeToggle}
                     variant="outline"
-                    className="flex-1 rounded-xl py-3 font-medium bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-white/95 btn-outline-professional"
+                    className="flex-1 text-gray-700 border-gray-300 hover:bg-gray-50"
                   >
-                    🎨 Theme
+                    Theme
                   </Button>
                   <Button
-                    onClick={handleLogout}
-                    className="flex-1 rounded-xl py-3 font-medium bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white btn-professional"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                    Sign out
                   </Button>
-                </motion.div>
+                </div>
               </div>
             </motion.div>
           </>
