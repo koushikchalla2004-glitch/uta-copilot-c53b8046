@@ -95,6 +95,7 @@ export const useVoiceInterface = ({
 
   // Start voice recording
   const startRecording = useCallback(async () => {
+    console.log('Starting recording...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -119,6 +120,7 @@ export const useVoiceInterface = ({
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        console.log('MediaRecorder stopped');
         setIsProcessing(true);
         
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
@@ -137,11 +139,15 @@ export const useVoiceInterface = ({
             if (error) throw error;
 
             if (data.text && data.text.trim()) {
+              console.log('Transcription received:', data.text);
               onTranscription(data.text);
+            } else {
+              console.log('No transcription received or empty text');
             }
           } catch (error) {
             console.error('Transcription error:', error);
           } finally {
+            console.log('Setting processing to false');
             setIsProcessing(false);
           }
         };
@@ -173,7 +179,11 @@ export const useVoiceInterface = ({
 
   // Stop voice recording
   const stopRecording = useCallback(() => {
-    console.log('Stopping recording...');
+    console.log('Stopping recording... Current state:', {
+      mediaRecorderState: mediaRecorderRef.current?.state,
+      isRecording
+    });
+    
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
     }
