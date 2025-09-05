@@ -6,7 +6,7 @@ import Index from '@/pages/Index';
 import Hero from '@/pages/Hero';
 import DiningPage from '@/pages/DiningPage';
 import EventsPage from '@/pages/EventsPage';
-import { DataSetupPage } from '@/pages/DataSetupPage';
+import AboutPage from '@/pages/AboutPage';
 import { Toaster } from '@/components/ui/toaster';
 
 const App = () => {
@@ -69,8 +69,8 @@ const App = () => {
           element={session ? <EventsPage /> : <Navigate to="/auth" replace />} 
         />
         <Route 
-          path="/admin/data-setup" 
-          element={session ? <DataSetupPage /> : <Navigate to="/auth" replace />} 
+          path="/about" 
+          element={session ? <AboutPage /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="/app" 

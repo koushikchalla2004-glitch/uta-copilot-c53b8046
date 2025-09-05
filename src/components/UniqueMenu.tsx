@@ -35,7 +35,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
     { icon: Map, label: 'Campus Map', path: '/map', color: 'from-blue-500 to-cyan-600' },
     { icon: Calendar, label: 'Events', path: '/events', color: 'from-purple-500 to-pink-600' },
     { icon: UtensilsCrossed, label: 'Dining', path: '/dining', color: 'from-orange-500 to-red-600' },
-    { icon: Database, label: 'Data Setup', path: '/admin/data-setup', color: 'from-indigo-500 to-purple-600' },
+    { icon: Info, label: 'About', path: '/about', color: 'from-indigo-500 to-purple-600' },
     { icon: User, label: 'Profile', path: '/profile', color: 'from-gray-500 to-slate-600' }
   ];
 
@@ -147,19 +147,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4 border-t border-gray-200">
                   <Button
-                    onClick={onThemeToggle}
-                    variant="outline"
-                    className="flex-1 text-gray-700 border-gray-300 hover:bg-gray-50"
-                  >
-                    Theme
-                  </Button>
-                  <Button
                     onClick={(e) => {
                       e.preventDefault();
                       handleLogout();
                       setIsOpen(false);
                     }}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign out
