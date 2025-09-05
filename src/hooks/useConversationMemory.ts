@@ -8,7 +8,10 @@ interface ConversationMessage {
 }
 
 export const useConversationMemory = () => {
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const [sessionId] = useState(() => {
+    // Generate a unique session ID
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  });
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
 
   // Load conversation history on mount
