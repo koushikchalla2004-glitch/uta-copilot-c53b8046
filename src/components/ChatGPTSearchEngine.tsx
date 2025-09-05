@@ -112,10 +112,20 @@ export const ChatGPTSearchEngine = () => {
         }
       }
 
-      // For other queries, you could add AI search logic here
+      // For other queries, call the AI search function
+      const { data, error } = await supabase.functions.invoke('ai-search', {
+        body: { query }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Display the AI response
       toast({
-        title: "Search submitted",
-        description: `Searching for: "${query}"`,
+        title: "AI Response",
+        description: data.response || "No response received",
+        duration: 10000, // Show for 10 seconds so user can read it
       });
       
       // Clear the search
