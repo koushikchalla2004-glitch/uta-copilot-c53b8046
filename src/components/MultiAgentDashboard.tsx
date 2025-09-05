@@ -59,7 +59,7 @@ export const MultiAgentDashboard: React.FC = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {Object.entries(stats).map(([agentName, agentStats]) => (
               <div key={agentName} className="space-y-2">
                 <div className="flex items-center justify-between">
