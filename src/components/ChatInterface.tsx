@@ -399,9 +399,9 @@ export const ChatInterface = () => {
           transition={{ duration: 0.5 }}
         >
           {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-8">
             <div className="max-w-4xl mx-auto px-4 md:px-6">
-              <div className="py-6 space-y-6">
+              <div className="py-6 space-y-6 min-h-full">
                 <AnimatePresence>
                   {messages.map((message) => (
                     <motion.div
@@ -453,7 +453,7 @@ export const ChatInterface = () => {
 
           {/* Fixed Input Section at Bottom */}
           <motion.div
-            className="sticky bottom-0 bg-gradient-to-t from-background via-background/98 to-transparent backdrop-blur-sm"
+            className="sticky bottom-0 bg-gradient-to-t from-background via-background to-transparent backdrop-blur-sm pb-4"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
