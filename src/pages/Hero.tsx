@@ -18,7 +18,9 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-hero overflow-hidden flex flex-col pt-16">
+    <>
+      <div className="w-full h-16 bg-white"></div>
+      <div className="relative min-h-screen bg-gradient-hero overflow-hidden flex flex-col pt-16">
       {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 1] }}>
@@ -118,6 +120,7 @@ const Hero = () => {
         <ChatInterface />
       </div>
     </div>
+    </>
   );
 };
 
