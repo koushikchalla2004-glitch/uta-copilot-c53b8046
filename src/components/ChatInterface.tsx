@@ -18,6 +18,7 @@ import { useResponseOptimization } from '@/hooks/useResponseOptimization';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useSentiment } from '@/hooks/useSentiment';
+import { TypingAnimation, TypingIndicator } from './TypingAnimation';
 import { TTSControls } from './TTSControls';
 import { MultiAgentDashboard } from './MultiAgentDashboard';
 
@@ -108,6 +109,8 @@ export const ChatInterface = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -153,6 +156,26 @@ export const ChatInterface = () => {
     return newMessage.id;
   };
 
+  const addTypingMessage = (content: string) => {
+    const messageId = `typing-${Date.now()}`;
+    setTypingMessageId(messageId);
+    setMessages(prev => [...prev, {
+      id: messageId,
+      type: 'assistant',
+      content,
+      timestamp: new Date(),
+      isTyping: true
+    }]);
+    return messageId;
+  };
+
+  const removeTypingMessage = () => {
+    if (typingMessageId) {
+      setMessages(prev => prev.filter(msg => msg.id !== typingMessageId));
+      setTypingMessageId(null);
+    }
+  };
+
   const updateMessageTyping = (messageId: string, isTyping: boolean) => {
     setMessages(prev => prev.map(msg => 
       msg.id === messageId ? { ...msg, isTyping } : msg
@@ -194,6 +217,7 @@ export const ChatInterface = () => {
     addMessage('user', userMessage);
     optimization.setIsLoading(true);
     setIsTyping(true);
+    setShowTypingIndicator(true);
 
     try {
       let responseText = '';
@@ -221,13 +245,18 @@ export const ChatInterface = () => {
       // Humanize assistant response based on user's sentiment
       responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
       
-      const messageId = addMessage('assistant', responseText, true);
+      // Hide typing indicator and add typing animation message
+      setShowTypingIndicator(false);
+      const messageId = addTypingMessage(responseText);
       
+      // After typing animation completes, update to final message
       setTimeout(() => {
-        updateMessageTyping(messageId, false);
+        removeTypingMessage();
+        addMessage('assistant', responseText, false);
         const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
         setFollowUpSuggestions(suggestions);
-      }, responseText.length * 25);
+        triggerTTSForMessage(responseText);
+      }, responseText.length * 25 + 1000); // Small delay after typing completes
 
       // Store successful AI response in cache
       if (data.response && responseText.length > 20) {
@@ -241,8 +270,9 @@ export const ChatInterface = () => {
 
     } catch (error: any) {
       console.error('Chat error:', error);
-      const messageId = addMessage('assistant', "I couldn't complete that request right now. Please try again.", true);
-      setTimeout(() => updateMessageTyping(messageId, false), 2000);
+      setShowTypingIndicator(false);
+      removeTypingMessage();
+      addMessage('assistant', "I couldn't complete that request right now. Please try again.", false);
     } finally {
       setIsTyping(false);
       optimization.setIsLoading(false);
@@ -379,20 +409,41 @@ export const ChatInterface = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ModernChatBubble
-                        type={message.type}
-                        content={message.content}
-                        timestamp={message.timestamp}
-                        isTyping={message.isTyping}
-                        onRegenerate={() => {
-                          updateMessageTyping(message.id, false);
-                          if (message.type === 'assistant') {
-                            triggerTTSForMessage(message.content);
-                          }
-                        }}
-                      />
+                      {message.isTyping && message.type === 'assistant' ? (
+                        <TypingAnimation
+                          text={message.content}
+                          onComplete={() => {
+                            // Will be handled by the timeout in handleSendMessage
+                          }}
+                          speed={25}
+                          className="mb-4"
+                        />
+                      ) : (
+                        <ModernChatBubble
+                          type={message.type}
+                          content={message.content}
+                          timestamp={message.timestamp}
+                          isTyping={false}
+                          onRegenerate={() => {
+                            if (message.type === 'assistant') {
+                              triggerTTSForMessage(message.content);
+                            }
+                          }}
+                        />
+                      )}
                     </motion.div>
                   ))}
+                  
+                  {/* Show typing indicator while AI is processing */}
+                  {showTypingIndicator && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <TypingIndicator className="mb-4" />
+                    </motion.div>
+                  )}
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
               </div>
