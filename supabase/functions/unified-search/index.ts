@@ -130,7 +130,7 @@ async function searchEvents(supabase: any, query: string, limit: number): Promis
 async function searchFaculty(supabase: any, query: string, limit: number): Promise<SearchResult[]> {
   const { data, error } = await supabase
     .from('faculty')
-    .select('*')
+    .select('id,name,dept,office,office_hours,profile_url,research_areas')
     .or(`name.ilike.%${query}%,dept.ilike.%${query}%,research_areas::text.ilike.%${query}%`)
     .limit(limit);
 
@@ -149,11 +149,10 @@ async function searchFaculty(supabase: any, query: string, limit: number): Promi
     source: 'UTA Faculty Directory',
     metadata: {
       dept: faculty.dept,
-      email: faculty.email,
       office: faculty.office,
-      phone: faculty.phone,
       office_hours: faculty.office_hours,
-      research_areas: faculty.research_areas
+      research_areas: faculty.research_areas,
+      profile_url: faculty.profile_url
     }
   }));
 }

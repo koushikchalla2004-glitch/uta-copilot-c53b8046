@@ -153,26 +153,30 @@ export class AcademicAgent implements Agent {
         }
       }
 
-      // Search faculty
+      // Search faculty (via secure edge function, sanitized)
       if (queryLower.includes('professor') || queryLower.includes('faculty')) {
-        const { data: faculty } = await supabase
-          .from('faculty')
-          .select('*')
-          .or(`name.ilike.%${queryLower}%,dept.ilike.%${queryLower}%`)
-          .limit(3);
-        
-        if (faculty && faculty.length > 0) {
-          response += "**Faculty:**\n";
-          faculty.forEach(prof => {
-            response += `• **${prof.name}** (${prof.dept})\n`;
-            if (prof.office) response += `  Office: ${prof.office}\n`;
-            if (prof.email) response += `  Email: ${prof.email}\n`;
-            if (prof.research_areas && prof.research_areas.length > 0) {
-              response += `  Research: ${prof.research_areas.join(', ')}\n`;
-            }
-            response += '\n';
+        try {
+          const res = await fetch('https://jtkrgxrutwbcjgruexuf.supabase.co/functions/v1/unified-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, categories: ['faculty'], limit: 3 })
           });
-          hasResults = true;
+          const json = await res.json();
+          const results = (json?.results || []).filter((r: any) => r.category === 'Faculty');
+          if (results.length > 0) {
+            response += "**Faculty:**\n";
+            results.forEach((r: any) => {
+              response += `• **${r.title}** (${r.metadata?.dept || 'Department'})\n`;
+              if (r.metadata?.office) response += `  Office: ${r.metadata.office}\n`;
+              if (Array.isArray(r.metadata?.research_areas) && r.metadata.research_areas.length) {
+                response += `  Research: ${r.metadata.research_areas.join(', ')}\n`;
+              }
+              response += '\n';
+            });
+            hasResults = true;
+          }
+        } catch (_) {
+          // ignore and continue
         }
       }
 
