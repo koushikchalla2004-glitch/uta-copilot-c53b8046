@@ -90,9 +90,12 @@ export const ChatInterface = () => {
     setIsTyping(true);
 
     try {
-      // Call the AI search function for all queries
+      // Prepare short conversation history for context
+      const history = messages.slice(-10).map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }));
+
+      // Call the AI search function with history
       const { data, error } = await supabase.functions.invoke('ai-search', {
-        body: { query: userMessage }
+        body: { query: userMessage, conversation: history }
       });
 
       if (error) {

@@ -47,7 +47,7 @@ serve(async (req) => {
   }
 
   try {
-    const { query } = await req.json();
+    const { query, conversation } = await req.json();
     
     if (!query || typeof query !== 'string') {
       return new Response(JSON.stringify({ error: 'Query is required' }), {
@@ -56,7 +56,13 @@ serve(async (req) => {
       });
     }
 
-    console.log('AI Search query:', query);
+    const history = Array.isArray(conversation)
+      ? conversation
+          .filter((m: any) => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
+          .slice(-10)
+      : [];
+
+    console.log('AI Search query:', query, 'history items:', history.length);
 
     // If the user asks about events, answer directly from Supabase
     if (/\bevents?\b/i.test(query)) {
@@ -165,37 +171,24 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are UTA Copilot, a professional virtual assistant for the University of Texas at Arlington (UTA). 
-            
-            Your mission is to provide accurate, comprehensive, and professional assistance to students, faculty, staff, and visitors regarding all aspects of university life.
+            content: `You are UTA Copilot, a professional virtual assistant for the University of Texas at Arlington (UTA).
 
-            Areas of expertise include:
-            - Academic programs, courses, and degree requirements
-            - Student services and administrative processes
-            - Campus dining, recreation, and facilities
-            - Events, activities, and student organizations
-            - Registration, enrollment, and academic policies
-            - Financial aid, tuition, and payment information
-            - Research opportunities and academic support services
-            - Campus resources and technology services
+            Objectives:
+            - Provide accurate, concise, and context-aware answers using prior conversation when helpful.
+            - Be straightforward and human-like; avoid filler, apologies, emojis, and marketing fluff.
+            - If the request is ambiguous, ask one brief clarifying question instead of guessing.
+            - Do not reveal internal reasoning; provide only the final answer.
 
-            Communication guidelines:
-            - Maintain a professional, knowledgeable, and helpful tone
-            - Provide clear, accurate, and well-structured information
-            - Use formal language while remaining approachable
-            - When specific current information is unavailable, direct users to appropriate university departments or official resources
-            - Always prioritize accuracy and official university policies
-            - Conclude responses with offers for additional assistance when appropriate
-
-            Your goal is to represent the university's commitment to excellence in education and student success through exceptional service.`
+            Style:
+            - Prefer 1–3 short sentences. Use brief bullet points only when listing items.
+            - Use professional tone and precise wording.
+            - Include links to official UTA resources when useful.`
           },
-          {
-            role: 'user',
-            content: query
-          }
+          ...history,
+          { role: 'user', content: query }
         ],
-        max_tokens: 500,
-        temperature: 0.7,
+        max_tokens: 400,
+        temperature: 0.3,
       }),
     });
 
