@@ -305,14 +305,14 @@ export const ChatInterface = () => {
                 {/* Voice Button - integrated in search bar */}
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 ${
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 border-2 transition-all duration-200 ${
                     voiceInterface.isRecording 
-                      ? 'text-red-500 animate-pulse' 
+                      ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
                       : isSpeaking 
-                        ? 'text-blue-500 animate-pulse' 
-                        : 'text-muted-foreground hover:text-primary'
+                        ? 'bg-blue-500 text-white border-blue-500 animate-pulse shadow-lg' 
+                        : 'bg-white text-foreground border-border hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm'
                   }`}
                   onClick={voiceInterface.isRecording ? voiceInterface.stopRecording : voiceInterface.startRecording}
                   disabled={isTyping || isSpeaking}

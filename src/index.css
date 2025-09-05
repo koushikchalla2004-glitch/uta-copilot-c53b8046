@@ -8,7 +8,7 @@
 /* Professional Presentation Theme - Pure White and Black */
 :root {
   /* Core Colors - Clean gradient background */
-  --background: 220 14% 96%; /* light gray-blue HSL */
+  --background: 0 0% 100%; /* pure white HSL */
   --foreground: 0 0% 0%; /* pure black HSL */
   --card: 0 0% 100%; /* pure white HSL */
   --card-foreground: 0 0% 0%; /* pure black HSL */
@@ -26,7 +26,7 @@
   --secondary-foreground: 0 0% 0%; /* black text HSL */
   --secondary-glow: 0 0% 90%; /* slightly darker gray for glow effects HSL */
   --muted: 0 0% 96%; /* very light gray HSL */
-  --muted-foreground: 0 0% 45%; /* medium gray text HSL */
+  --muted-foreground: 0 0% 25%; /* darker gray text for better visibility HSL */
   --accent: 203 60% 95%; /* light blue HSL */
   --accent-foreground: 0 0% 0%; /* black text HSL */
   
