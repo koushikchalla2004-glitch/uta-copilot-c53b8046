@@ -98,161 +98,103 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         </Button>
       </motion.div>
 
-      {/* Circular Menu Overlay */}
+      {/* Dock Style Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-background/20 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-background/30 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           >
             {/* Close Button - Top Right */}
             <motion.button
-              initial={{ opacity: 0, scale: 0.8, rotate: -90 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.8, rotate: 90 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ delay: 0.2 }}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(false);
               }}
-              className="absolute top-6 right-6 w-14 h-14 rounded-full bg-background/90 backdrop-blur-md border border-border hover:bg-background shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+              className="absolute top-8 right-8 w-12 h-12 rounded-full bg-background/90 backdrop-blur-md border border-border hover:bg-background shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
             >
-              <X className="w-6 h-6 text-foreground" />
+              <X className="w-5 h-5 text-foreground" />
             </motion.button>
 
-            {/* Central Layout */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              
-              {/* Central App Logo */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0, rotate: -180 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0, opacity: 0, rotate: 180 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="relative z-10"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="w-32 h-32 bg-gradient-to-br from-primary via-primary-glow to-primary rounded-full flex items-center justify-center shadow-2xl border-4 border-background/50 backdrop-blur-md">
-                  <Sparkles className="w-16 h-16 text-white" />
-                  
-                  {/* Pulsing rings around logo */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-transparent animate-ping" />
-                  <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/20 to-transparent animate-pulse" />
-                </div>
-                
-                {/* Logo Label */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center"
-                >
-                  <h3 className="text-lg font-bold text-foreground bg-background/90 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-lg">
-                    UTA Copilot
-                  </h3>
-                </motion.div>
-              </motion.div>
+            {/* Central App Logo */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-32 h-32 bg-gradient-to-br from-primary via-primary-glow to-primary rounded-full flex items-center justify-center shadow-2xl border-4 border-background/50 backdrop-blur-md mb-6">
+                <Sparkles className="w-16 h-16 text-white" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-transparent animate-pulse" />
+              </div>
+              <h2 className="text-3xl font-bold text-foreground mb-2">UTA Copilot</h2>
+              <p className="text-muted-foreground">Your Campus Assistant</p>
+            </motion.div>
 
-              {/* Menu Options in Circle Around Logo */}
-              {menuItems.map((item, index) => {
-                // Position options in cardinal directions with proper spacing
-                const positions = [
-                  { x: 0, y: -180 },    // Top - New Chat
-                  { x: 180, y: 0 },     // Right - Profile  
-                  { x: 0, y: 180 },     // Bottom - Maps
-                  { x: -180, y: 0 }     // Left - About
-                ];
-                const { x, y } = positions[index];
-
-                return (
+            {/* Horizontal Dock Menu */}
+            <motion.div
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 300, damping: 25 }}
+              className="absolute bottom-20 left-1/2 transform -translate-x-1/2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center space-x-6 bg-background/90 backdrop-blur-xl rounded-2xl px-8 py-6 border border-border shadow-2xl">
+                {menuItems.map((item, index) => (
                   <motion.div
                     key={item.label}
-                    className="absolute"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
-                    }}
-                    initial={{ scale: 0, opacity: 0, x: 0, y: 0 }}
-                    animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
-                    exit={{ scale: 0, opacity: 0, x: 0, y: 0 }}
+                    initial={{ scale: 0, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0, opacity: 0, y: 20 }}
                     transition={{ 
-                      delay: 0.2 + index * 0.1,
+                      delay: 0.4 + index * 0.1,
                       type: "spring",
-                      stiffness: 200,
-                      damping: 15
+                      stiffness: 400,
+                      damping: 25
                     }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNavigation(item.path);
-                    }}
+                    onClick={() => handleNavigation(item.path)}
+                    className="group cursor-pointer flex flex-col items-center space-y-3"
                   >
-                    <div className="group cursor-pointer relative">
-                      {/* Option Circle */}
-                      <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${item.color} p-5 shadow-xl hover:shadow-2xl transition-all duration-300 group-hover:scale-125 border-2 border-background/30 backdrop-blur-sm`}>
-                        <item.icon className="w-10 h-10 text-white" />
-                        
-                        {/* Hover glow effect */}
-                        <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-30 transition-opacity duration-300 animate-pulse`} />
-                      </div>
-                      
-                      {/* Option Label */}
-                      <motion.div
-                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 whitespace-nowrap"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: (0.2 + index * 0.1) + 0.3 }}
-                      >
-                        <span className="text-sm font-semibold text-foreground bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border shadow-lg group-hover:bg-background group-hover:scale-105 transition-all duration-200">
-                          {item.label}
-                        </span>
-                      </motion.div>
-
-                      {/* Connecting line to center */}
-                      <motion.div
-                        className="absolute top-1/2 left-1/2 origin-left h-0.5 bg-gradient-to-r from-primary/40 to-transparent"
-                        style={{
-                          width: '120px',
-                          transform: `translate(-50%, -50%) rotate(${Math.atan2(y, x) * (180 / Math.PI) + 180}deg)`
-                        }}
-                        initial={{ scaleX: 0, opacity: 0 }}
-                        animate={{ scaleX: 1, opacity: 1 }}
-                        transition={{ delay: 0.4 + index * 0.15, duration: 0.6 }}
-                      />
+                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} p-4 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-2`}>
+                      <item.icon className="w-8 h-8 text-white" />
                     </div>
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-200">
+                      {item.label}
+                    </span>
                   </motion.div>
-                );
-              })}
+                ))}
+              </div>
+            </motion.div>
 
-              {/* Logout Button - Positioned below the circle */}
-              <motion.div
-                className="absolute"
-                style={{ left: '50%', top: '50%', transform: 'translate(-50%, 200px)' }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ 
-                  delay: 0.8,
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 20
-                }}
-                onClick={(e) => e.stopPropagation()}
+            {/* Logout Button */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ delay: 0.8, type: "spring", stiffness: 300, damping: 25 }}
+              className="absolute bottom-6 left-1/2 transform -translate-x-1/2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                onClick={handleLogout}
+                variant="destructive"
+                size="lg"
+                className="rounded-full px-6 py-3 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 backdrop-blur-md"
               >
-                <Button
-                  onClick={handleLogout}
-                  variant="destructive"
-                  size="lg"
-                  className="rounded-full px-6 py-3 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 backdrop-blur-md border border-destructive/20"
-                >
-                  <LogOut className="w-5 h-5 mr-2" />
-                  Logout
-                </Button>
-              </motion.div>
-            </div>
+                <LogOut className="w-5 h-5 mr-2" />
+                Logout
+              </Button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
