@@ -318,12 +318,21 @@ export const ChatInterface = () => {
                   disabled={isTyping || isSpeaking}
                 >
                   {voiceInterface.isRecording ? (
-                    <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
+                    <div className="flex items-center justify-center gap-0.5">
+                      <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '0ms'}} />
+                      <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '100ms'}} />
+                      <div className="w-0.5 h-2 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '200ms'}} />
+                      <div className="w-0.5 h-4 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '300ms'}} />
+                      <div className="w-0.5 h-3 bg-white rounded-full animate-pulse waveform-bar" style={{animationDelay: '400ms'}} />
+                    </div>
                   ) : (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 2a3 3 0 00-3 3v4a3 3 0 006 0V5a3 3 0 00-3-3z" />
-                      <path d="M4 9a1 1 0 112 0 6 6 0 1012 0 1 1 0 112 0 8 8 0 01-7 7.937V18h3a1 1 0 110 2H6a1 1 0 110-2h3v-1.063A8 8 0 014 9z" />
-                    </svg>
+                    <div className="flex items-center justify-center gap-0.5">
+                      <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                      <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                      <div className="w-0.5 h-1.5 bg-current rounded-full transition-all duration-200" />
+                      <div className="w-0.5 h-3 bg-current rounded-full transition-all duration-200" />
+                      <div className="w-0.5 h-2 bg-current rounded-full transition-all duration-200" />
+                    </div>
                   )}
                 </Button>
               </div>
