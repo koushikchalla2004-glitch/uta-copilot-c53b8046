@@ -95,7 +95,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-6 left-6 z-50"
+            className="fixed top-6 right-6 z-50"
           >
             <Button
               onClick={(e) => {
