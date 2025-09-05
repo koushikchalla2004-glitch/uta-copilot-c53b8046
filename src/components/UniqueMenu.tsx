@@ -87,7 +87,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         </Button>
       </motion.div>
 
-      {/* Top-Left Close Button (when menu is open) */}
+      {/* Top-Right Close Button (when menu is open) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -95,17 +95,18 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-6 right-6 z-50"
+            className="fixed top-6 right-6 z-[60]"
           >
             <Button
               onClick={(e) => {
                 e.stopPropagation();
+                console.log('X button clicked!'); // Debug log
                 setIsOpen(false);
               }}
-              className="w-12 h-12 rounded-full bg-background/90 backdrop-blur-md border border-border/50 hover:bg-background shadow-xl transition-all duration-300 hover:scale-110"
+              className="w-14 h-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-border/60 hover:bg-background shadow-2xl transition-all duration-300 hover:scale-110"
               size="icon"
             >
-              <X className="w-5 h-5 text-foreground" />
+              <X className="w-6 h-6 text-foreground" />
             </Button>
           </motion.div>
         )}
