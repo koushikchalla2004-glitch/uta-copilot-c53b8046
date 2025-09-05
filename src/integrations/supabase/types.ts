@@ -79,6 +79,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           name: string
+          search_tsv: unknown | null
         }
         Insert: {
           category?: string | null
@@ -88,6 +89,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name: string
+          search_tsv?: unknown | null
         }
         Update: {
           category?: string | null
@@ -97,6 +99,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name?: string
+          search_tsv?: unknown | null
         }
         Relationships: []
       }
@@ -108,6 +111,7 @@ export type Database = {
           description: string | null
           id: number
           prereqs: string | null
+          search_tsv: unknown | null
           title: string | null
         }
         Insert: {
@@ -117,6 +121,7 @@ export type Database = {
           description?: string | null
           id?: number
           prereqs?: string | null
+          search_tsv?: unknown | null
           title?: string | null
         }
         Update: {
@@ -126,6 +131,7 @@ export type Database = {
           description?: string | null
           id?: number
           prereqs?: string | null
+          search_tsv?: unknown | null
           title?: string | null
         }
         Relationships: []
@@ -234,6 +240,7 @@ export type Database = {
           phone: string | null
           profile_url: string | null
           research_areas: string[] | null
+          search_tsv: unknown | null
           updated_at: string | null
         }
         Insert: {
@@ -246,6 +253,7 @@ export type Database = {
           phone?: string | null
           profile_url?: string | null
           research_areas?: string[] | null
+          search_tsv?: unknown | null
           updated_at?: string | null
         }
         Update: {
@@ -258,6 +266,7 @@ export type Database = {
           phone?: string | null
           profile_url?: string | null
           research_areas?: string[] | null
+          search_tsv?: unknown | null
           updated_at?: string | null
         }
         Relationships: []
@@ -500,6 +509,7 @@ export type Database = {
           level: string | null
           name: string
           overview: string | null
+          search_tsv: unknown | null
         }
         Insert: {
           catalog_url?: string | null
@@ -508,6 +518,7 @@ export type Database = {
           level?: string | null
           name: string
           overview?: string | null
+          search_tsv?: unknown | null
         }
         Update: {
           catalog_url?: string | null
@@ -516,6 +527,7 @@ export type Database = {
           level?: string | null
           name?: string
           overview?: string | null
+          search_tsv?: unknown | null
         }
         Relationships: []
       }
