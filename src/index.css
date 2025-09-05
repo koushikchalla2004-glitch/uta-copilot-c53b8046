@@ -16,21 +16,21 @@
   --popover-foreground: 0 0 0; /* black text */
   
   /* Light Blue Palette (#EBF4FA) */
-  --primary: 203 60 95; /* #EBF4FA converted to HSL */
-  --primary-hover: 203 70 90; /* slightly darker on hover */
+  --primary: 203 60 95; /* #EBF4FA - correct HSL conversion */
+  --primary-hover: 203 60 90; /* slightly darker on hover */
   --primary-foreground: 0 0 0; /* black text on light blue */
   
   /* Professional Colors */
   --secondary: 203 60 95; /* light blue */
   --secondary-foreground: 0 0 0; /* black text */
-  --muted: 203 30 97; /* very light blue */
-  --muted-foreground: 0 0 20; /* dark gray text */
+  --muted: 203 30 98; /* very light blue */
+  --muted-foreground: 0 0 40; /* dark gray text */
   --accent: 203 60 95; /* light blue */
   --accent-foreground: 0 0 0; /* black text */
   
   /* Borders & Dividers */
-  --border: 0 0 0; /* black borders */
-  --input: 0 0 0; /* black input borders */
+  --border: 0 0 20; /* dark gray borders */
+  --input: 0 0 20; /* dark gray input borders */
   --ring: 203 60 95; /* light blue focus ring */
   --radius: 0.5rem;
   

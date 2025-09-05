@@ -74,7 +74,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             e.stopPropagation();
             if (!isOpen) setIsOpen(true);
           }}
-          className="relative w-16 h-16 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 shadow-xl hover:shadow-2xl transition-all duration-300 group border border-white/20 btn-professional"
+          className="relative w-16 h-16 rounded-2xl bg-primary shadow-xl hover:shadow-2xl transition-all duration-300 group border border-border btn-presentation"
           size="icon"
         >
           <motion.div

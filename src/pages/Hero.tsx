@@ -18,86 +18,8 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-sky-50 to-blue-50 overflow-hidden">
-      {/* Animated Background Pattern */}
-      <div className="absolute inset-0">
-        {/* Geometric Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="geometric" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="1"/>
-                <circle cx="50" cy="50" r="15" fill="currentColor" opacity="0.3"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#geometric)" className="text-sky-600"/>
-          </svg>
-        </div>
-
-        {/* Floating Gradient Orbs */}
-        <motion.div
-          className="absolute top-20 left-20 w-64 h-64 bg-gradient-to-r from-sky-200/30 to-blue-300/30 rounded-full blur-3xl"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        
-        <motion.div
-          className="absolute top-40 right-32 w-48 h-48 bg-gradient-to-r from-blue-200/30 to-sky-300/30 rounded-full blur-3xl"
-          animate={{
-            x: [0, -80, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-        <motion.div
-          className="absolute bottom-32 left-1/2 w-56 h-56 bg-gradient-to-r from-sky-300/30 to-blue-200/30 rounded-full blur-3xl"
-          animate={{
-            x: [0, 60, -60, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-
-      {/* Professional Floating Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-3 h-3 bg-sky-400/20 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0.2, 0.8, 0.2],
-            }}
-            transition={{
-              duration: 8 + Math.random() * 4,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
+    <div className="relative min-h-screen bg-background overflow-hidden">
+      {/* Plain White Background - removed all animations and gradients */}
 
       {/* Header */}
       <motion.header
