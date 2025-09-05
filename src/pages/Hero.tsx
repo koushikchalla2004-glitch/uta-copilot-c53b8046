@@ -48,7 +48,7 @@ const Hero = () => {
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-foreground/20 rounded-full"
+            className="absolute w-2 h-2 bg-white/30 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -85,12 +85,12 @@ const Hero = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <div className="relative w-16 h-16 professional-gradient rounded-2xl flex items-center justify-center shadow-lg presentation-hover">
-                <Sparkles className="w-8 h-8 text-foreground animate-pulse" />
+                <Sparkles className="w-8 h-8 text-white animate-pulse" />
                 <div className="absolute inset-0 rounded-2xl border border-white/30 animate-pulse-professional" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-foreground tracking-tight">UTA Copilot</h1>
-                <p className="text-lg text-muted-foreground font-medium">Your Intelligent Campus Assistant</p>
+                <h1 className="text-4xl font-bold text-white tracking-tight">UTA Copilot</h1>
+                <p className="text-lg text-white/80 font-medium">Your Intelligent Campus Assistant</p>
               </div>
             </motion.div>
           </div>
@@ -102,8 +102,8 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <h2 className="text-xl text-muted-foreground font-light mb-4">
-              Elevating Your Campus Experience with <span className="font-semibold text-foreground">Artificial Intelligence</span>
+            <h2 className="text-xl text-white/70 font-light mb-4">
+              Elevating Your Campus Experience with <span className="font-semibold text-white">Artificial Intelligence</span>
             </h2>
             <div className="w-24 h-1 bg-primary rounded-full mx-auto"></div>
           </motion.div>
