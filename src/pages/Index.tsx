@@ -180,7 +180,7 @@ const Index = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-primary hover:bg-primary-hover text-primary-foreground rounded-md font-medium transition-colors disabled:bg-muted disabled:cursor-not-allowed" 
+                className="w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md font-medium transition-all duration-300 hover-scale animate-fade-in disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:transform-none shadow-sm hover:shadow-md" 
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Continue'}
