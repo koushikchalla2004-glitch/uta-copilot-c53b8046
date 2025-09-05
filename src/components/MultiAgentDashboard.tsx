@@ -13,10 +13,14 @@ export const MultiAgentDashboard: React.FC = () => {
     const updateStats = () => {
       const performanceStats = multiAgentCoordinator.getPerformanceStats();
       setStats(performanceStats);
+      // Auto-show dashboard when there's activity
+      if (Object.keys(performanceStats).length > 0) {
+        setIsVisible(true);
+      }
     };
 
     updateStats();
-    const interval = setInterval(updateStats, 5000); // Update every 5 seconds
+    const interval = setInterval(updateStats, 3000); // Update every 3 seconds
 
     return () => clearInterval(interval);
   }, []);

@@ -227,29 +227,60 @@ export const ChatInterface = () => {
       let responseText = '';
       let isOptimizedResponse = false;
 
-      // Enhanced AI call with conversation context
-      const recentContext = conversationMemory.getRecentContext(6);
-      const contextSummary = conversationMemory.getContextSummary();
+      // STEP 1: Try Multi-Agent System first for specialized queries
+      console.log('🤖 Multi-Agent System: Processing query...');
+      const multiAgentResult = await multiAgentCoordinator.processQuery(userMessage);
       
-      const { data, error } = await supabase.functions.invoke('enhanced-ai-search', {
-        body: { 
-          query: userMessage, 
-          conversation: recentContext,
-          context: contextSummary
+      if (multiAgentResult.primary.success && multiAgentResult.primary.confidence > 0.7) {
+        console.log('✅ Multi-agent handled query:', {
+          strategy: multiAgentResult.strategy,
+          agents: multiAgentResult.agentsUsed,
+          confidence: multiAgentResult.primary.confidence
+        });
+        
+        responseText = multiAgentResult.primary.message;
+        isOptimizedResponse = true;
+        
+        // Add multi-agent source info
+        await conversationMemory.addMessage('assistant', responseText, { 
+          source: 'multi_agent',
+          strategy: multiAgentResult.strategy,
+          agents: multiAgentResult.agentsUsed,
+          confidence: multiAgentResult.primary.confidence,
+          processingTime: multiAgentResult.totalTime
+        });
+      } else {
+        // STEP 2: Fallback to Enhanced AI Search
+        console.log('🔄 Falling back to enhanced AI search...');
+        const recentContext = conversationMemory.getRecentContext(6);
+        const contextSummary = conversationMemory.getContextSummary();
+        
+        const { data, error } = await supabase.functions.invoke('enhanced-ai-search', {
+          body: { 
+            query: userMessage, 
+            conversation: recentContext,
+            context: contextSummary
+          }
+        });
+
+        if (error) {
+          throw error;
         }
-      });
 
-      if (error) {
-        throw error;
+        responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
+        
+        await conversationMemory.addMessage('assistant', responseText, { 
+          source: data.enhanced ? 'enhanced_ai' : 'ai', 
+          sources: data.sources 
+        });
       }
-
-      // Enhanced AI response
-      responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
 
       // Humanize assistant response based on user's sentiment
       responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
       // Make it concise and human-like
-      responseText = optimization.makeConcise(responseText);
+      if (!isOptimizedResponse) {
+        responseText = optimization.makeConcise(responseText);
+      }
       
       // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);
@@ -264,14 +295,9 @@ export const ChatInterface = () => {
       }, responseText.length * 20 + 2000); // Timing adjusted for typing speed
 
       // Store successful AI response in cache
-      if (data.response && responseText.length > 20) {
-        await optimization.storeInCache(userMessage, responseText, 'ai_response');
+      if (responseText.length > 20) {
+        await optimization.storeInCache(userMessage, responseText, isOptimizedResponse ? 'multi_agent' : 'ai_response');
       }
-      
-      await conversationMemory.addMessage('assistant', responseText, { 
-        source: data.enhanced ? 'enhanced_ai' : 'ai', 
-        sources: data.sources 
-      });
 
     } catch (error: any) {
       console.error('Chat error:', error);
@@ -562,6 +588,9 @@ export const ChatInterface = () => {
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
       />
+      
+      {/* Multi-Agent Dashboard - Debug Mode */}
+      <MultiAgentDashboard />
     </>
   );
 };
