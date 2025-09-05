@@ -298,7 +298,7 @@ export const ChatInterface = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Message UTA Copilot..."
-                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12"
+                  className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70"
                   disabled={isTyping}
                 />
                 
