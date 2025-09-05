@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Home, 
   MessageSquare, 
-  Map, 
   Info, 
   User, 
   Menu,
@@ -30,7 +29,6 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
   const menuItems = [
     { icon: MessageSquare, label: 'New Chat', path: '/chat', color: 'from-green-500 to-teal-600' },
     { icon: User, label: 'Profile', path: '/profile', color: 'from-indigo-500 to-blue-600' },
-    { icon: Map, label: 'Maps', path: '/map', color: 'from-orange-500 to-red-600' },
     { icon: Info, label: 'About', path: '/about', color: 'from-purple-500 to-pink-600' }
   ];
 

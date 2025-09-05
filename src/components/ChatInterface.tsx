@@ -42,7 +42,7 @@ export const ChatInterface = () => {
     {
       id: '1',
       type: 'assistant',
-      content: "Hello! I'm your UTA Copilot assistant. I can help you with campus information, dining options, building locations, events, academic programs, and much more. What would you like to know?",
+      content: "Hello! I'm your UTA Copilot assistant. I can help you with campus information, dining options, events, academic programs, and much more. What would you like to know?",
       timestamp: new Date(),
       isTyping: false
     }
@@ -52,70 +52,6 @@ export const ChatInterface = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Location keywords for automatic map navigation
-  const locationKeywords = [
-    'where is', 'location', 'directions', 'navigate', 'find', 'building', 'hall', 'center',
-    'library', 'gym', 'dining', 'cafeteria', 'parking', 'office', 'department'
-  ];
-
-  const buildingAliases = {
-    'library': 'Central Library',
-    'lib': 'Central Library',
-    'central library': 'Central Library',
-    'mac': 'Maverick Activities Center',
-    'maverick activities': 'Maverick Activities Center',
-    'gym': 'Maverick Activities Center',
-    'fitness': 'Maverick Activities Center',
-    'erb': 'Engineering Research Building',
-    'engineering': 'Engineering Research Building',
-    'uc': 'University Center',
-    'university center': 'University Center',
-    'student union': 'University Center',
-    'business': 'Business Building',
-    'bus': 'Business Building',
-    'science': 'Science Hall',
-    'sh': 'Science Hall',
-    'ssb': 'Student Services Building',
-    'student services': 'Student Services Building',
-    'arlington hall': 'Arlington Hall',
-    'ah': 'Arlington Hall',
-    'dorm': 'Arlington Hall'
-  };
-
-  const detectLocationQuery = (query: string): boolean => {
-    const lowerQuery = query.toLowerCase();
-    return locationKeywords.some(keyword => lowerQuery.includes(keyword)) ||
-           Object.keys(buildingAliases).some(alias => lowerQuery.includes(alias));
-  };
-
-  const findBuildingFromQuery = async (query: string): Promise<any | null> => {
-    const lowerQuery = query.toLowerCase();
-    
-    // Check aliases first
-    for (const [alias, buildingName] of Object.entries(buildingAliases)) {
-      if (lowerQuery.includes(alias)) {
-        const { data } = await supabase
-          .from('buildings')
-          .select('*')
-          .ilike('name', `%${buildingName}%`)
-          .limit(1);
-        
-        if (data && data.length > 0) {
-          return data[0];
-        }
-      }
-    }
-
-    // Search by name or code
-    const { data } = await supabase
-      .from('buildings')
-      .select('*')
-      .or(`name.ilike.%${query}%,code.ilike.%${query}%`)
-      .limit(1);
-    
-    return data && data.length > 0 ? data[0] : null;
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -154,35 +90,7 @@ export const ChatInterface = () => {
     setIsTyping(true);
 
     try {
-      // Check if this is a location query
-      if (detectLocationQuery(userMessage)) {
-        const building = await findBuildingFromQuery(userMessage);
-        
-        if (building) {
-          const messageId = addMessage('assistant', `I found ${building.name}! I'm redirecting you to the campus map to show you its exact location and get directions.`, true);
-          setTimeout(() => updateMessageTyping(messageId, false), 2000);
-          
-          setTimeout(() => {
-            navigate('/map', { 
-              state: { 
-                selectedBuilding: building,
-                searchQuery: userMessage 
-              } 
-            });
-          }, 1500);
-          return;
-        } else {
-          const messageId = addMessage('assistant', "I couldn't find that specific building, but I'm taking you to the campus map where you can search manually and explore all available buildings.", true);
-          setTimeout(() => updateMessageTyping(messageId, false), 2000);
-          
-          setTimeout(() => {
-            navigate('/map', { state: { searchQuery: userMessage } });
-          }, 1500);
-          return;
-        }
-      }
-
-      // For other queries, call the AI search function
+      // Call the AI search function for all queries
       const { data, error } = await supabase.functions.invoke('ai-search', {
         body: { query: userMessage }
       });
@@ -319,7 +227,7 @@ export const ChatInterface = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center mt-2">
-          UTA Copilot can help with campus info, dining, buildings, events, and academics
+          UTA Copilot can help with campus info, dining, events, and academics
         </p>
       </div>
     </div>

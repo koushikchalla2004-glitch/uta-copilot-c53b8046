@@ -6,8 +6,6 @@ import Index from '@/pages/Index';
 import Hero from '@/pages/Hero';
 import DiningPage from '@/pages/DiningPage';
 import EventsPage from '@/pages/EventsPage';
-import MapPage from '@/pages/MapPage';
-import MapDemo from '@/pages/MapDemo';
 import { Toaster } from '@/components/ui/toaster';
 
 const App = () => {
@@ -70,16 +68,8 @@ const App = () => {
           element={session ? <EventsPage /> : <Navigate to="/auth" replace />} 
         />
         <Route 
-          path="/map" 
-          element={session ? <MapPage /> : <Navigate to="/auth" replace />} 
-        />
-        <Route 
           path="/app" 
           element={<Navigate to="/hero" replace />} 
-        />
-        <Route 
-          path="/demo" 
-          element={session ? <MapDemo /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="*" 
