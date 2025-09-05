@@ -56,9 +56,7 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
       initial={{ y: 0 }}
       animate={{ y: isVisible ? 0 : -100 }}
       transition={{ duration: 0.3 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass-card border-b border-[var(--glass-border)]' : 'bg-transparent'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -68,7 +66,7 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
             className="flex items-center space-x-3"
           >
             <img src={utaCopilotLogo} alt="UTA Copilot" className="w-8 h-8" />
-            <span className="font-inter-tight font-bold text-lg">UTA Copilot</span>
+            <span className="font-inter-tight font-bold text-lg text-black">UTA Copilot</span>
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -77,7 +75,7 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
               <button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-medium"
+                className="text-gray-600 hover:text-black transition-colors duration-200 font-medium"
               >
                 {item.label}
               </button>
@@ -91,7 +89,7 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
               variant="ghost"
               size="sm"
               onClick={onThemeToggle}
-              className="glass-card p-2"
+              className="p-2 text-black hover:bg-gray-100"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
@@ -116,7 +114,7 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden glass-card p-2"
+              className="md:hidden p-2 text-black hover:bg-gray-100"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -131,14 +129,14 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass-card border-t border-[var(--glass-border)]"
+            className="md:hidden bg-white border-t border-gray-200"
           >
             <div className="px-4 py-4 space-y-3">
               {navItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left text-muted-foreground hover:text-foreground transition-colors duration-200 py-2 font-medium"
+                  className="block w-full text-left text-gray-600 hover:text-black transition-colors duration-200 py-2 font-medium"
                 >
                   {item.label}
                 </button>
