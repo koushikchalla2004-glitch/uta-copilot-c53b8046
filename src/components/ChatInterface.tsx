@@ -13,7 +13,29 @@ interface Message {
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  isTyping?: boolean;
 }
+
+// Typing animation component
+const TypewriterText = ({ text, onComplete }: { text: string; onComplete: () => void }) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, Math.random() * 30 + 20); // Random speed between 20-50ms for natural feel
+
+      return () => clearTimeout(timeout);
+    } else {
+      onComplete();
+    }
+  }, [currentIndex, text, onComplete]);
+
+  return <span>{displayedText}</span>;
+};
 
 export const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -21,7 +43,8 @@ export const ChatInterface = () => {
       id: '1',
       type: 'assistant',
       content: "Hello! I'm your UTA Copilot assistant. I can help you with campus information, dining options, building locations, events, academic programs, and much more. What would you like to know?",
-      timestamp: new Date()
+      timestamp: new Date(),
+      isTyping: false
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -102,14 +125,22 @@ export const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const addMessage = (type: 'user' | 'assistant', content: string) => {
+  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       type,
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isTyping
     };
     setMessages(prev => [...prev, newMessage]);
+    return newMessage.id;
+  };
+
+  const updateMessageTyping = (messageId: string, isTyping: boolean) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId ? { ...msg, isTyping } : msg
+    ));
   };
 
   const handleSendMessage = async () => {
@@ -128,7 +159,8 @@ export const ChatInterface = () => {
         const building = await findBuildingFromQuery(userMessage);
         
         if (building) {
-          addMessage('assistant', `I found ${building.name}! I'm redirecting you to the campus map to show you its exact location and get directions.`);
+          const messageId = addMessage('assistant', `I found ${building.name}! I'm redirecting you to the campus map to show you its exact location and get directions.`, true);
+          setTimeout(() => updateMessageTyping(messageId, false), 2000);
           
           setTimeout(() => {
             navigate('/map', { 
@@ -140,7 +172,8 @@ export const ChatInterface = () => {
           }, 1500);
           return;
         } else {
-          addMessage('assistant', "I couldn't find that specific building, but I'm taking you to the campus map where you can search manually and explore all available buildings.");
+          const messageId = addMessage('assistant', "I couldn't find that specific building, but I'm taking you to the campus map where you can search manually and explore all available buildings.", true);
+          setTimeout(() => updateMessageTyping(messageId, false), 2000);
           
           setTimeout(() => {
             navigate('/map', { state: { searchQuery: userMessage } });
@@ -158,12 +191,14 @@ export const ChatInterface = () => {
         throw error;
       }
 
-      // Add AI response
-      addMessage('assistant', data.response || "I'm sorry, I couldn't generate a response right now. Please try again.");
+      // Add AI response with typing animation
+      const messageId = addMessage('assistant', data.response || "I'm sorry, I couldn't generate a response right now. Please try again.", true);
+      setTimeout(() => updateMessageTyping(messageId, false), data.response ? data.response.length * 25 : 2000);
 
     } catch (error: any) {
       console.error('Chat error:', error);
-      addMessage('assistant', "I'm experiencing some technical difficulties. Please try again in a moment.");
+      const messageId = addMessage('assistant', "I'm experiencing some technical difficulties. Please try again in a moment.", true);
+      setTimeout(() => updateMessageTyping(messageId, false), 2000);
     } finally {
       setIsTyping(false);
     }
@@ -185,9 +220,9 @@ export const ChatInterface = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background">
+    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background/80 backdrop-blur-md border border-border/20 rounded-lg">
       {/* Header */}
-      <div className="flex-shrink-0 p-6 border-b border-border/40">
+      <div className="flex-shrink-0 p-6 border-b border-border/40 bg-background/50 backdrop-blur-sm rounded-t-lg">
         <div className="text-center">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent mb-2">
             UTA Copilot
@@ -224,10 +259,17 @@ export const ChatInterface = () => {
                 <Card className={`p-4 ${
                   message.type === 'user'
                     ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted/50'
+                    : 'bg-background/70 backdrop-blur-sm border border-border/30'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.content}
+                    {message.type === 'assistant' && message.isTyping ? (
+                      <TypewriterText 
+                        text={message.content} 
+                        onComplete={() => updateMessageTyping(message.id, false)}
+                      />
+                    ) : (
+                      message.content
+                    )}
                   </p>
                   <p className={`text-xs mt-2 opacity-70 ${
                     message.type === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
@@ -248,10 +290,10 @@ export const ChatInterface = () => {
             className="flex justify-start"
           >
             <div className="flex gap-3 max-w-[80%]">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-background/70 backdrop-blur-sm border border-border/30 text-muted-foreground flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
-              <Card className="p-4 bg-muted/50">
+              <Card className="p-4 bg-background/70 backdrop-blur-sm border border-border/30">
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm text-muted-foreground">UTA Copilot is thinking...</span>
@@ -291,7 +333,7 @@ export const ChatInterface = () => {
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 p-4 border-t border-border/40">
+      <div className="flex-shrink-0 p-4 border-t border-border/40 bg-background/50 backdrop-blur-sm rounded-b-lg">
         <div className="flex gap-2">
           <Input
             value={inputValue}
