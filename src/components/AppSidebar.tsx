@@ -131,8 +131,8 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
   };
 
   return (
-    <Sidebar className={`${!open ? 'w-16' : 'w-80'} transition-all duration-300`} collapsible="icon">
-      <SidebarHeader className="border-b border-border/40 pb-4">
+    <Sidebar className={`${!open ? 'w-16' : 'w-80'} transition-all duration-300 bg-background border-r border-border`} collapsible="icon">
+      <SidebarHeader className="border-b border-border/40 pb-4 bg-background">
         <div className="flex items-center gap-3 px-4 py-2">
           <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-cyan-600 rounded-lg flex items-center justify-center">
             <Bot className="w-4 h-4 text-white" />
@@ -149,7 +149,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
           <div className="px-4">
             <Button 
               onClick={onNewChat}
-              className="w-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 text-white"
+              className="w-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 text-white border-0"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Chat
@@ -158,7 +158,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 bg-background">
         {/* Quick Actions */}
         <SidebarGroup>
           {open && (
@@ -172,7 +172,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
                 <SidebarMenuButton asChild>
                   <button 
                     onClick={onNewChat}
-                    className="w-full justify-start hover:bg-muted/50 rounded-lg"
+                    className="w-full justify-start hover:bg-muted/50 rounded-lg text-foreground flex items-center gap-2 p-2"
                   >
                     <MessageSquare className="w-4 h-4" />
                     {open && <span>New Conversation</span>}
@@ -203,7 +203,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
                   <SidebarMenuButton asChild>
                     <button
                       onClick={() => onSelectChat(chat.id)}
-                      className={`w-full justify-start hover:bg-muted/50 rounded-lg p-2 ${
+                      className={`w-full justify-start hover:bg-muted/50 rounded-lg p-2 text-foreground ${
                         currentChatId === chat.id ? 'bg-muted' : ''
                       }`}
                     >
@@ -212,7 +212,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
                         {open && (
                           <div className="flex-1 min-w-0 text-left">
                             <div className="flex items-center gap-1">
-                              <p className="text-sm font-medium truncate">{chat.title}</p>
+                              <p className="text-sm font-medium truncate text-foreground">{chat.title}</p>
                               {chat.isStarred && (
                                 <Star className="w-3 h-3 text-yellow-500 fill-current" />
                               )}
@@ -264,7 +264,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/40 pt-4">
+      <SidebarFooter className="border-t border-border/40 pt-4 bg-background">
         {/* User Profile */}
         <div className="px-4 py-2">
           <div className="flex items-center gap-3">
@@ -276,7 +276,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
             </Avatar>
             {open && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-medium truncate text-foreground">
                   {user?.user_metadata?.full_name || user?.email || 'UTA Student'}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
@@ -291,7 +291,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="w-full justify-start hover:bg-muted/50 rounded-lg">
+              <button className="w-full justify-start hover:bg-muted/50 rounded-lg text-foreground flex items-center gap-2 p-2">
                 <User className="w-4 h-4" />
                 {open && <span>Profile</span>}
               </button>
@@ -299,7 +299,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <button className="w-full justify-start hover:bg-muted/50 rounded-lg">
+              <button className="w-full justify-start hover:bg-muted/50 rounded-lg text-foreground flex items-center gap-2 p-2">
                 <Settings className="w-4 h-4" />
                 {open && <span>Settings</span>}
               </button>
@@ -309,7 +309,7 @@ export function AppSidebar({ onNewChat, onSelectChat, currentChatId }: AppSideba
             <SidebarMenuButton asChild>
               <button 
                 onClick={handleLogout}
-                className="w-full justify-start hover:bg-muted/50 rounded-lg text-destructive"
+                className="w-full justify-start hover:bg-muted/50 rounded-lg text-destructive flex items-center gap-2 p-2"
               >
                 <LogOut className="w-4 h-4" />
                 {open && <span>Logout</span>}
