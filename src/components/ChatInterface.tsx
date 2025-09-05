@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap } from 'lucide-react';
+import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap, Command } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
+import { ModernChatBubble } from './ModernChatBubble';
+import { ModernCommandPalette } from './ModernCommandPalette';
+import { ModernStatusIndicator } from './ModernStatusIndicator';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -111,6 +114,7 @@ export const ChatInterface = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -526,171 +530,215 @@ export const ChatInterface = () => {
         isProcessing={voiceInterface.isProcessing}
       />
 
-      <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
-      {/* Header */}
-      <div className="flex-shrink-0 p-6 border-b border-border/40 bg-background/50 backdrop-blur-sm rounded-t-lg">
-        <div className="text-center">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent mb-2">
-            UTA Copilot
-          </h1>
-          <p className="text-muted-foreground">
-            Your intelligent campus assistant
-          </p>
-        </div>
-      </div>
-
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-transparent">
-        <AnimatePresence>
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+      <div className="flex flex-col h-screen max-w-5xl mx-auto">
+        {/* Modern Header */}
+        <motion.div 
+          className="flex items-center justify-between p-6 border-b border-border bg-card/80 backdrop-blur-md"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="flex items-center space-x-4">
+            <motion.div 
+              className="w-12 h-12 professional-gradient rounded-xl flex items-center justify-center shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div className={`flex max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'} gap-3`}>
-                {/* Avatar */}
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.type === 'user' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-muted text-muted-foreground'
-                }`}>
-                  {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                </div>
-
-                {/* Message Bubble */}
-                <Card className={`p-4 ${
-                  message.type === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-background/70 backdrop-blur-sm border border-border/30'
-                }`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed flex-1">
-                      {message.type === 'assistant' && message.isTyping ? (
-                        <TypewriterText 
-                          text={message.content} 
-                          onComplete={() => {
-                            updateMessageTyping(message.id, false);
-                            // Trigger TTS after typing animation completes
-                            if (message.type === 'assistant') {
-                              triggerTTSForMessage(message.content);
-                            }
-                          }}
-                        />
-                       ) : (
-                         <span>{formatMessageWithLinks(message.content)}</span>
-                       )}
-                    </p>
-                    
-                    {/* TTS Controls for assistant messages */}
-                    {message.type === 'assistant' && !message.isTyping && (
-                      <TTSControls
-                        isPlaying={tts.isPlaying}
-                        isLoading={tts.isLoading}
-                        hasAudio={tts.hasAudio}
-                        error={tts.error}
-                        enabled={tts.settings.enabled}
-                        onPlayPause={tts.playPauseAudio}
-                        onStop={tts.stopCurrentAudio}
-                        onToggleEnabled={() => tts.updateSettings({ enabled: !tts.settings.enabled })}
-                        onClearError={tts.clearError}
-                        className="ml-2 flex-shrink-0"
-                      />
-                    )}
-                  </div>
-                  <p className={`text-xs mt-2 opacity-70 ${
-                    message.type === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}>
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </Card>
-              </div>
+              <Bot className="w-6 h-6 text-foreground" />
             </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Typing Indicator */}
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-start"
-          >
-            <div className="flex gap-3 max-w-[80%]">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-background/70 backdrop-blur-sm border border-border/30 text-muted-foreground flex items-center justify-center">
-                <Bot className="w-4 h-4" />
-              </div>
-              <Card className="p-4 bg-background/70 backdrop-blur-sm border border-border/30">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm text-muted-foreground">UTA Copilot is thinking...</span>
-                </div>
-              </Card>
+            <div>
+              <h3 className="text-xl font-bold text-foreground">UTA Copilot</h3>
+              <p className="text-sm text-muted-foreground">Your AI Campus Assistant</p>
             </div>
-          </motion.div>
-        )}
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {/* Modern Status Indicator */}
+            <ModernStatusIndicator
+              isListening={voiceInterface.isRecording}
+              isSpeaking={isSpeaking}
+              isThinking={isTyping}
+              isConnected={true}
+            />
+            
+            {/* Command Palette Trigger */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="flex items-center space-x-2 glass-card"
+            >
+              <Command className="w-4 h-4" />
+              <span className="text-xs">⌘K</span>
+            </Button>
+            
+            {/* TTS Controls */}
+            <TTSControls
+              isPlaying={tts.isPlaying}
+              isLoading={tts.isLoading}
+              hasAudio={tts.hasAudio}
+              error={tts.error}
+              enabled={tts.settings.enabled}
+              onPlayPause={tts.playPauseAudio}
+              onStop={tts.stopCurrentAudio}
+              onToggleEnabled={() => tts.updateSettings({ enabled: !tts.settings.enabled })}
+              onClearError={tts.clearError}
+            />
+          </div>
+        </motion.div>
 
-        {/* Follow-up Suggestions */}
-        {followUpSuggestions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap gap-2 justify-center px-4"
-          >
-            {followUpSuggestions.map((suggestion, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setInputValue(suggestion);
-                  setFollowUpSuggestions([]);
-                }}
-                className="text-xs hover:bg-primary/10 transition-colors"
+        {/* Modern Messages Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-background/50 to-background/80">
+          {messages.map((message) => (
+            <ModernChatBubble
+              key={message.id}
+              type={message.type}
+              content={message.content}
+              timestamp={message.timestamp}
+              isTyping={message.isTyping}
+              onRegenerate={() => {
+                // Handle message regeneration
+                console.log('Regenerating message...');
+              }}
+            />
+          ))}
+
+          {/* Enhanced Typing Indicator */}
+          <AnimatePresence>
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-start"
               >
-                <Lightbulb className="w-3 h-3 mr-1" />
-                {suggestion}
-              </Button>
-            ))}
-          </motion.div>
-        )}
+                <div className="flex items-end space-x-2">
+                  <motion.div
+                    className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    <Bot className="w-4 h-4" />
+                  </motion.div>
+                  <div className="chat-bubble-assistant">
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm text-muted-foreground mr-2">AI is thinking</span>
+                      <div className="w-2 h-2 bg-primary/60 rounded-full typing-dots" />
+                      <div className="w-2 h-2 bg-primary/60 rounded-full typing-dots" />
+                      <div className="w-2 h-2 bg-primary/60 rounded-full typing-dots" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <div ref={messagesEndRef} />
-      </div>
+          {/* Modern Follow-up Suggestions */}
+          <AnimatePresence>
+            {followUpSuggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="px-6 pb-4"
+              >
+                <div className="mb-2">
+                  <span className="text-sm font-medium text-muted-foreground flex items-center">
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                    Suggested follow-ups
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {followUpSuggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, type: "spring", stiffness: 400, damping: 25 }}
+                      onClick={() => handleSendMessage(suggestion)}
+                      className="suggestion-pill"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {suggestion}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      {/* Input Area */}
-      <div className="flex-shrink-0 p-4 border-t border-border/40 bg-background/50 backdrop-blur-sm rounded-b-lg">
-        
-        <div className="flex gap-2">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={voiceInterface.isRecording ? "Listening..." : "Ask me anything about UTA campus..."}
-            className="flex-1 resize-none min-h-[44px] rounded-xl"
-            disabled={isTyping || voiceInterface.isRecording}
-          />
-          <voiceInterface.MicButton />
-          <Button
-            onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim() || isTyping}
-            size="icon"
-            className="w-11 h-11 rounded-xl bg-primary hover:bg-primary/90"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+          <div ref={messagesEndRef} />
         </div>
-        <p className="text-xs text-muted-foreground text-center mt-2">
-          UTA Copilot provides professional assistance with academic programs, campus services, and university resources
-        </p>
-      </div>
-    </div>
 
-    {/* Multi-Agent Performance Dashboard */}
-    <MultiAgentDashboard />
+        {/* Modern Input Area */}
+        <motion.div 
+          className="p-6 border-t border-border bg-card/80 backdrop-blur-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="flex space-x-3 items-end">
+            <div className="flex-1 relative">
+              <div className="modern-input-container">
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  placeholder="Ask me anything about UTA campus..."
+                  className="border-0 bg-transparent focus:ring-0 focus:ring-offset-0 text-base py-4 px-4"
+                  disabled={isTyping}
+                />
+                <voiceInterface.MicButton />
+              </div>
+            </div>
+            
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                onClick={() => handleSendMessage()}
+                disabled={!inputValue.trim() || isTyping}
+                className="px-6 py-4 rounded-xl professional-gradient shadow-lg hover:shadow-xl transition-all duration-300"
+                size="lg"
+              >
+                <Send className="w-5 h-5" />
+              </Button>
+            </motion.div>
+          </div>
+          
+          {/* Live captions */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-4"
+          >
+            <LiveCaptions 
+              isVisible={voiceInterface.isRecording || voiceInterface.isProcessing}
+              currentText={voiceInterface.liveCaptionText}
+              isListening={voiceInterface.isRecording}
+              isSpeaking={false}
+              isProcessing={voiceInterface.isProcessing}
+            />
+          </motion.div>
+        </motion.div>
+
+        {/* Command Palette */}
+        <ModernCommandPalette 
+          isOpen={isCommandPaletteOpen} 
+          onClose={() => setIsCommandPaletteOpen(false)} 
+        />
+
+        {/* Multi-Agent Dashboard */}
+        <motion.div 
+          className="mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <MultiAgentDashboard />
+        </motion.div>
+      </div>
     </>
   );
 };
