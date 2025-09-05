@@ -453,7 +453,7 @@ export const ChatInterface = () => {
 
           {/* Fixed Input Section at Bottom */}
           <motion.div
-            className="sticky bottom-0 bg-gradient-to-t from-background via-background/95 to-background/80 backdrop-blur-lg border-t border-white/10"
+            className="sticky bottom-0 bg-gradient-to-t from-background via-background/98 to-transparent backdrop-blur-sm"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
