@@ -16,16 +16,26 @@ interface Message {
   isTyping?: boolean;
 }
 
-// Helper function to detect and format links in text
+// Helper function to detect and format links and emails in text
 const formatMessageWithLinks = (text: string) => {
-  // URL regex pattern for various protocols and domain patterns
+  // Combined regex for URLs and email addresses
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
+  const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
   
-  const parts = text.split(urlRegex);
+  // First split by URLs, then by emails
+  let parts = text.split(urlRegex);
+  
+  // Process each part to check for emails
+  parts = parts.flatMap(part => {
+    if (urlRegex.test(part)) {
+      return [part]; // Keep URLs as-is for now
+    }
+    return part.split(emailRegex);
+  });
   
   return parts.map((part, index) => {
     if (urlRegex.test(part)) {
-      // Ensure URL has protocol
+      // Handle URLs
       const url = part.startsWith('http') ? part : `https://${part}`;
       return (
         <a
@@ -38,6 +48,18 @@ const formatMessageWithLinks = (text: string) => {
         >
           {part}
           <ExternalLink className="w-3 h-3" />
+        </a>
+      );
+    } else if (emailRegex.test(part)) {
+      // Handle emails
+      return (
+        <a
+          key={index}
+          href={`mailto:${part}`}
+          className="text-primary hover:text-primary/80 underline transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
         </a>
       );
     }
