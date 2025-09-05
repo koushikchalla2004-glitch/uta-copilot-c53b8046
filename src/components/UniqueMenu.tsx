@@ -67,40 +67,49 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         <Button
           onClick={(e) => {
             e.stopPropagation();
-            setIsOpen(!isOpen);
+            if (!isOpen) setIsOpen(true);
           }}
           className="relative w-16 h-16 rounded-full bg-gradient-to-r from-primary via-primary-glow to-primary shadow-2xl hover:shadow-3xl transition-all duration-300 group border-2 border-background/20"
           size="icon"
         >
-          <AnimatePresence mode="wait">
-            {isOpen ? (
-              <motion.div
-                key="close"
-                initial={{ rotate: -180, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 180, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="cursor-pointer"
-              >
-                <X className="w-6 h-6 text-white" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="menu"
-                initial={{ rotate: 180, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -180, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Menu className="w-6 h-6 text-white" />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            key="menu"
+            initial={{ rotate: 180, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: -180, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Menu className="w-6 h-6 text-white" />
+          </motion.div>
           
           {/* Animated ring */}
           <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-pulse" />
         </Button>
       </motion.div>
+
+      {/* Top-Left Close Button (when menu is open) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
+            className="fixed top-6 left-6 z-50"
+          >
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="w-12 h-12 rounded-full bg-background/90 backdrop-blur-md border border-border/50 hover:bg-background shadow-xl transition-all duration-300 hover:scale-110"
+              size="icon"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Center Menu Overlay */}
       <AnimatePresence>
