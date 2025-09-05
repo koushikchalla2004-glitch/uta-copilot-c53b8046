@@ -228,14 +228,96 @@ export const ChatInterface = () => {
         // Note: Voice responses will be handled by FloatingVoiceButton component
       }, data.response ? data.response.length * 25 : 2000);
 
-      // Friendly clarification for location-intent queries
+      // Handle "near me" queries with geolocation
       if (/(near me|nearby|closest|nearest)/i.test(userMessage)) {
-        const followUpId = addMessage(
+        const geoMessageId = addMessage(
           'assistant',
-          'Want me to use your device location to find nearby spots? Or share a building/area on campus and I\'ll tailor it.',
+          'Let me find what\'s nearby using your location...',
           true
         );
-        setTimeout(() => updateMessageTyping(followUpId, false), 2200);
+        
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              try {
+                updateMessageTyping(geoMessageId, false);
+                
+                const { data: nearbyData, error: nearbyError } = await supabase.functions.invoke('places-nearby', {
+                  body: {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    limit: 5
+                  }
+                });
+
+                if (nearbyError) throw nearbyError;
+
+                const buildings = nearbyData.results.buildings || [];
+                const dining = nearbyData.results.dining || [];
+                const events = nearbyData.results.events || [];
+
+                let response = "Here's what I found near you:\n\n";
+                
+                if (buildings.length > 0) {
+                  response += "🏢 **Buildings:**\n";
+                  buildings.forEach((building: any) => {
+                    response += `• ${building.name} (${building.distance}) - ${building.category || 'Building'}\n`;
+                  });
+                  response += "\n";
+                }
+                
+                if (dining.length > 0) {
+                  response += "🍽️ **Dining:**\n";
+                  dining.forEach((place: any) => {
+                    response += `• ${place.name}${place.is_open ? ' (Open)' : ''}\n`;
+                  });
+                  response += "\n";
+                }
+                
+                if (events.length > 0) {
+                  response += "📅 **Upcoming Events:**\n";
+                  events.forEach((event: any) => {
+                    const eventDate = new Date(event.start_time).toLocaleDateString();
+                    response += `• ${event.title} - ${eventDate}\n`;
+                  });
+                }
+
+                if (buildings.length === 0 && dining.length === 0 && events.length === 0) {
+                  response = "I couldn't find specific campus facilities near your exact location, but I can help you with general campus information or directions to specific buildings!";
+                }
+
+                const responseMessageId = addMessage('assistant', response, true);
+                setTimeout(() => updateMessageTyping(responseMessageId, false), response.length * 25);
+                
+              } catch (error) {
+                console.error('Nearby search error:', error);
+                updateMessageTyping(geoMessageId, false);
+                const errorMessageId = addMessage('assistant', 'I had trouble finding nearby places. Try asking about a specific building or area on campus!', true);
+                setTimeout(() => updateMessageTyping(errorMessageId, false), 2000);
+              }
+            },
+            (error) => {
+              console.error('Geolocation error:', error);
+              updateMessageTyping(geoMessageId, false);
+              const fallbackMessageId = addMessage(
+                'assistant',
+                'I need location access to find nearby places. You can also tell me a building name or area on campus and I\'ll help you find what\'s around there!',
+                true
+              );
+              setTimeout(() => updateMessageTyping(fallbackMessageId, false), 3000);
+            },
+            { timeout: 10000, enableHighAccuracy: true }
+          );
+        } else {
+          updateMessageTyping(geoMessageId, false);
+          const noGeoMessageId = addMessage(
+            'assistant', 
+            'Your device doesn\'t support location services. Tell me a building name or area on campus and I\'ll help you find what\'s nearby!',
+            true
+          );
+          setTimeout(() => updateMessageTyping(noGeoMessageId, false), 2500);
+        }
+        return;
       }
 
     } catch (error: any) {

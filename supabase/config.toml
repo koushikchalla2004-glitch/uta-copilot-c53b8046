@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.add-sample-buildings]
 verify_jwt = false
+
+[functions.places-nearby]
+verify_jwt = false
