@@ -40,6 +40,91 @@ function generateFallbackResponse(query: string): string {
   return `🎓 **UTA Campus Information:**\n\nI'd be happy to help you with information about the University of Texas at Arlington! Here are some key resources:\n\n• **Main website:** uta.edu\n• **Student services:** (817) 272-2011\n• **Campus tours and information:** admissions.uta.edu\n• **Emergency services:** (817) 272-3003\n\nFor specific questions about "${query}", I recommend:\n• Visiting the UTA website\n• Calling the main information line\n• Stopping by the Visitor Information Center\n\nIs there something specific about UTA you'd like to know more about?`;
 }
 
+// Build lightweight retrieval-augmented context from Supabase tables
+async function getRagContext(query: string): Promise<{ contextText: string; sources: Array<{ category: string; title: string; snippet?: string; url?: string }> }> {
+  try {
+    if (!db) return { contextText: '', sources: [] };
+
+    const qWeb = query.length > 200 ? query.slice(0, 200) : query;
+    const limitPer = 3;
+
+    const [buildingsRes, coursesRes, facultyRes, programsRes, eventsRes] = await Promise.all([
+      db.from('buildings').select('id,name,code,category').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+      db.from('courses').select('id,code,title,description,catalog_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+      db.from('faculty').select('id,name,dept,office,profile_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+      db.from('programs').select('id,name,dept,level,catalog_url,overview').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+      db.from('events').select('id,title,description,location,start_time,source_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+    ]);
+
+    const clamp = (s?: string | null, n = 180) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
+
+    const sources: Array<{ category: string; title: string; snippet?: string; url?: string }> = [];
+
+    if (buildingsRes.data) {
+      buildingsRes.data.forEach((b: any) => {
+        sources.push({
+          category: 'Building',
+          title: b.name + (b.code ? ` (${b.code})` : ''),
+          snippet: clamp(b.category),
+        });
+      });
+    }
+
+    if (coursesRes.data) {
+      coursesRes.data.forEach((c: any) => {
+        sources.push({
+          category: 'Course',
+          title: (c.code ? `${c.code}: ` : '') + (c.title || 'Course'),
+          snippet: clamp(c.description),
+          url: c.catalog_url || undefined,
+        });
+      });
+    }
+
+    if (facultyRes.data) {
+      facultyRes.data.forEach((f: any) => {
+        sources.push({
+          category: 'Faculty',
+          title: f.name + (f.dept ? ` — ${f.dept}` : ''),
+          snippet: clamp(f.office),
+          url: f.profile_url || undefined,
+        });
+      });
+    }
+
+    if (programsRes.data) {
+      programsRes.data.forEach((p: any) => {
+        sources.push({
+          category: 'Program',
+          title: p.name + (p.level ? ` (${p.level})` : ''),
+          snippet: clamp(p.overview),
+          url: p.catalog_url || undefined,
+        });
+      });
+    }
+
+    if (eventsRes.data) {
+      const fmt = (iso?: string | null) => (iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric' }) : '');
+      eventsRes.data.forEach((e: any) => {
+        sources.push({
+          category: 'Event',
+          title: e.title + (e.start_time ? ` — ${fmt(e.start_time)}` : ''),
+          snippet: clamp(e.location || e.description),
+          url: e.source_url || undefined,
+        });
+      });
+    }
+
+    // Limit overall size and build compact context text
+    const top = sources.slice(0, 12);
+    const contextText = top.map((s) => `- [${s.category}] ${s.title}${s.snippet ? `: ${s.snippet}` : ''}`).join('\n');
+    return { contextText, sources: top };
+  } catch (err) {
+    console.error('RAG context build failed:', err);
+    return { contextText: '', sources: [] };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -160,6 +245,10 @@ serve(async (req) => {
       }
     }
 
+    // Build retrieval context from Supabase
+    const rag = await getRagContext(query);
+    console.log('RAG context ready', { items: rag.sources.length, len: rag.contextText.length });
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -184,6 +273,7 @@ serve(async (req) => {
             - Use professional tone and precise wording.
             - Include links to official UTA resources when useful.`
           },
+          ...(rag.contextText ? [{ role: 'system', content: `Campus context (use if relevant):\n${rag.contextText}` }] : []),
           ...history,
           { role: 'user', content: query }
         ],
@@ -219,7 +309,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       response: aiResponse,
-      query: query,
+      query,
+      sources: rag?.sources || [],
       timestamp: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
