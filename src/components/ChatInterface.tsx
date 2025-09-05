@@ -4,7 +4,7 @@ import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap, Command 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
-import { ModernChatBubble } from './ModernChatBubble';
+import { ResponseCard } from './ResponseCard';
 import { ModernCommandPalette } from './ModernCommandPalette';
 import { ModernStatusIndicator } from './ModernStatusIndicator';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,16 @@ interface Message {
   content: string;
   timestamp: Date;
   isTyping?: boolean;
+  metadata?: {
+    source?: string;
+    strategy?: string;
+    agents?: string[];
+    confidence?: number;
+    processingTime?: number;
+    sentiment?: string;
+    sentimentScore?: number;
+    sources?: any[];
+  };
 }
 
 // Helper function to detect and format links and emails in text
@@ -144,13 +154,14 @@ export const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false) => {
+  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false, metadata?: Message['metadata']) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       type,
       content,
       timestamp: new Date(),
-      isTyping
+      isTyping,
+      metadata
     };
     setMessages(prev => [...prev, newMessage]);
     return newMessage.id;
@@ -226,6 +237,8 @@ export const ChatInterface = () => {
     try {
       let responseText = '';
       let isOptimizedResponse = false;
+      let agentMetadata: Message['metadata'] = undefined;
+      let aiMetadata: Message['metadata'] = undefined;
 
       // STEP 1: Try Multi-Agent System first for specialized queries
       console.log('🤖 Multi-Agent System: Processing query...');
@@ -242,13 +255,14 @@ export const ChatInterface = () => {
         isOptimizedResponse = true;
         
         // Add multi-agent source info
-        await conversationMemory.addMessage('assistant', responseText, { 
+        agentMetadata = { 
           source: 'multi_agent',
           strategy: multiAgentResult.strategy,
           agents: multiAgentResult.agentsUsed,
           confidence: multiAgentResult.primary.confidence,
           processingTime: multiAgentResult.totalTime
-        });
+        };
+        await conversationMemory.addMessage('assistant', responseText, agentMetadata);
       } else {
         // STEP 2: Fallback to Enhanced AI Search
         console.log('🔄 Falling back to enhanced AI search...');
@@ -269,10 +283,11 @@ export const ChatInterface = () => {
 
         responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
         
-        await conversationMemory.addMessage('assistant', responseText, { 
+        aiMetadata = { 
           source: data.enhanced ? 'enhanced_ai' : 'ai', 
           sources: data.sources 
-        });
+        };
+        await conversationMemory.addMessage('assistant', responseText, aiMetadata);
       }
 
       // Humanize assistant response based on user's sentiment
@@ -284,7 +299,8 @@ export const ChatInterface = () => {
       
       // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);
-      const messageId = addMessage('assistant', responseText, true);
+      const finalMetadata = isOptimizedResponse ? agentMetadata : aiMetadata;
+      const messageId = addMessage('assistant', responseText, true, finalMetadata);
       
       // After typing animation completes, update to final message
       setTimeout(() => {
@@ -440,11 +456,13 @@ export const ChatInterface = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ModernChatBubble
+                      <ResponseCard
+                        id={message.id}
                         type={message.type}
                         content={message.content}
                         timestamp={message.timestamp}
                         isTyping={message.isTyping || false}
+                        metadata={message.metadata}
                         onRegenerate={() => {
                           if (message.type === 'assistant') {
                             triggerTTSForMessage(message.content);
