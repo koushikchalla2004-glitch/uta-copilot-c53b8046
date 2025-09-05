@@ -9,8 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
 import { useVoiceInterface } from './VoiceInterface';
-import { LiveCaptions } from './LiveCaptions';
-import { SiriVoiceAnimation } from './SiriVoiceAnimation';
+import { FloatingVoiceButton } from './FloatingVoiceButton';
 
 interface Message {
   id: string;
@@ -109,17 +108,6 @@ export const ChatInterface = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Voice interface integration
-  const voice = useVoiceInterface({
-    onTranscription: async (text) => {
-      console.log('Voice transcription received:', text);
-      setInputValue(text);
-      // Auto-search after voice input (no confirmation needed)
-      await handleSendMessage(text);
-    },
-    onSpeakingChange: setIsSpeaking
-  });
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -167,12 +155,8 @@ export const ChatInterface = () => {
           const messageId = addMessage('assistant', result.message, true);
           setTimeout(() => {
             updateMessageTyping(messageId, false);
-            // Auto-speak navigation responses if voice is enabled
-            if (voice.audioEnabled && result.message) {
-              setTimeout(() => {
-                voice.speakText(result.message);
-              }, 300);
-            }
+            // Auto-speak navigation responses if voice is enabled  
+            // Note: Will be handled by FloatingVoiceButton component
           }, result.message.length * 25);
           
           if (result.success) {
@@ -230,13 +214,7 @@ export const ChatInterface = () => {
       const messageId = addMessage('assistant', data.response || "I apologize, but I am unable to process your request at this time. Please try again momentarily.", true);
       setTimeout(() => {
         updateMessageTyping(messageId, false);
-        // Auto-speak AI responses if voice is enabled (enhanced timing)
-        if (voice.audioEnabled && data.response) {
-          setTimeout(() => {
-            console.log('Speaking AI response:', data.response);
-            voice.speakText(data.response);
-          }, 300);
-        }
+        // Note: Voice responses will be handled by FloatingVoiceButton component
       }, data.response ? data.response.length * 25 : 2000);
 
     } catch (error: any) {
@@ -255,23 +233,18 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleVoiceTranscription = async (text: string) => {
+    console.log('Voice transcription received:', text);
+    setInputValue(text);
+    await handleSendMessage(text);
+  };
+
   return (
     <>
-      {/* Siri Voice Animation */}
-      <SiriVoiceAnimation
-        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
-        isListening={voice.isRecording}
-        isSpeaking={voice.isSpeaking}
-        isProcessing={voice.isProcessing}
-      />
-
-      {/* Live Captions */}
-      <LiveCaptions
-        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
-        currentText={voice.liveCaptionText}
-        isListening={voice.isRecording}
-        isSpeaking={voice.isSpeaking}
-        isProcessing={voice.isProcessing}
+      {/* Floating Voice Button */}
+      <FloatingVoiceButton
+        onTranscription={handleVoiceTranscription}
+        onSpeakingChange={setIsSpeaking}
       />
 
       <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
@@ -368,11 +341,10 @@ export const ChatInterface = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={voice.isRecording ? "Listening..." : "Ask me anything about UTA campus..."}
+            placeholder="Ask me anything about UTA campus..."
             className="flex-1 resize-none min-h-[44px] rounded-xl"
-            disabled={isTyping || voice.isRecording}
+            disabled={isTyping}
           />
-          <voice.MicButton />
           <Button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isTyping}
