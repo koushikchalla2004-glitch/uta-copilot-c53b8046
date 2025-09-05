@@ -19,9 +19,16 @@ const Hero = () => {
 
   return (
     <>
-      <div className="w-full h-24 bg-white flex items-center justify-center border-b border-gray-200">
-        <p className="text-black font-medium">Top White Background Section</p>
-      </div>
+      <nav className="w-full h-16 bg-white flex items-center justify-center border-b border-gray-200 relative z-50">
+        <div className="flex items-center space-x-8">
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Home</button>
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">About</button>
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Map</button>
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Events</button>
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Dining</button>
+          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Profile</button>
+        </div>
+      </nav>
       <div className="relative min-h-screen bg-gradient-hero overflow-hidden flex flex-col pt-16">
       {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
@@ -72,50 +79,7 @@ const Hero = () => {
         ))}
       </div>
 
-      {/* Professional Header */}
-      <motion.header
-        className="relative z-20 p-6"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-        <div className="max-w-7xl mx-auto">
-          {/* Logo and Title Section */}
-          <div className="flex items-center justify-center mb-6">
-            <motion.div 
-              className="flex items-center space-x-4"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="relative w-16 h-16 professional-gradient rounded-2xl flex items-center justify-center shadow-lg presentation-hover">
-                <Sparkles className="w-8 h-8 text-white animate-pulse" />
-                <div className="absolute inset-0 rounded-2xl border border-white/30 animate-pulse-professional" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-white tracking-tight">UTA Copilot</h1>
-                <p className="text-lg text-white/80 font-medium">Your Intelligent Campus Assistant</p>
-              </div>
-            </motion.div>
-          </div>
 
-          {/* Professional Subtitle */}
-          <motion.div
-            className="text-center max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-          >
-            <h2 className="text-xl text-white/70 font-light mb-4">
-              Elevating Your Campus Experience with <span className="font-semibold text-white">Artificial Intelligence</span>
-            </h2>
-            <div className="w-24 h-1 bg-primary rounded-full mx-auto"></div>
-          </motion.div>
-        </div>
-      </motion.header>
-
-      {/* Unique Floating Menu */}
-      <UniqueMenu onThemeToggle={handleThemeToggle} isDark={isDark} />
       
       {/* Main Content */}
       <div className="relative z-10 flex-1">
