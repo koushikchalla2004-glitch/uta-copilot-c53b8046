@@ -74,8 +74,14 @@ export const useRealtimeVoice = () => {
       };
 
       wsRef.current.onmessage = async (event) => {
-        const data = JSON.parse(event.data);
-        console.log("Received message:", data.type);
+        let data: any;
+        try {
+          data = JSON.parse(event.data);
+        } catch (e) {
+          console.error("Non-JSON message from voice service:", event.data);
+          return;
+        }
+        console.log("Received message:", data.type, data);
 
         switch (data.type) {
           case 'session.created':
@@ -133,14 +139,16 @@ export const useRealtimeVoice = () => {
             setIsSpeaking(false);
             break;
 
-          case 'error':
-            console.error("Voice chat error:", data.message);
+          case 'error': {
+            const msg = data.message || data.error?.message || data.error || JSON.stringify(data);
+            console.error("Voice chat error:", data);
             toast({
               title: "Voice Chat Error",
-              description: data.message,
+              description: typeof msg === 'string' ? msg : JSON.stringify(msg),
               variant: "destructive"
             });
             break;
+          }
         }
       };
 
