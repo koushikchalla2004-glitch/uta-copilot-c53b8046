@@ -23,6 +23,9 @@ import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useVoiceInterface } from './VoiceInterface';
+import { SiriVoiceAnimation } from './SiriVoiceAnimation';
+import { LiveCaptions } from './LiveCaptions';
 
 interface SearchResult {
   id: string;
@@ -74,6 +77,17 @@ const mockResults: SearchResult[] = [
 export const SearchEngine = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Voice interface integration
+  const voice = useVoiceInterface({
+    onTranscription: async (text) => {
+      console.log('Voice transcription received in SearchEngine:', text);
+      setSearchQuery(text);
+      // Auto-search after voice input
+      performSearch(text);
+    },
+    onSpeakingChange: () => {} // No action needed for speaking change in search
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [facets, setFacets] = useState<Facet[]>([
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, active: false },
@@ -290,6 +304,24 @@ export const SearchEngine = () => {
   }, [selectedResult, showResults]);
 
   return (
+    <>
+      {/* Siri Voice Animation */}
+      <SiriVoiceAnimation
+        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
+        isListening={voice.isRecording}
+        isSpeaking={voice.isSpeaking}
+        isProcessing={voice.isProcessing}
+      />
+
+      {/* Live Captions */}
+      <LiveCaptions
+        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
+        currentText={voice.liveCaptionText}
+        isListening={voice.isRecording}
+        isSpeaking={voice.isSpeaking}
+        isProcessing={voice.isProcessing}
+      />
+
     <section id="search" className="py-20 px-4 relative overflow-hidden">
       <div className="max-w-4xl mx-auto">
         <motion.div
@@ -347,8 +379,8 @@ export const SearchEngine = () => {
                 onKeyDown={handleKeyDown}
                 className="flex-1 border-none bg-transparent focus:ring-0 focus:outline-none text-lg placeholder:text-muted-foreground"
               />
-              {/* Mic Button placeholder - will be replaced by parent */}
-              <div id="voice-mic-placeholder" className="mr-2" />
+              {/* Voice Mic Button */}
+              <voice.MicButton />
               <Button
                 type="button"
                 variant="ghost"
@@ -501,5 +533,6 @@ export const SearchEngine = () => {
         </AnimatePresence>
       </div>
     </section>
+    </>
   );
 };
