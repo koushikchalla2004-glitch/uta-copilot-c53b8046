@@ -58,9 +58,10 @@ serve(async (req) => {
     const blob = new Blob([binaryAudio], { type: 'audio/webm' });
     formData.append('file', blob, 'audio.webm');
     formData.append('model', 'whisper-1');
+    formData.append('language', 'en'); // Force English output
 
-    // Send to OpenAI Whisper
-    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    // Send to OpenAI Whisper (translate to English)
+    const response = await fetch('https://api.openai.com/v1/audio/translations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
