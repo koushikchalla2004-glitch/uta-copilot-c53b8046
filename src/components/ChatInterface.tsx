@@ -220,7 +220,7 @@ export const ChatInterface = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background/80 backdrop-blur-md border border-border/20 rounded-lg">
+    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
       {/* Header */}
       <div className="flex-shrink-0 p-6 border-b border-border/40 bg-background/50 backdrop-blur-sm rounded-t-lg">
         <div className="text-center">
@@ -234,7 +234,7 @@ export const ChatInterface = () => {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-transparent">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
