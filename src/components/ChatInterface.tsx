@@ -42,7 +42,7 @@ export const ChatInterface = () => {
     {
       id: '1',
       type: 'assistant',
-      content: "Hello! I'm your UTA Copilot assistant. I can help you with campus information, dining options, events, academic programs, and much more. What would you like to know?",
+      content: "Good day. I am UTA Copilot, your professional virtual assistant for the University of Texas at Arlington. I am here to provide comprehensive assistance with academic programs, student services, campus resources, and any other university-related inquiries. How may I assist you today?",
       timestamp: new Date(),
       isTyping: false
     }
@@ -100,12 +100,12 @@ export const ChatInterface = () => {
       }
 
       // Add AI response with typing animation
-      const messageId = addMessage('assistant', data.response || "I'm sorry, I couldn't generate a response right now. Please try again.", true);
+      const messageId = addMessage('assistant', data.response || "I apologize, but I am unable to process your request at this time. Please try again momentarily.", true);
       setTimeout(() => updateMessageTyping(messageId, false), data.response ? data.response.length * 25 : 2000);
 
     } catch (error: any) {
       console.error('Chat error:', error);
-      const messageId = addMessage('assistant', "I'm experiencing some technical difficulties. Please try again in a moment.", true);
+      const messageId = addMessage('assistant', "I am currently experiencing technical difficulties. Please try your request again in a few moments.", true);
       setTimeout(() => updateMessageTyping(messageId, false), 2000);
     } finally {
       setIsTyping(false);
@@ -227,7 +227,7 @@ export const ChatInterface = () => {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center mt-2">
-          UTA Copilot can help with campus info, dining, events, and academics
+          UTA Copilot provides professional assistance with academic programs, campus services, and university resources
         </p>
       </div>
     </div>
