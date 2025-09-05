@@ -9,14 +9,32 @@ import { Sparkles, MessageSquare, Zap, Users, ChevronDown, Map, Calendar, Utensi
 const Hero = () => {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentInfoIndex, setCurrentInfoIndex] = useState(0);
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
+    
+    // Rotate information lines every 5 seconds
+    const interval = setInterval(() => {
+      setCurrentInfoIndex((prev) => (prev + 1) % infoLines.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleThemeToggle = () => {
     setIsDark(false);
   };
+
+  const infoLines = [
+    "🎓 Discover campus events, dining options, and academic resources",
+    "🗺️ Navigate UTA's campus with interactive maps and real-time directions", 
+    "📚 Access library hours, study spaces, and academic support services",
+    "🍕 Find dining locations, meal plans, and campus food options nearby",
+    "🏢 Explore student organizations, clubs, and campus involvement opportunities",
+    "🚌 Get shuttle schedules, parking info, and transportation around campus",
+    "💡 Ask questions about admissions, registration, and student services"
+  ];
 
   const menuItems = [
     { icon: MessageSquare, label: 'New Chat', color: 'from-green-500 to-teal-600' },
@@ -95,14 +113,18 @@ const Hero = () => {
           </AnimatePresence>
         </div>
         
-        {/* Center menu items */}
-        <div className="flex items-center space-x-8">
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Home</button>
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">About</button>
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Map</button>
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Events</button>
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Dining</button>
-          <button className="text-black font-bold text-lg hover:text-gray-600 transition-colors font-mono">Profile</button>
+        {/* Center - Rotating Information */}
+        <div className="flex-1 flex justify-center">
+          <motion.div
+            key={currentInfoIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.5 }}
+            className="text-black font-medium text-base font-mono text-center max-w-2xl"
+          >
+            {infoLines[currentInfoIndex]}
+          </motion.div>
         </div>
         
         {/* Right side spacer */}
