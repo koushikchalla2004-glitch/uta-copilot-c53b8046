@@ -15,11 +15,11 @@
   --popover: 0 0% 100%; /* pure white HSL */
   --popover-foreground: 0 0% 0%; /* pure black HSL */
   
-  /* Light Blue Accents */
-  --primary: 203 60% 95%; /* light blue HSL */
-  --primary-hover: 203 60% 90%; /* slightly darker on hover HSL */
-  --primary-foreground: 0 0% 0%; /* black text on light blue HSL */
-  --primary-glow: 203 60% 85%; /* lighter blue for glow effects HSL */
+  /* Slight Gray Accents */
+  --primary: 0 0% 94%; /* slight gray HSL */
+  --primary-hover: 0 0% 88%; /* slightly darker gray on hover HSL */
+  --primary-foreground: 0 0% 0%; /* black text on gray HSL */
+  --primary-glow: 0 0% 90%; /* lighter gray for glow effects HSL */
   
   /* Professional Grays */
   --secondary: 0 0% 96%; /* very light gray HSL */
@@ -27,13 +27,13 @@
   --secondary-glow: 0 0% 90%; /* slightly darker gray for glow effects HSL */
   --muted: 0 0% 96%; /* very light gray HSL */
   --muted-foreground: 0 0% 25%; /* darker gray text for better visibility HSL */
-  --accent: 203 60% 95%; /* light blue HSL */
+  --accent: 0 0% 94%; /* slight gray HSL */
   --accent-foreground: 0 0% 0%; /* black text HSL */
   
   /* Borders & Dividers */
   --border: 0 0% 90%; /* light gray borders HSL */
   --input: 0 0% 90%; /* light gray input borders HSL */
-  --ring: 203 60% 95%; /* light blue focus ring HSL */
+  --ring: 0 0% 88%; /* gray focus ring HSL */
   
   /* Destructive Colors */
   --destructive: 0 62% 50%; /* red for destructive actions HSL */
