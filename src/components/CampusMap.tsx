@@ -249,6 +249,7 @@ export const CampusMap = () => {
       map.current.on('load', () => {
         setMapLoaded(true);
         addBuildingMarkers();
+        add3DBuildings(); // Enable 3D buildings
         
         // Handle building selection from navigation
         if (selectedBuilding && selectedBuilding.lat && selectedBuilding.lng) {
@@ -257,7 +258,7 @@ export const CampusMap = () => {
         
         toast({
           title: "Map Loaded",
-          description: "Campus map is ready to use",
+          description: "Campus map with 3D buildings is ready to use",
         });
       });
 
