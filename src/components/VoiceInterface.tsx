@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -17,12 +17,44 @@ export const useVoiceInterface = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [currentTranscript, setCurrentTranscript] = useState('');
+  const [currentSpeechText, setCurrentSpeechText] = useState('');
+  const [liveCaptionText, setLiveCaptionText] = useState('');
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const speechRecognitionRef = useRef<any>(null);
   
   const { toast } = useToast();
+
+  // Initialize speech recognition for live captions
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      speechRecognitionRef.current = new SpeechRecognition();
+      speechRecognitionRef.current.continuous = true;
+      speechRecognitionRef.current.interimResults = true;
+      speechRecognitionRef.current.lang = 'en-US';
+
+      speechRecognitionRef.current.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        setCurrentTranscript(finalTranscript || interimTranscript);
+        setLiveCaptionText(finalTranscript || interimTranscript);
+      };
+    }
+  }, []);
 
   // Start voice recording
   const startRecording = useCallback(async () => {
@@ -93,6 +125,13 @@ export const useVoiceInterface = ({
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setCurrentTranscript('');
+      setLiveCaptionText('');
+
+      // Start live speech recognition for captions
+      if (speechRecognitionRef.current) {
+        speechRecognitionRef.current.start();
+      }
 
       toast({
         title: "Listening",
@@ -114,6 +153,12 @@ export const useVoiceInterface = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setLiveCaptionText('');
+      
+      // Stop speech recognition
+      if (speechRecognitionRef.current) {
+        speechRecognitionRef.current.stop();
+      }
     }
   }, [isRecording]);
 
@@ -129,6 +174,8 @@ export const useVoiceInterface = ({
 
     try {
       setIsSpeaking(true);
+      setCurrentSpeechText(text);
+      setLiveCaptionText(text);
       onSpeakingChange(true);
 
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
@@ -200,6 +247,9 @@ export const useVoiceInterface = ({
     isProcessing,
     isSpeaking,
     audioEnabled,
+    liveCaptionText,
+    currentTranscript,
+    currentSpeechText,
     startRecording,
     stopRecording,
     speakText,

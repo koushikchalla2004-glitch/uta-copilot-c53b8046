@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
 import { useVoiceInterface } from './VoiceInterface';
+import { LiveCaptions } from './LiveCaptions';
+import VoiceVisualizer from './VoiceVisualizer';
 
 interface Message {
   id: string;
@@ -245,7 +247,24 @@ export const ChatInterface = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
+    <>
+      {/* Live Captions */}
+      <LiveCaptions
+        isVisible={voice.isRecording || voice.isSpeaking || voice.isProcessing}
+        currentText={voice.liveCaptionText}
+        isListening={voice.isRecording}
+        isSpeaking={voice.isSpeaking}
+        isProcessing={voice.isProcessing}
+      />
+
+      {/* Voice Visualizer */}
+      <VoiceVisualizer
+        isListening={voice.isRecording}
+        isSpeaking={voice.isSpeaking}
+        isConnected={voice.audioEnabled}
+      />
+
+      <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
       {/* Header */}
       <div className="flex-shrink-0 p-6 border-b border-border/40 bg-background/50 backdrop-blur-sm rounded-t-lg">
         <div className="text-center">
@@ -361,5 +380,6 @@ export const ChatInterface = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
