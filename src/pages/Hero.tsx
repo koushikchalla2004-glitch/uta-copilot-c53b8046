@@ -4,7 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot, Phone, PhoneOff } from 'lucide-react';
+import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
@@ -565,11 +565,11 @@ const Hero = () => {
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : voiceConnected ? (
                     <div className="relative">
-                      <PhoneOff className="w-5 h-5 text-white animate-bounce" />
+                      <MicOff className="w-5 h-5 text-white animate-bounce" />
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping"></div>
                     </div>
                   ) : (
-                    <Phone className="w-5 h-5 text-white hover:scale-110 transition-transform" />
+                    <Mic className="w-5 h-5 text-white hover:scale-110 transition-transform" />
                   )}
                 </Button>
               </div>
@@ -577,7 +577,7 @@ const Hero = () => {
               {/* Instructions */}
               {!voiceConnected && (
                 <div className="mt-3 text-center text-white/60 text-sm">
-                  💡 Click the phone icon to start voice chat for a more natural conversation!
+                  💡 Click the microphone icon to start voice chat for a more natural conversation!
                 </div>
               )}
             </div>
