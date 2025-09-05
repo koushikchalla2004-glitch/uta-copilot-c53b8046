@@ -245,14 +245,13 @@ export const ChatInterface = () => {
       // Humanize assistant response based on user's sentiment
       responseText = sentiment.humanizeResponse(responseText, userSentimentLabel);
       
-      // Hide typing indicator and add typing animation message
+      // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);
-      const messageId = addTypingMessage(responseText);
+      const messageId = addMessage('assistant', responseText, true);
       
       // After typing animation completes, update to final message
       setTimeout(() => {
-        removeTypingMessage();
-        addMessage('assistant', responseText, false);
+        updateMessageTyping(messageId, false);
         const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
         setFollowUpSuggestions(suggestions);
         triggerTTSForMessage(responseText);
@@ -452,7 +451,7 @@ export const ChatInterface = () => {
 
           {/* Fixed Input Section at Bottom */}
           <motion.div
-            className="sticky bottom-0 bg-background/90 backdrop-blur-sm border-t border-white/10"
+            className="sticky bottom-0 bg-gradient-to-t from-background via-background/95 to-background/80 backdrop-blur-lg border-t border-white/10"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -487,7 +486,7 @@ export const ChatInterface = () => {
 
               {/* Search Input Section */}
               <div className="w-full max-w-3xl mx-auto">
-                <Card className="p-2 glass-card backdrop-blur-lg bg-white/10 border-white/20">
+                <Card className="p-3 glass-card backdrop-blur-lg bg-white/10 border-white/20 shadow-lg">
                   <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
                     <div className="flex-1 relative">
                       <Input

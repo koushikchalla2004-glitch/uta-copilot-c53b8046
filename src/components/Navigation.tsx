@@ -23,9 +23,18 @@ export const Navigation = ({ onThemeToggle, isDark, onLogout, isAuthenticated }:
       
       setIsScrolled(currentScrollY > 10);
       
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
+      // Only hide nav on manual scroll, not programmatic scroll
+      const scrollDiff = Math.abs(currentScrollY - lastScrollY);
+      if (scrollDiff > 5 && currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Check if this is a manual scroll by checking scroll speed
+        setTimeout(() => {
+          const newScrollY = window.scrollY;
+          if (Math.abs(newScrollY - currentScrollY) < 10) {
+            // Likely manual scroll, hide nav
+            setIsVisible(false);
+          }
+        }, 100);
+      } else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       }
       
