@@ -37,8 +37,8 @@ const App = () => {
   if (loading) {
     console.log('App is loading...');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="text-gray-900 text-xl">Loading...</div>
       </div>
     );
   }

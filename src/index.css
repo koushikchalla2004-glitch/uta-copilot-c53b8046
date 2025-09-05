@@ -7,8 +7,8 @@
 
 /* Professional Presentation Theme - Pure White and Black */
 :root {
-  /* Core Colors - Pure White and Black */
-  --background: 0 0% 100%; /* pure white HSL */
+  /* Core Colors - Clean gradient background */
+  --background: 220 14% 96%; /* light gray-blue HSL */
   --foreground: 0 0% 0%; /* pure black HSL */
   --card: 0 0% 100%; /* pure white HSL */
   --card-foreground: 0 0% 0%; /* pure black HSL */

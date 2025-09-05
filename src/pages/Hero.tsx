@@ -18,7 +18,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative h-screen bg-background overflow-hidden flex flex-col">
+    <div className="relative h-screen bg-gradient-hero overflow-hidden flex flex-col">
       {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
         <Canvas camera={{ position: [0, 0, 1] }}>
