@@ -158,12 +158,14 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
 
               {/* Menu Options in Circle Around Logo */}
               {menuItems.map((item, index) => {
-                // Position options in cardinal directions: top, right, bottom, left
-                const angles = [-90, 0, 90, 180]; // Top, Right, Bottom, Left
-                const angle = angles[index];
-                const radius = 140;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
+                // Position options in cardinal directions with proper spacing
+                const positions = [
+                  { x: 0, y: -180 },    // Top - New Chat
+                  { x: 180, y: 0 },     // Right - Profile  
+                  { x: 0, y: 180 },     // Bottom - Maps
+                  { x: -180, y: 0 }     // Left - About
+                ];
+                const { x, y } = positions[index];
 
                 return (
                   <motion.div
@@ -174,9 +176,9 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                       top: '50%',
                       transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
                     }}
-                    initial={{ scale: 0, opacity: 0, rotate: -180 }}
-                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                    exit={{ scale: 0, opacity: 0, rotate: 180 }}
+                    initial={{ scale: 0, opacity: 0, x: 0, y: 0 }}
+                    animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
+                    exit={{ scale: 0, opacity: 0, x: 0, y: 0 }}
                     transition={{ 
                       delay: 0.2 + index * 0.1,
                       type: "spring",
@@ -213,12 +215,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                       <motion.div
                         className="absolute top-1/2 left-1/2 origin-left h-0.5 bg-gradient-to-r from-primary/40 to-transparent"
                         style={{
-                          width: `${radius - 50}px`,
-                          transform: `translate(-50%, -50%) rotate(${angle + 180}deg)`
+                          width: '120px',
+                          transform: `translate(-50%, -50%) rotate(${Math.atan2(y, x) * (180 / Math.PI) + 180}deg)`
                         }}
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
-                        transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
+                        transition={{ delay: 0.4 + index * 0.15, duration: 0.6 }}
                       />
                     </div>
                   </motion.div>
