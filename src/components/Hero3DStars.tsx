@@ -8,7 +8,7 @@ const StarField = () => {
   const starsRef = useRef<THREE.Points>(null);
   
   // Create star positions
-  const starCount = 2000;
+  const starCount = 800;
   const positions = new Float32Array(starCount * 3);
   
   for (let i = 0; i < starCount; i++) {
