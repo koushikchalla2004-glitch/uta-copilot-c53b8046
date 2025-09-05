@@ -109,7 +109,7 @@ export const ChatInterface = () => {
   const { toast } = useToast();
 
   // Voice interface for chat
-  const voice = useVoiceInterface({
+  const voiceInterface = useVoiceInterface({
     onTranscription: async (text) => {
       console.log('Voice transcription received:', text);
       setInputValue(text);
@@ -247,11 +247,11 @@ export const ChatInterface = () => {
     <>
       {/* Live Captions for Chat */}
       <LiveCaptions
-        isVisible={voice.isRecording || voice.isProcessing}
-        currentText={voice.liveCaptionText}
-        isListening={voice.isRecording}
+        isVisible={voiceInterface.isRecording || voiceInterface.isProcessing}
+        currentText={voiceInterface.liveCaptionText}
+        isListening={voiceInterface.isRecording}
         isSpeaking={false}
-        isProcessing={voice.isProcessing}
+        isProcessing={voiceInterface.isProcessing}
       />
 
       <div className="flex flex-col h-screen max-w-4xl mx-auto bg-transparent border border-border/10 rounded-lg">
@@ -348,11 +348,11 @@ export const ChatInterface = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={voice.isRecording ? "Listening..." : "Ask me anything about UTA campus..."}
+            placeholder={voiceInterface.isRecording ? "Listening..." : "Ask me anything about UTA campus..."}
             className="flex-1 resize-none min-h-[44px] rounded-xl"
-            disabled={isTyping || voice.isRecording}
+            disabled={isTyping || voiceInterface.isRecording}
           />
-          <voice.MicButton />
+          <voiceInterface.MicButton />
           <Button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isTyping}
