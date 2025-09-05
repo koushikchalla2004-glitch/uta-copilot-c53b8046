@@ -63,9 +63,10 @@ export const useVoiceInterface = ({
 
         // Set new silence timer (1 second) only if we have text and are recording
         if (currentText.trim() && isRecording) {
+          console.log('Setting silence timer for 1 second');
           const timer = setTimeout(() => {
+            console.log('Silence timer triggered - stopping recording');
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-              console.log('Auto-stopping recording due to silence (1 second)');
               stopRecording();
             }
           }, 1000);
@@ -75,10 +76,21 @@ export const useVoiceInterface = ({
 
       speechRecognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          console.log('Microphone permission denied');
+        }
       };
 
       speechRecognitionRef.current.onend = () => {
-        console.log('Speech recognition ended');
+        console.log('Speech recognition ended - restarting if still recording');
+        // Restart speech recognition if we're still recording
+        if (isRecording && speechRecognitionRef.current) {
+          try {
+            speechRecognitionRef.current.start();
+          } catch (error) {
+            console.log('Failed to restart speech recognition:', error);
+          }
+        }
       };
     }
 
@@ -91,7 +103,7 @@ export const useVoiceInterface = ({
         speechRecognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [isRecording, silenceTimer]);
 
   // Start voice recording
   const startRecording = useCallback(async () => {
@@ -120,38 +132,49 @@ export const useVoiceInterface = ({
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        console.log('MediaRecorder stopped');
+        console.log('MediaRecorder stopped - processing audio');
         setIsProcessing(true);
         
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        console.log('Audio blob size:', audioBlob.size);
         
-        // Convert to base64
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          try {
-            const base64Audio = (reader.result as string).split(',')[1];
-            
-            // Send to transcription service
-            const { data, error } = await supabase.functions.invoke('voice-to-text', {
-              body: { audio: base64Audio }
-            });
+        if (audioBlob.size > 0) {
+          // Convert to base64
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            try {
+              const base64Audio = (reader.result as string).split(',')[1];
+              console.log('Sending audio to transcription service...');
+              
+              // Send to transcription service
+              const { data, error } = await supabase.functions.invoke('voice-to-text', {
+                body: { audio: base64Audio }
+              });
 
-            if (error) throw error;
+              if (error) {
+                console.error('Transcription service error:', error);
+                throw error;
+              }
 
-            if (data.text && data.text.trim()) {
-              console.log('Transcription received:', data.text);
-              onTranscription(data.text);
-            } else {
-              console.log('No transcription received or empty text');
+              console.log('Transcription response:', data);
+              if (data.text && data.text.trim()) {
+                console.log('Calling onTranscription with:', data.text);
+                onTranscription(data.text);
+              } else {
+                console.log('No transcription received or empty text');
+              }
+            } catch (error) {
+              console.error('Transcription error:', error);
+            } finally {
+              console.log('Setting processing to false');
+              setIsProcessing(false);
             }
-          } catch (error) {
-            console.error('Transcription error:', error);
-          } finally {
-            console.log('Setting processing to false');
-            setIsProcessing(false);
-          }
-        };
-        reader.readAsDataURL(audioBlob);
+          };
+          reader.readAsDataURL(audioBlob);
+        } else {
+          console.log('Audio blob is empty, skipping transcription');
+          setIsProcessing(false);
+        }
 
         // Clean up stream
         stream.getTracks().forEach(track => track.stop());
@@ -161,10 +184,16 @@ export const useVoiceInterface = ({
       setIsRecording(true);
       setCurrentTranscript('');
       setLiveCaptionText('');
+      setIsProcessing(false); // Make sure processing is false when starting
 
       // Start live speech recognition for captions
       if (speechRecognitionRef.current) {
-        speechRecognitionRef.current.start();
+        try {
+          speechRecognitionRef.current.start();
+          console.log('Speech recognition started');
+        } catch (error) {
+          console.error('Failed to start speech recognition:', error);
+        }
       }
 
     } catch (error) {
@@ -187,6 +216,7 @@ export const useVoiceInterface = ({
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
     }
+    
     setIsRecording(false);
     setLiveCaptionText('');
     
