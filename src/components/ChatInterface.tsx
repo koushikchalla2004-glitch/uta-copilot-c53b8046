@@ -20,7 +20,7 @@ import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useSentiment } from '@/hooks/useSentiment';
 import { TypingAnimation, TypingIndicator } from './TypingAnimation';
 import { TTSControls } from './TTSControls';
-import { MultiAgentDashboard } from './MultiAgentDashboard';
+
 
 interface Message {
   id: string;
@@ -589,8 +589,6 @@ export const ChatInterface = () => {
         onClose={() => setIsCommandPaletteOpen(false)}
       />
       
-      {/* Multi-Agent Dashboard - Debug Mode */}
-      <MultiAgentDashboard />
     </>
   );
 };
