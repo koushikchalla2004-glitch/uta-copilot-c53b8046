@@ -67,39 +67,71 @@ const Hero = () => {
         ))}
       </div>
 
-      {/* Header */}
+      {/* Professional Header */}
       <motion.header
-        className="relative z-20 p-6"
-        initial={{ opacity: 0, y: -20 }}
+        className="relative z-20 p-8"
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1, ease: "easeOut" }}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg presentation-hover">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">UTA Copilot</h1>
-              <p className="text-sm text-muted-foreground">Your Campus Assistant</p>
-            </div>
+        <div className="max-w-7xl mx-auto">
+          {/* Logo and Title Section */}
+          <div className="flex items-center justify-between mb-8">
+            <motion.div 
+              className="flex items-center space-x-4"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="relative w-16 h-16 professional-gradient rounded-2xl flex items-center justify-center shadow-lg presentation-hover">
+                <Sparkles className="w-8 h-8 text-foreground animate-pulse" />
+                <div className="absolute inset-0 rounded-2xl border border-white/30 animate-pulse-professional" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-foreground tracking-tight">UTA Copilot</h1>
+                <p className="text-lg text-muted-foreground font-medium">Your Intelligent Campus Assistant</p>
+              </div>
+            </motion.div>
+            
+            {/* Professional Stats Cards */}
+            <motion.div 
+              className="hidden lg:flex items-center space-x-6"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              {[
+                { value: "24/7", label: "Available", icon: "⚡" },
+                { value: "AI", label: "Powered", icon: "🧠" },
+                { value: "Smart", label: "Responses", icon: "💡" }
+              ].map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  className="text-center glass-card p-4 min-w-[80px] presentation-hover"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                >
+                  <div className="text-2xl mb-1">{stat.icon}</div>
+                  <div className="text-xl font-bold text-foreground">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-          
-          {/* Quick Stats */}
-          <div className="hidden md:flex items-center space-x-6">
-            <div className="text-center card-clean p-2 presentation-hover">
-              <div className="text-2xl font-bold text-primary">24/7</div>
-              <div className="text-xs text-muted-foreground">Available</div>
-            </div>
-            <div className="text-center card-clean p-2 presentation-hover">
-              <div className="text-2xl font-bold text-primary">AI</div>
-              <div className="text-xs text-muted-foreground">Powered</div>
-            </div>
-            <div className="text-center card-clean p-2 presentation-hover">
-              <div className="text-2xl font-bold text-primary">Smart</div>
-              <div className="text-xs text-muted-foreground">Responses</div>
-            </div>
-          </div>
+
+          {/* Professional Subtitle */}
+          <motion.div
+            className="text-center max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            <h2 className="text-2xl text-muted-foreground font-light mb-4">
+              Elevating Your Campus Experience with <span className="font-semibold text-foreground">Artificial Intelligence</span>
+            </h2>
+            <div className="w-24 h-1 bg-primary rounded-full mx-auto"></div>
+          </motion.div>
         </div>
       </motion.header>
 
@@ -111,27 +143,36 @@ const Hero = () => {
         <ChatInterface />
       </div>
 
-      {/* Professional Features Bar */}
+      {/* Professional Features Showcase */}
       <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
-        initial={{ opacity: 0, y: 20 }}
+        className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.5 }}
+        transition={{ duration: 0.8, delay: 1.2 }}
       >
-        <div className="flex items-center space-x-4 card-clean p-4 presentation-hover">
-          <div className="flex items-center space-x-2 text-primary">
-            <MessageSquare className="w-4 h-4" />
-            <span className="text-sm font-medium">Chat</span>
-          </div>
-          <div className="w-px h-4 bg-border"></div>
-          <div className="flex items-center space-x-2 text-primary">
-            <Zap className="w-4 h-4" />
-            <span className="text-sm font-medium">Voice</span>
-          </div>
-          <div className="w-px h-4 bg-border"></div>
-          <div className="flex items-center space-x-2 text-primary">
-            <Users className="w-4 h-4" />
-            <span className="text-sm font-medium">Smart</span>
+        <div className="glass-card p-6 presentation-hover">
+          <div className="flex items-center space-x-8">
+            {[
+              { icon: MessageSquare, label: "Intelligent Chat", color: "text-blue-600" },
+              { icon: Zap, label: "Voice Commands", color: "text-amber-600" },
+              { icon: Users, label: "Multi-Agent AI", color: "text-green-600" }
+            ].map((feature, index) => (
+              <motion.div
+                key={feature.label}
+                className="flex items-center space-x-3 group cursor-pointer"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.4 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className={`p-2 rounded-lg bg-background/50 ${feature.color} group-hover:bg-background transition-all`}>
+                  <feature.icon className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {feature.label}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.div>

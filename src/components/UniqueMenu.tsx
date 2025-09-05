@@ -74,7 +74,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             e.stopPropagation();
             if (!isOpen) setIsOpen(true);
           }}
-          className="relative w-16 h-16 rounded-2xl bg-primary shadow-xl hover:shadow-2xl transition-all duration-300 group border border-border btn-presentation"
+          className="relative w-16 h-16 rounded-2xl professional-gradient shadow-xl hover:shadow-2xl transition-all duration-300 group border border-border btn-presentation"
           size="icon"
         >
           <motion.div
@@ -84,7 +84,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             exit={{ rotate: -180, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Menu className="w-6 h-6 text-white" />
+            <Menu className="w-6 h-6 text-foreground" />
           </motion.div>
           
           {/* Professional glow effect */}
