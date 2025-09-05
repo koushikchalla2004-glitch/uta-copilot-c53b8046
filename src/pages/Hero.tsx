@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Hero3DStars } from '@/components/Hero3DStars';
-import { ChatGPTSearchEngine } from '@/components/ChatGPTSearchEngine';
+import { ChatInterface } from '@/components/ChatInterface';
 import { UniqueMenu } from '@/components/UniqueMenu';
 
 const Hero = () => {
@@ -24,9 +24,9 @@ const Hero = () => {
       {/* Unique Floating Menu */}
       <UniqueMenu onThemeToggle={handleThemeToggle} isDark={isDark} />
       
-      {/* Main Content - ChatGPT Style Search */}
-      <div className="relative z-10">
-        <ChatGPTSearchEngine />
+      {/* Main Content - ChatGPT Style Conversation */}
+      <div className="relative z-10 h-screen">
+        <ChatInterface />
       </div>
     </div>
   );
