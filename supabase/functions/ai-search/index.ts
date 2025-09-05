@@ -335,13 +335,60 @@ serve(async (req) => {
             - Only provide links/sources when you're uncertain or need more details.
             - When you have live data (dining open/closed, current events, etc.), state it directly.
             - Use conversation context to understand follow-up questions.
-            - If unsure about specific details like exact hours, then suggest checking official sources.`
+            - If unsure about specific details like exact hours, then suggest checking official sources.
+            
+            Special Actions Available:
+            - For DIRECTIONS/NAVIGATION queries: Call the navigation function
+            - For REMINDER/ALARM requests: Call the reminder function
+            - These will trigger automatic actions in the app`
           },
           ...(rag.contextText ? [{ role: 'system', content: `Campus context (use if relevant):\n${rag.contextText}` }] : []),
           ...(liveContext ? [{ role: 'system', content: `Live campus status:\n${liveContext}` }] : []),
           ...history,
           { role: 'user', content: query }
         ],
+        tools: [
+          {
+            type: 'function',
+            name: 'get_directions',
+            description: 'Get directions to a campus building. Use when user asks for directions, navigation, or location of buildings.',
+            parameters: {
+              type: 'object',
+              properties: {
+                building: { 
+                  type: 'string',
+                  description: 'The building name or alias (e.g., "library", "ERB", "business building")'
+                }
+              },
+              required: ['building']
+            }
+          },
+          {
+            type: 'function',
+            name: 'set_reminder',
+            description: 'Set a reminder for events or classes. Use when user wants to be reminded about something.',
+            parameters: {
+              type: 'object',
+              properties: {
+                title: { 
+                  type: 'string',
+                  description: 'Title of the event or class'
+                },
+                datetime: { 
+                  type: 'string',
+                  description: 'Date and time in ISO format'
+                },
+                type: { 
+                  type: 'string',
+                  enum: ['event', 'class'],
+                  description: 'Type of reminder'
+                }
+              },
+              required: ['title', 'datetime']
+            }
+          }
+        ],
+        tool_choice: 'auto',
         max_tokens: 400,
         temperature: 0.3,
       }),

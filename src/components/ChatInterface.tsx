@@ -7,6 +7,7 @@ import { Card } from './ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
 
 interface Message {
   id: string;
@@ -141,6 +142,32 @@ export const ChatInterface = () => {
     setIsTyping(true);
 
     try {
+      // Check if this should trigger a specialized agent
+      const agentRoute = await AgentRouter.processQuery(userMessage);
+      
+      if (agentRoute.agent && agentRoute.confidence > 0.7) {
+        // Handle specialized agent actions
+        if (agentRoute.agent === 'navigation' && agentRoute.action === 'get_directions') {
+          const result = await NavigationAgent.getDirections(agentRoute.params.building);
+          const messageId = addMessage('assistant', result.message, true);
+          setTimeout(() => updateMessageTyping(messageId, false), result.message.length * 25);
+          
+          if (result.success) {
+            toast({
+              title: "Navigation",
+              description: `Opening directions to ${agentRoute.params.building}`,
+            });
+          }
+          setIsTyping(false);
+          return;
+        }
+        
+        if (agentRoute.agent === 'reminder') {
+          // For reminder, we still need AI to parse the exact datetime and event details
+          // Fall through to AI call but with special context
+        }
+      }
+
       // Prepare short conversation history for context
       const history = messages.slice(-10).map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }));
 
@@ -151,6 +178,29 @@ export const ChatInterface = () => {
 
       if (error) {
         throw error;
+      }
+
+      // Handle function calls from AI
+      if (data.function_calls) {
+        for (const call of data.function_calls) {
+          if (call.name === 'get_directions') {
+            const result = await NavigationAgent.getDirections(call.arguments.building);
+            toast({
+              title: "Navigation",
+              description: result.message,
+            });
+          } else if (call.name === 'set_reminder') {
+            const result = await ReminderAgent.setReminder(
+              call.arguments.title,
+              call.arguments.datetime,
+              call.arguments.type || 'event'
+            );
+            toast({
+              title: "Reminder",
+              description: result.message,
+            });
+          }
+        }
       }
 
       // Add AI response with typing animation
