@@ -81,7 +81,7 @@ export default {
 				},
 			},
 			backgroundImage: {
-				'gradient-hero': 'linear-gradient(to bottom, #ffffff 0%, #f8fafc 25%, #f1f5f9 50%, #e2e8f0 75%, #cbd5e1 100%)',
+				'gradient-hero': 'linear-gradient(to top, #000000 0%, #1a1a1a 20%, #333333 40%, #666666 60%, #999999 80%, #cccccc 100%)',
 				'gradient-card': 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)))',
 				'gradient-professional': 'linear-gradient(135deg, hsl(var(--primary)) 0%, rgba(0, 0, 0, 0.1) 100%)',
 				'gradient-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
