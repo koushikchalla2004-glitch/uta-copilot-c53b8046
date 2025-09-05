@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.ai-search]
 verify_jwt = false
+
+[functions.uta-data-ingestion]
+verify_jwt = false
+
+[functions.unified-search]
+verify_jwt = false
