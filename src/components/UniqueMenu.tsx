@@ -92,30 +92,6 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         </Button>
       </motion.div>
 
-      {/* Top-Right Close Button (when menu is open) - ChatGPT Style */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-4 right-4 z-[60]"
-          >
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-              }}
-              variant="ghost"
-              className="w-10 h-10 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200"
-              size="icon"
-            >
-              <X className="w-5 h-5 text-gray-700" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Center Menu Overlay */}
       <AnimatePresence>

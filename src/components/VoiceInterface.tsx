@@ -363,14 +363,14 @@ export const useVoiceInterface = ({
         disabled={isProcessing}
         variant="ghost"
         size="icon"
-        className={`transition-all ${
+        className={`transition-all border border-gray-300 bg-white hover:bg-gray-50 ${
           isRecording 
-            ? 'text-red-500 animate-pulse' 
-            : 'text-muted-foreground hover:text-primary'
+            ? 'text-red-500 animate-pulse border-red-300 bg-red-50' 
+            : 'text-gray-600 hover:text-gray-900'
         }`}
       >
         {isProcessing ? (
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
         ) : (
           <Mic className="w-4 h-4" />
         )}
