@@ -15,7 +15,9 @@ import {
   Clock,
   Car,
   Bike,
-  PersonStanding
+  PersonStanding,
+  RefreshCw,
+  Loader
 } from 'lucide-react';
 
 interface Building {
@@ -44,30 +46,84 @@ export const CampusMap = () => {
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [transportMode, setTransportMode] = useState<'walking' | 'driving' | 'cycling'>('walking');
+  const [isLoading, setIsLoading] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const { toast } = useToast();
 
   // UTA Campus center coordinates
   const UTA_CENTER: [number, number] = [-97.1131, 32.7357];
 
   useEffect(() => {
-    loadBuildings();
-    initializeMap();
+    initializeData();
     getUserLocation();
   }, []);
 
-  const loadBuildings = async () => {
-    const { data, error } = await supabase
-      .from('buildings')
-      .select('*')
-      .not('lat', 'is', null)
-      .not('lng', 'is', null);
+  const initializeData = async () => {
+    setIsLoading(true);
+    await loadBuildings();
+    await initializeMap();
+    setIsLoading(false);
+  };
 
-    if (error) {
-      console.error('Error loading buildings:', error);
-      return;
+  const addSampleData = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('add-sample-buildings');
+      
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Sample Data Added",
+        description: `Added ${data.buildingsAdded} UTA buildings to the map`,
+      });
+
+      // Reload buildings after adding sample data
+      await loadBuildings();
+      
+      // Refresh map markers
+      if (map.current && mapLoaded) {
+        addBuildingMarkers();
+      }
+    } catch (error: any) {
+      console.error('Error adding sample data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add sample data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    setBuildings(data || []);
+  const loadBuildings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('buildings')
+        .select('*')
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
+
+      if (error) {
+        console.error('Error loading buildings:', error);
+        return;
+      }
+
+      console.log('Loaded buildings:', data?.length || 0);
+      setBuildings(data || []);
+      
+      if (!data || data.length === 0) {
+        toast({
+          title: "No Buildings Found",
+          description: "Click 'Add Sample Data' to populate the map with UTA buildings",
+          duration: 5000
+        });
+      }
+    } catch (error) {
+      console.error('Error loading buildings:', error);
+    }
   };
 
   const getUserLocation = () => {
@@ -103,11 +159,13 @@ export const CampusMap = () => {
 
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/satellite-streets-v12', // Better, clearer style
         center: UTA_CENTER,
-        zoom: 15,
-        pitch: 45,
-        bearing: 0
+        zoom: 16, // Closer zoom for better detail
+        pitch: 0, // Flat view for clarity
+        bearing: 0,
+        maxZoom: 20,
+        minZoom: 14
       });
 
       // Add navigation controls
@@ -131,60 +189,81 @@ export const CampusMap = () => {
       );
 
       map.current.on('load', () => {
+        setMapLoaded(true);
         addBuildingMarkers();
-        add3DBuildings();
+        toast({
+          title: "Map Loaded",
+          description: "Campus map is ready to use",
+        });
       });
 
     } catch (error) {
       console.error('Error initializing map:', error);
       toast({
         title: "Map Error",
-        description: "Failed to load map. Using fallback token.",
+        description: "Failed to load map. Please refresh the page.",
         variant: "destructive"
       });
-      
-      // Fallback - use a placeholder token (users will need to configure)
-      mapboxgl.accessToken = 'pk.YOUR_MAPBOX_TOKEN_HERE';
     }
   };
 
   const addBuildingMarkers = () => {
-    if (!map.current) return;
+    if (!map.current || !mapLoaded) return;
+
+    console.log('Adding markers for', buildings.length, 'buildings');
 
     buildings.forEach((building) => {
       if (!building.lat || !building.lng) return;
 
-      // Create marker element
+      // Create marker element with better styling
       const markerEl = document.createElement('div');
       markerEl.className = 'building-marker';
       markerEl.style.cssText = `
-        width: 30px;
-        height: 30px;
-        background: hsl(var(--primary));
-        border: 2px solid white;
+        width: 40px;
+        height: 40px;
+        background: #FF6B35;
+        border: 3px solid white;
         border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: bold;
         color: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        transition: all 0.3s ease;
       `;
       markerEl.textContent = building.code || building.name.substring(0, 2).toUpperCase();
 
-      // Create popup
+      // Add hover effects
+      markerEl.addEventListener('mouseenter', () => {
+        markerEl.style.transform = 'scale(1.2)';
+        markerEl.style.boxShadow = '0 6px 12px rgba(0,0,0,0.6)';
+      });
+      
+      markerEl.addEventListener('mouseleave', () => {
+        markerEl.style.transform = 'scale(1)';
+        markerEl.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)';
+      });
+
+      // Create enhanced popup
       const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: false
+        offset: 35,
+        closeButton: true,
+        maxWidth: '300px'
       }).setHTML(`
-        <div style="font-family: system-ui; padding: 8px;">
-          <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: bold;">
+        <div style="font-family: system-ui; padding: 12px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #2563eb;">
             ${building.code ? `${building.code} - ` : ''}${building.name}
           </h3>
-          <p style="margin: 0; font-size: 12px; color: #666;">
-            ${building.category || 'Building'}
+          <div style="margin-bottom: 8px;">
+            <span style="display: inline-block; background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+              ${building.category || 'Building'}
+            </span>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: #6b7280;">
+            Click marker for directions and details
           </p>
         </div>
       `);
@@ -200,7 +279,7 @@ export const CampusMap = () => {
         setSelectedBuilding(building);
         map.current?.flyTo({
           center: [building.lng!, building.lat!],
-          zoom: 17,
+          zoom: 18,
           essential: true
         });
       });
@@ -334,12 +413,36 @@ export const CampusMap = () => {
 
   return (
     <div className="relative w-full h-screen">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader className="w-8 h-8 animate-spin mx-auto" />
+            <p className="text-lg font-medium">Loading Campus Map...</p>
+          </div>
+        </div>
+      )}
+
       {/* Map Container */}
       <div ref={mapContainer} className="absolute inset-0" />
 
-      {/* Search Panel */}
-      <Card className="absolute top-4 left-4 w-80 p-4 bg-background/95 backdrop-blur">
+      {/* Enhanced Search Panel */}
+      <Card className="absolute top-4 left-4 w-80 p-4 bg-background/95 backdrop-blur shadow-xl">
         <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Campus Buildings</h3>
+            {buildings.length === 0 && (
+              <Button
+                onClick={addSampleData}
+                size="sm"
+                disabled={isLoading}
+                className="text-xs"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Add Sample Data
+              </Button>
+            )}
+          </div>
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
             <Input
