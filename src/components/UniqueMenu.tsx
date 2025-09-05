@@ -98,96 +98,152 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         </Button>
       </motion.div>
 
-      {/* Full Screen Menu Overlay */}
+      {/* Circular Menu Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl"
+            className="fixed inset-0 z-40 bg-background/20 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           >
             {/* Close Button - Top Right */}
             <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, scale: 0.8, rotate: -90 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              exit={{ opacity: 0, scale: 0.8, rotate: 90 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(false);
               }}
-              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors duration-200 z-50"
+              className="absolute top-6 right-6 w-14 h-14 rounded-full bg-background/90 backdrop-blur-md border border-border hover:bg-background shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
             >
               <X className="w-6 h-6 text-foreground" />
             </motion.button>
 
-            {/* Menu Content Container */}
-            <div className="flex flex-col items-center justify-center min-h-screen px-6">
+            {/* Central Layout */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               
-              {/* App Logo in Center */}
+              {/* Central App Logo */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ delay: 0.1 }}
-                className="text-center mb-16"
+                initial={{ scale: 0, opacity: 0, rotate: -180 }}
+                animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                exit={{ scale: 0, opacity: 0, rotate: 180 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                className="relative z-10"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="w-24 h-24 bg-gradient-to-r from-primary to-primary-glow rounded-full flex items-center justify-center shadow-2xl mb-6 mx-auto">
-                  <Sparkles className="w-12 h-12 text-white" />
+                <div className="w-32 h-32 bg-gradient-to-br from-primary via-primary-glow to-primary rounded-full flex items-center justify-center shadow-2xl border-4 border-background/50 backdrop-blur-md">
+                  <Sparkles className="w-16 h-16 text-white" />
+                  
+                  {/* Pulsing rings around logo */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-transparent animate-ping" />
+                  <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/20 to-transparent animate-pulse" />
                 </div>
-                <h1 className="text-4xl font-bold text-foreground mb-2">UTA Copilot</h1>
-                <p className="text-lg text-muted-foreground">Your Campus Assistant</p>
+                
+                {/* Logo Label */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-center"
+                >
+                  <h3 className="text-lg font-bold text-foreground bg-background/90 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-lg">
+                    UTA Copilot
+                  </h3>
+                </motion.div>
               </motion.div>
 
-              {/* Menu Options Grid */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 30 }}
-                transition={{ delay: 0.2 }}
-                className="grid grid-cols-2 gap-8 mb-12"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {menuItems.map((item, index) => (
+              {/* Menu Options in Circle */}
+              {menuItems.map((item, index) => {
+                const angle = (index * 90) - 45; // 90 degrees apart, starting from top-right
+                const radius = 160;
+                const x = Math.cos((angle * Math.PI) / 180) * radius;
+                const y = Math.sin((angle * Math.PI) / 180) * radius;
+
+                return (
                   <motion.div
                     key={item.label}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    onClick={() => handleNavigation(item.path)}
-                    className="group cursor-pointer"
+                    className="absolute"
+                    style={{
+                      left: '50%',
+                      top: '50%',
+                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
+                    }}
+                    initial={{ scale: 0, opacity: 0, rotate: -180 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0, opacity: 0, rotate: 180 }}
+                    transition={{ 
+                      delay: 0.2 + index * 0.1,
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 15
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigation(item.path);
+                    }}
                   >
-                    <div className="flex flex-col items-center space-y-4 p-8 rounded-2xl bg-card hover:bg-card/80 border border-border hover:border-primary/50 transition-all duration-300 group-hover:scale-105 shadow-lg hover:shadow-xl">
-                      <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${item.color} p-4 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                        <item.icon className="w-8 h-8 text-white" />
+                    <div className="group cursor-pointer relative">
+                      {/* Option Circle */}
+                      <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${item.color} p-5 shadow-xl hover:shadow-2xl transition-all duration-300 group-hover:scale-125 border-2 border-background/30 backdrop-blur-sm`}>
+                        <item.icon className="w-10 h-10 text-white" />
+                        
+                        {/* Hover glow effect */}
+                        <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${item.color} opacity-0 group-hover:opacity-30 transition-opacity duration-300 animate-pulse`} />
                       </div>
-                      <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
-                        {item.label}
-                      </span>
+                      
+                      {/* Option Label */}
+                      <motion.div
+                        className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 whitespace-nowrap"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: (0.2 + index * 0.1) + 0.3 }}
+                      >
+                        <span className="text-sm font-semibold text-foreground bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border shadow-lg group-hover:bg-background group-hover:scale-105 transition-all duration-200">
+                          {item.label}
+                        </span>
+                      </motion.div>
+
+                      {/* Connecting line to center */}
+                      <motion.div
+                        className="absolute top-1/2 left-1/2 origin-left h-0.5 bg-gradient-to-r from-primary/50 to-transparent"
+                        style={{
+                          width: `${radius - 60}px`,
+                          transform: `translate(-50%, -50%) rotate(${angle + 180}deg)`
+                        }}
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        animate={{ scaleX: 1, opacity: 1 }}
+                        transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
+                      />
                     </div>
                   </motion.div>
-                ))}
-              </motion.div>
+                );
+              })}
 
               {/* Logout Button */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ delay: 0.6 }}
+                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-20"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ 
+                  delay: 0.8,
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Button
                   onClick={handleLogout}
                   variant="destructive"
                   size="lg"
-                  className="rounded-full px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="rounded-full px-6 py-3 font-medium shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 backdrop-blur-md border border-destructive/20"
                 >
-                  <LogOut className="w-5 h-5 mr-3" />
+                  <LogOut className="w-5 h-5 mr-2" />
                   Logout
                 </Button>
               </motion.div>
