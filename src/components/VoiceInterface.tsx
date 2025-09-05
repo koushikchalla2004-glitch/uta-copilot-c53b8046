@@ -55,22 +55,42 @@ export const useVoiceInterface = ({
         setCurrentTranscript(currentText);
         setLiveCaptionText(currentText);
 
-        // Reset silence timer when speech is detected
+        // Clear existing silence timer
         if (silenceTimer) {
           clearTimeout(silenceTimer);
+          setSilenceTimer(null);
         }
 
-        // Set new silence timer (2.5 seconds)
-        if (currentText.trim()) {
+        // Set new silence timer (2.5 seconds) only if we have text and are recording
+        if (currentText.trim() && isRecording) {
           const timer = setTimeout(() => {
-            if (isRecording) {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+              console.log('Auto-stopping recording due to silence');
               stopRecording();
             }
           }, 2500);
           setSilenceTimer(timer);
         }
       };
+
+      speechRecognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+      };
+
+      speechRecognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
+      };
     }
+
+    return () => {
+      // Cleanup on unmount
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+      }
+      if (speechRecognitionRef.current) {
+        speechRecognitionRef.current.stop();
+      }
+    };
   }, []);
 
   // Start voice recording
@@ -153,23 +173,28 @@ export const useVoiceInterface = ({
 
   // Stop voice recording
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
+    console.log('Stopping recording...');
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setLiveCaptionText('');
-      
-      // Clear silence timer
-      if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        setSilenceTimer(null);
-      }
-      
-      // Stop speech recognition
-      if (speechRecognitionRef.current) {
+    }
+    setIsRecording(false);
+    setLiveCaptionText('');
+    
+    // Clear silence timer
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      setSilenceTimer(null);
+    }
+    
+    // Stop speech recognition
+    if (speechRecognitionRef.current) {
+      try {
         speechRecognitionRef.current.stop();
+      } catch (error) {
+        console.log('Speech recognition already stopped');
       }
     }
-  }, [isRecording, silenceTimer]);
+  }, [silenceTimer]);
 
   // Speak text using TTS
   const speakText = useCallback(async (text: string, voice: string = 'alloy') => {
