@@ -4,7 +4,7 @@ import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap, Command 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
-import { ModernChatBubble } from './ModernChatBubble';
+import { ResponseCard } from './ResponseCard';
 import { ModernCommandPalette } from './ModernCommandPalette';
 import { ModernStatusIndicator } from './ModernStatusIndicator';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,16 @@ interface Message {
   content: string;
   timestamp: Date;
   isTyping?: boolean;
+  metadata?: {
+    source?: string;
+    strategy?: string;
+    agents?: string[];
+    confidence?: number;
+    processingTime?: number;
+    sources?: any[];
+    sentiment?: string;
+    sentimentScore?: number;
+  };
 }
 
 // Helper function to detect and format links and emails in text
@@ -144,13 +154,14 @@ export const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false) => {
+  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false, metadata?: any) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       type,
       content,
       timestamp: new Date(),
-      isTyping
+      isTyping,
+      metadata
     };
     setMessages(prev => [...prev, newMessage]);
     return newMessage.id;
@@ -218,7 +229,11 @@ export const ChatInterface = () => {
     });
     
     // Add user message to UI
-    addMessage('user', userMessage);
+    const userMetadata = {
+      sentiment: userSentimentLabel,
+      sentimentScore: userSentimentResult.score,
+    };
+    addMessage('user', userMessage, false, userMetadata);
     optimization.setIsLoading(true);
     setIsTyping(true);
     setShowTypingIndicator(true);
@@ -226,10 +241,11 @@ export const ChatInterface = () => {
     try {
       let responseText = '';
       let isOptimizedResponse = false;
+      let multiAgentResult: any = null;
 
       // STEP 1: Try Multi-Agent System first for specialized queries
       console.log('🤖 Multi-Agent System: Processing query...');
-      const multiAgentResult = await multiAgentCoordinator.processQuery(userMessage);
+      multiAgentResult = await multiAgentCoordinator.processQuery(userMessage);
       
       if (multiAgentResult.primary.success && multiAgentResult.primary.confidence > 0.7) {
         console.log('✅ Multi-agent handled query:', {
@@ -284,7 +300,14 @@ export const ChatInterface = () => {
       
       // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);
-      const messageId = addMessage('assistant', responseText, true);
+      const assistantMetadata = {
+        source: isOptimizedResponse ? 'multi_agent' : 'enhanced_ai',
+        strategy: multiAgentResult?.strategy,
+        agents: multiAgentResult?.agentsUsed,
+        confidence: multiAgentResult?.primary?.confidence,
+        processingTime: multiAgentResult?.totalTime
+      };
+      const messageId = addMessage('assistant', responseText, true, assistantMetadata);
       
       // After typing animation completes, update to final message
       setTimeout(() => {
@@ -440,11 +463,12 @@ export const ChatInterface = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ModernChatBubble
+                      <ResponseCard
                         type={message.type}
                         content={message.content}
                         timestamp={message.timestamp}
                         isTyping={message.isTyping || false}
+                        metadata={message.metadata}
                         onRegenerate={() => {
                           if (message.type === 'assistant') {
                             triggerTTSForMessage(message.content);
