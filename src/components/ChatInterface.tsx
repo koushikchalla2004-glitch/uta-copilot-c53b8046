@@ -12,6 +12,8 @@ import { useVoiceInterface } from './VoiceInterface';
 import { LiveCaptions } from './LiveCaptions';
 import { useResponseOptimization } from '@/hooks/useResponseOptimization';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { TTSControls } from './TTSControls';
 
 interface Message {
   id: string;
@@ -114,6 +116,9 @@ export const ChatInterface = () => {
   // Optimization hooks
   const optimization = useResponseOptimization();
   const conversationMemory = useConversationMemory();
+  
+  // TTS for voice responses
+  const tts = useTextToSpeech();
 
   // Voice interface for chat
   const voiceInterface = useVoiceInterface({
@@ -149,6 +154,21 @@ export const ChatInterface = () => {
     setMessages(prev => prev.map(msg => 
       msg.id === messageId ? { ...msg, isTyping } : msg
     ));
+  };
+
+  // Helper function to trigger TTS after message is complete
+  const triggerTTSForMessage = (content: string) => {
+    // Clean content for TTS (remove prefixes and markdown)
+    const cleanContent = content
+      .replace(/^[⚡💨🎯🧠]\s*/, '') // Remove optimization prefixes
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+      .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+      .trim();
+
+    if (cleanContent.length > 10) { // Only speak substantial content
+      tts.speakText(cleanContent, tts.settings.autoPlay);
+    }
   };
 
   const handleSendMessage = async (messageText?: string) => {
@@ -501,16 +521,40 @@ export const ChatInterface = () => {
                     ? 'bg-primary text-primary-foreground ml-auto'
                     : 'bg-background/70 backdrop-blur-sm border border-border/30'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {message.type === 'assistant' && message.isTyping ? (
-                      <TypewriterText 
-                        text={message.content} 
-                        onComplete={() => updateMessageTyping(message.id, false)}
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed flex-1">
+                      {message.type === 'assistant' && message.isTyping ? (
+                        <TypewriterText 
+                          text={message.content} 
+                          onComplete={() => {
+                            updateMessageTyping(message.id, false);
+                            // Trigger TTS after typing animation completes
+                            if (message.type === 'assistant') {
+                              triggerTTSForMessage(message.content);
+                            }
+                          }}
+                        />
+                       ) : (
+                         <span>{formatMessageWithLinks(message.content)}</span>
+                       )}
+                    </p>
+                    
+                    {/* TTS Controls for assistant messages */}
+                    {message.type === 'assistant' && !message.isTyping && (
+                      <TTSControls
+                        isPlaying={tts.isPlaying}
+                        isLoading={tts.isLoading}
+                        hasAudio={tts.hasAudio}
+                        error={tts.error}
+                        enabled={tts.settings.enabled}
+                        onPlayPause={tts.playPauseAudio}
+                        onStop={tts.stopCurrentAudio}
+                        onToggleEnabled={() => tts.updateSettings({ enabled: !tts.settings.enabled })}
+                        onClearError={tts.clearError}
+                        className="ml-2 flex-shrink-0"
                       />
-                     ) : (
-                       <span>{formatMessageWithLinks(message.content)}</span>
-                     )}
-                  </p>
+                    )}
+                  </div>
                   <p className={`text-xs mt-2 opacity-70 ${
                     message.type === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                   }`}>
