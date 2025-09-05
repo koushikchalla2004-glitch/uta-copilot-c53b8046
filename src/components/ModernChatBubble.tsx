@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Bot, Copy, RefreshCw, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from './ui/button';
@@ -20,7 +20,37 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
   onRegenerate
 }) => {
   const [isLiked, setIsLiked] = useState<boolean | null>(null);
+  const [displayedText, setDisplayedText] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
   const { toast } = useToast();
+
+  // Typing animation effect
+  useEffect(() => {
+    if (isTyping && type === 'assistant') {
+      setDisplayedText('');
+      setCurrentIndex(0);
+      setShowCursor(true);
+    }
+  }, [isTyping, type, content]);
+
+  useEffect(() => {
+    if (isTyping && type === 'assistant' && currentIndex < content.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText(prev => prev + content[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, Math.random() * 30 + 15); // Random speed for natural feel
+
+      return () => clearTimeout(timer);
+    } else if (isTyping && type === 'assistant' && currentIndex >= content.length) {
+      // Typing complete - hide cursor after a delay
+      setTimeout(() => setShowCursor(false), 500);
+    } else if (!isTyping) {
+      // Not typing - show full content immediately
+      setDisplayedText(content);
+      setShowCursor(false);
+    }
+  }, [isTyping, type, content, currentIndex]);
 
   const copyToClipboard = async () => {
     try {
@@ -84,12 +114,13 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
             animate={{ scale: 1 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 25 }}
           >
-            {/* Content with proper typing animation */}
-            {isTyping ? (
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0ms'}} />
-                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0.1s'}} />
-                <div className="w-2 h-2 bg-current/60 rounded-full animate-bounce" style={{animationDelay: '0.2s'}} />
+            {/* Content with real typing animation */}
+            {isTyping && type === 'assistant' ? (
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                {displayedText}
+                {showCursor && (
+                  <span className="inline-block w-0.5 h-4 bg-current ml-0.5 animate-pulse" />
+                )}
               </div>
             ) : (
               <div className="text-sm leading-relaxed whitespace-pre-wrap">

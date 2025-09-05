@@ -261,7 +261,7 @@ export const ChatInterface = () => {
         const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
         setFollowUpSuggestions(suggestions);
         triggerTTSForMessage(responseText);
-      }, responseText.length * 25 + 1000); // Small delay after typing completes
+      }, responseText.length * 20 + 2000); // Timing adjusted for typing speed
 
       // Store successful AI response in cache
       if (data.response && responseText.length > 20) {
