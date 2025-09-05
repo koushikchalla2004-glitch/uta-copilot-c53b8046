@@ -63,8 +63,9 @@ export const useRealtimeVoice = () => {
       
       wsRef.current = new WebSocket(wsUrl);
 
-      wsRef.current.onopen = () => {
+      wsRef.current.onopen = async () => {
         console.log("WebSocket connected");
+        try { await audioContextRef.current?.resume(); } catch {}
         setIsConnected(true);
         setIsConnecting(false);
         toast({
@@ -85,7 +86,11 @@ export const useRealtimeVoice = () => {
 
         switch (data.type) {
           case 'session.created':
-            console.log("Session created, starting recording...");
+            console.log("Session created; awaiting session.updated before recording...");
+            break;
+
+          case 'session.updated':
+            console.log("Session updated; starting recording now...");
             await startRecording();
             break;
 
