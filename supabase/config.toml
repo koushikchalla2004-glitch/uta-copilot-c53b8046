@@ -1,1 +1,7 @@
 project_id = "jtkrgxrutwbcjgruexuf"
+
+[functions.realtime-voice]
+verify_jwt = false
+
+[functions.ai-search]
+verify_jwt = false
