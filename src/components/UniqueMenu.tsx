@@ -28,11 +28,10 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
   const { toast } = useToast();
 
   const menuItems = [
-    { icon: Home, label: 'Home', path: '/hero', color: 'from-blue-500 to-purple-600' },
     { icon: MessageSquare, label: 'New Chat', path: '/chat', color: 'from-green-500 to-teal-600' },
+    { icon: User, label: 'Profile', path: '/profile', color: 'from-indigo-500 to-blue-600' },
     { icon: Map, label: 'Maps', path: '/map', color: 'from-orange-500 to-red-600' },
-    { icon: Info, label: 'About', path: '/about', color: 'from-purple-500 to-pink-600' },
-    { icon: User, label: 'Profile', path: '/profile', color: 'from-indigo-500 to-blue-600' }
+    { icon: Info, label: 'About', path: '/about', color: 'from-purple-500 to-pink-600' }
   ];
 
   const handleLogout = async () => {
@@ -99,112 +98,100 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
         </Button>
       </motion.div>
 
-      {/* Radial Menu Overlay */}
+      {/* Full Screen Menu Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-md"
+            className="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl"
             onClick={() => setIsOpen(false)}
           >
-            {/* Central Hub */}
-            <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            {/* Close Button - Top Right */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ delay: 0.2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors duration-200 z-50"
             >
-              <Card className="relative w-32 h-32 rounded-full bg-gradient-to-br from-background to-muted border-2 border-primary/20 shadow-2xl flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-primary" />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/10 to-transparent" />
-              </Card>
+              <X className="w-6 h-6 text-foreground" />
+            </motion.button>
 
-              {/* Menu Items in Circle */}
-              {menuItems.map((item, index) => {
-                const angle = (index * 72) - 90; // 72 degrees apart, starting from top
-                const radius = 120;
-                const x = Math.cos((angle * Math.PI) / 180) * radius;
-                const y = Math.sin((angle * Math.PI) / 180) * radius;
+            {/* Menu Content Container */}
+            <div className="flex flex-col items-center justify-center min-h-screen px-6">
+              
+              {/* App Logo in Center */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ delay: 0.1 }}
+                className="text-center mb-16"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="w-24 h-24 bg-gradient-to-r from-primary to-primary-glow rounded-full flex items-center justify-center shadow-2xl mb-6 mx-auto">
+                  <Sparkles className="w-12 h-12 text-white" />
+                </div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">UTA Copilot</h1>
+                <p className="text-lg text-muted-foreground">Your Campus Assistant</p>
+              </motion.div>
 
-                return (
+              {/* Menu Options Grid */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 30 }}
+                transition={{ delay: 0.2 }}
+                className="grid grid-cols-2 gap-8 mb-12"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {menuItems.map((item, index) => (
                   <motion.div
                     key={item.label}
-                    className="absolute"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
-                    }}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ 
-                      delay: index * 0.1,
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNavigation(item.path);
-                    }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    onClick={() => handleNavigation(item.path)}
+                    className="group cursor-pointer"
                   >
-                    <Card className="relative group cursor-pointer">
-                      <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${item.color} p-4 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                    <div className="flex flex-col items-center space-y-4 p-8 rounded-2xl bg-card hover:bg-card/80 border border-border hover:border-primary/50 transition-all duration-300 group-hover:scale-105 shadow-lg hover:shadow-xl">
+                      <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${item.color} p-4 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
                         <item.icon className="w-8 h-8 text-white" />
                       </div>
-                      
-                      {/* Label */}
-                      <motion.div
-                        className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: (index * 0.1) + 0.3 }}
-                      >
-                        <span className="text-sm font-medium text-foreground bg-background/90 backdrop-blur px-2 py-1 rounded-md border">
-                          {item.label}
-                        </span>
-                      </motion.div>
-                    </Card>
+                      <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
+                        {item.label}
+                      </span>
+                    </div>
                   </motion.div>
-                );
-              })}
+                ))}
+              </motion.div>
 
               {/* Logout Button */}
               <motion.div
-                className="absolute"
-                style={{
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(calc(-50% + 0px), calc(-50% + 150px))'
-                }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ 
-                  delay: 0.6,
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20
-                }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ delay: 0.6 }}
+                onClick={(e) => e.stopPropagation()}
               >
                 <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLogout();
-                  }}
+                  onClick={handleLogout}
                   variant="destructive"
-                  size="sm"
-                  className="rounded-full"
+                  size="lg"
+                  className="rounded-full px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-5 h-5 mr-3" />
                   Logout
                 </Button>
               </motion.div>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
