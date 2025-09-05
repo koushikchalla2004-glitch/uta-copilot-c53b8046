@@ -58,8 +58,8 @@ export const useRealtimeVoice = () => {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
       // Connect to WebSocket
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//jtkrgxrutwbcjgruexuf.supabase.co/functions/v1/realtime-voice`;
+      const wsUrl = 'wss://jtkrgxrutwbcjgruexuf.functions.supabase.co/functions/v1/realtime-voice';
+      console.log('Connecting WebSocket to', wsUrl);
       
       wsRef.current = new WebSocket(wsUrl);
 
