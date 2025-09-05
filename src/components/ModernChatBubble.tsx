@@ -48,18 +48,18 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
 
   return (
     <motion.div
-      className={`flex ${type === 'user' ? 'justify-end' : 'justify-start'} mb-4 message-slide-up`}
+      className={`flex ${type === 'user' ? 'justify-end' : 'justify-start'} mb-6 message-slide-up`}
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      <div className={`max-w-[85%] flex ${type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2`}>
+      <div className={`max-w-[85%] flex ${type === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start gap-3`}>
         {/* Avatar */}
         <motion.div
           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
             type === 'user' 
-              ? 'bg-primary text-primary-foreground ml-2' 
-              : 'bg-muted text-muted-foreground mr-2'
+              ? 'bg-black text-white' 
+              : 'bg-white/90 text-black border border-white/20 backdrop-blur-sm'
           }`}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -73,23 +73,23 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
         </motion.div>
 
         {/* Message Content */}
-        <div className={`flex flex-col ${type === 'user' ? 'items-end' : 'items-start'}`}>
+        <div className={`flex flex-col ${type === 'user' ? 'items-end' : 'items-start'} flex-1`}>
           <motion.div
-            className={`px-4 py-3 ${
+            className={`px-4 py-3 rounded-2xl ${
               type === 'user' 
-                ? 'chat-bubble-user' 
-                : 'chat-bubble-assistant'
-            } group relative`}
+                ? 'bg-black text-white rounded-br-lg shadow-lg max-w-fit' 
+                : 'bg-white/95 text-black border border-white/20 rounded-bl-lg shadow-md backdrop-blur-lg w-full'
+            } group relative transition-all duration-200 hover:shadow-xl`}
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 25 }}
           >
-            {/* Typing indicator */}
+            {/* Content with typing animation */}
             {isTyping ? (
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-muted-foreground/50 rounded-full typing-dots" />
-                <div className="w-2 h-2 bg-muted-foreground/50 rounded-full typing-dots" />
-                <div className="w-2 h-2 bg-muted-foreground/50 rounded-full typing-dots" />
+                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
+                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
+                <div className="w-2 h-2 bg-current/50 rounded-full typing-dots" />
               </div>
             ) : (
               <div className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -145,8 +145,8 @@ export const ModernChatBubble: React.FC<ModernChatBubbleProps> = ({
 
           {/* Timestamp */}
           <motion.div
-            className={`text-xs text-muted-foreground mt-1 ${
-              type === 'user' ? 'mr-2' : 'ml-2'
+            className={`text-xs opacity-60 mt-1 ${
+              type === 'user' ? 'text-white/70' : 'text-black/60'
             }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

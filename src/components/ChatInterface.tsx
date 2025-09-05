@@ -451,9 +451,9 @@ export const ChatInterface = () => {
             </div>
           </div>
 
-          {/* Fixed Input Section at Bottom */}
+          {/* Fixed Input Section at Bottom - Darker Theme */}
           <motion.div
-            className="sticky bottom-0 bg-gradient-to-t from-black/80 via-background/95 to-transparent backdrop-blur-md border-t border-white/5"
+            className="sticky bottom-0 bg-gradient-to-t from-black/95 via-black/80 to-black/40 backdrop-blur-xl border-t border-white/10"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -486,9 +486,9 @@ export const ChatInterface = () => {
                 </motion.div>
               )}
 
-              {/* Search Input Section */}
+              {/* Search Input Section - Enhanced Dark Theme */}
               <div className="w-full max-w-3xl mx-auto">
-                <Card className="p-3 glass-card backdrop-blur-lg bg-black/20 border-white/10 shadow-lg">
+                <Card className="p-3 glass-card backdrop-blur-xl bg-black/40 border-white/20 shadow-xl ring-1 ring-white/10">
                   <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-2">
                     <div className="flex-1 relative">
                       <Input
