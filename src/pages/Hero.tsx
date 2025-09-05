@@ -19,7 +19,9 @@ const Hero = () => {
 
   return (
     <>
-      <div className="w-full h-16 bg-white"></div>
+      <div className="w-full h-24 bg-white flex items-center justify-center border-b border-gray-200">
+        <p className="text-black font-medium">Top White Background Section</p>
+      </div>
       <div className="relative min-h-screen bg-gradient-hero overflow-hidden flex flex-col pt-16">
       {/* 3D Stars Background - Made visible on white */}
       <div className="absolute inset-0">
