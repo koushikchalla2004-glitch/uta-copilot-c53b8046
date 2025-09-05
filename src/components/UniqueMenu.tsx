@@ -156,10 +156,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                 </motion.div>
               </motion.div>
 
-              {/* Menu Options in Circle */}
+              {/* Menu Options in Circle Around Logo */}
               {menuItems.map((item, index) => {
-                const angle = (index * 90) - 45; // 90 degrees apart, starting from top-right
-                const radius = 160;
+                // Position options in cardinal directions: top, right, bottom, left
+                const angles = [-90, 0, 90, 180]; // Top, Right, Bottom, Left
+                const angle = angles[index];
+                const radius = 140;
                 const x = Math.cos((angle * Math.PI) / 180) * radius;
                 const y = Math.sin((angle * Math.PI) / 180) * radius;
 
@@ -209,23 +211,24 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
 
                       {/* Connecting line to center */}
                       <motion.div
-                        className="absolute top-1/2 left-1/2 origin-left h-0.5 bg-gradient-to-r from-primary/50 to-transparent"
+                        className="absolute top-1/2 left-1/2 origin-left h-0.5 bg-gradient-to-r from-primary/40 to-transparent"
                         style={{
-                          width: `${radius - 60}px`,
+                          width: `${radius - 50}px`,
                           transform: `translate(-50%, -50%) rotate(${angle + 180}deg)`
                         }}
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
-                        transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
+                        transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
                       />
                     </div>
                   </motion.div>
                 );
               })}
 
-              {/* Logout Button */}
+              {/* Logout Button - Positioned below the circle */}
               <motion.div
-                className="absolute top-full left-1/2 transform -translate-x-1/2 mt-20"
+                className="absolute"
+                style={{ left: '50%', top: '50%', transform: 'translate(-50%, 200px)' }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
