@@ -192,6 +192,18 @@ const Index = () => {
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
                 <Input
+                  name="displayName"
+                  type="text"
+                  placeholder="Display name"
+                  value={formData.displayName}
+                  onChange={handleInputChange}
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input
                   name="email"
                   type="email"
                   placeholder="Email address"
@@ -208,6 +220,18 @@ const Index = () => {
                   type="password"
                   placeholder="Password"
                   value={formData.password}
+                  onChange={handleInputChange}
+                  className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className="h-12 border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-green-500"
                   required
