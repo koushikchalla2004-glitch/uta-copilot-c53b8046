@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
+import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
 import { useVoiceInterface } from './VoiceInterface';
 import { LiveCaptions } from './LiveCaptions';
+import { useResponseOptimization } from '@/hooks/useResponseOptimization';
+import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 interface Message {
   id: string;
@@ -104,9 +106,14 @@ export const ChatInterface = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Optimization hooks
+  const optimization = useResponseOptimization();
+  const conversationMemory = useConversationMemory();
 
   // Voice interface for chat
   const voiceInterface = useVoiceInterface({
@@ -150,12 +157,104 @@ export const ChatInterface = () => {
     
     setInputValue('');
     
-    // Add user message
+    // Add user message to conversation memory
+    await conversationMemory.addMessage('user', userMessage);
+    
+    // Add user message to UI
     addMessage('user', userMessage);
+    optimization.setIsLoading(true);
     setIsTyping(true);
 
     try {
-      // Check if this should trigger a specialized agent
+      let responseText = '';
+      let isOptimizedResponse = false;
+
+      // 1. Check FAQ templates first (instant response)
+      const faqResponse = await optimization.checkFAQTemplates(userMessage);
+      if (faqResponse) {
+        responseText = faqResponse;
+        isOptimizedResponse = true;
+        
+        const messageId = addMessage('assistant', `⚡ ${responseText}`, true);
+        setTimeout(() => {
+          updateMessageTyping(messageId, false);
+          // Generate follow-up suggestions
+          const suggestions = optimization.generateFollowUpSuggestions(userMessage, faqResponse);
+          setFollowUpSuggestions(suggestions);
+        }, responseText.length * 15); // Faster typing for cached responses
+        
+        await conversationMemory.addMessage('assistant', responseText, { source: 'faq' });
+        optimization.setIsLoading(false);
+        setIsTyping(false);
+        return;
+      }
+
+      // 2. Check response cache
+      const cachedResponse = await optimization.checkCache(userMessage);
+      if (cachedResponse) {
+        responseText = cachedResponse.response || cachedResponse;
+        isOptimizedResponse = true;
+        
+        const messageId = addMessage('assistant', `💨 ${responseText}`, true);
+        setTimeout(() => {
+          updateMessageTyping(messageId, false);
+          const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
+          setFollowUpSuggestions(suggestions);
+        }, responseText.length * 20);
+        
+        await conversationMemory.addMessage('assistant', responseText, { source: 'cache' });
+        optimization.setIsLoading(false);
+        setIsTyping(false);
+        return;
+      }
+
+      // 3. Check local database first (quick search)
+      const localData = await optimization.searchLocalData(userMessage);
+      if (localData && localData.results?.length > 0) {
+        let quickResponse = `Here's what I found in our campus database:\n\n`;
+        
+        if (localData.type === 'dining') {
+          quickResponse += "🍽️ **Dining Locations:**\n";
+          localData.results.forEach((place: any) => {
+            quickResponse += `• ${place.name} (${place.campus_area})${place.is_open ? ' - Open' : ' - Closed'}\n`;
+          });
+        } else if (localData.type === 'buildings') {
+          quickResponse += "🏢 **Buildings:**\n";
+          localData.results.forEach((building: any) => {
+            quickResponse += `• ${building.name} (${building.code}) - ${building.category}\n`;
+          });
+        } else if (localData.type === 'events') {
+          quickResponse += "📅 **Upcoming Events:**\n";
+          localData.results.forEach((event: any) => {
+            const eventDate = new Date(event.start_time).toLocaleDateString();
+            quickResponse += `• ${event.title} - ${eventDate} at ${event.location}\n`;
+          });
+        } else if (localData.type === 'courses') {
+          quickResponse += "📚 **Courses:**\n";
+          localData.results.forEach((course: any) => {
+            quickResponse += `• ${course.code}: ${course.title} (${course.credits} credits)\n`;
+          });
+        }
+
+        quickResponse += "\nWould you like more details about any of these?";
+        
+        const messageId = addMessage('assistant', `🎯 ${quickResponse}`, true);
+        setTimeout(() => {
+          updateMessageTyping(messageId, false);
+          const suggestions = optimization.generateFollowUpSuggestions(userMessage, quickResponse);
+          setFollowUpSuggestions(suggestions);
+        }, quickResponse.length * 20);
+
+        // Store in cache for future use
+        await optimization.storeInCache(userMessage, quickResponse, localData.type);
+        await conversationMemory.addMessage('assistant', quickResponse, { source: 'local_database' });
+        
+        optimization.setIsLoading(false);
+        setIsTyping(false);
+        return;
+      }
+
+      // 4. Check for specialized agents
       const agentRoute = await AgentRouter.processQuery(userMessage);
       
       if (agentRoute.agent && agentRoute.confidence > 0.7) {
@@ -165,8 +264,6 @@ export const ChatInterface = () => {
           const messageId = addMessage('assistant', result.message, true);
           setTimeout(() => {
             updateMessageTyping(messageId, false);
-            // Auto-speak navigation responses if voice is enabled  
-            // Note: Will be handled by FloatingVoiceButton component
           }, result.message.length * 25);
           
           if (result.success) {
@@ -175,22 +272,24 @@ export const ChatInterface = () => {
               description: `Opening directions to ${agentRoute.params.building}`,
             });
           }
+          
+          await conversationMemory.addMessage('assistant', result.message, { source: 'navigation_agent' });
+          optimization.setIsLoading(false);
           setIsTyping(false);
           return;
         }
-        
-        if (agentRoute.agent === 'reminder') {
-          // For reminder, we still need AI to parse the exact datetime and event details
-          // Fall through to AI call but with special context
-        }
       }
 
-      // Prepare short conversation history for context
-      const history = messages.slice(-10).map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content }));
-
-      // Call the AI search function with history
-      const { data, error } = await supabase.functions.invoke('ai-search', {
-        body: { query: userMessage, conversation: history }
+      // 5. Enhanced AI call with conversation context
+      const recentContext = conversationMemory.getRecentContext(6);
+      const contextSummary = conversationMemory.getContextSummary();
+      
+      const { data, error } = await supabase.functions.invoke('enhanced-ai-search', {
+        body: { 
+          query: userMessage, 
+          conversation: recentContext,
+          context: contextSummary
+        }
       });
 
       if (error) {
@@ -220,13 +319,27 @@ export const ChatInterface = () => {
         }
       }
 
-      // Add the AI response to messages (no fallback message)
-      const responseText = data.response || data.error || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
-      const messageId = addMessage('assistant', responseText, true);
+      // Enhanced AI response
+      responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
+      
+      const prefix = data.enhanced ? '🧠 ' : '';
+      const messageId = addMessage('assistant', `${prefix}${responseText}`, true);
+      
       setTimeout(() => {
         updateMessageTyping(messageId, false);
-        // Note: Voice responses will be handled by FloatingVoiceButton component
-      }, data.response ? data.response.length * 25 : 2000);
+        const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
+        setFollowUpSuggestions(suggestions);
+      }, responseText.length * 25);
+
+      // Store successful AI response in cache
+      if (data.response && responseText.length > 20) {
+        await optimization.storeInCache(userMessage, responseText, 'ai_response');
+      }
+      
+      await conversationMemory.addMessage('assistant', responseText, { 
+        source: data.enhanced ? 'enhanced_ai' : 'ai', 
+        sources: data.sources 
+      });
 
       // Handle "near me" queries with geolocation
       if (/(near me|nearby|closest|nearest)/i.test(userMessage)) {
@@ -427,6 +540,31 @@ export const ChatInterface = () => {
                 </div>
               </Card>
             </div>
+          </motion.div>
+        )}
+
+        {/* Follow-up Suggestions */}
+        {followUpSuggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap gap-2 justify-center px-4"
+          >
+            {followUpSuggestions.map((suggestion, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setInputValue(suggestion);
+                  setFollowUpSuggestions([]);
+                }}
+                className="text-xs hover:bg-primary/10 transition-colors"
+              >
+                <Lightbulb className="w-3 h-3 mr-1" />
+                {suggestion}
+              </Button>
+            ))}
           </motion.div>
         )}
 

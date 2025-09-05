@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.places-nearby]
 verify_jwt = false
+
+[functions.enhanced-ai-search]
+verify_jwt = false
