@@ -17,15 +17,15 @@
   
   /* Sky Blue Palette */
   --primary: 14 165 233; /* sky-500 */
-  --primary-light: 204 65 95; /* #EBF4FA - your specified light blue */
+  --primary-light: 203 60 95; /* #EBF4FA - your specified light blue */
   --primary-foreground: 255 255 255; /* white */
   
   /* Simple Secondary Colors */
-  --secondary: 204 65 95; /* light blue #EBF4FA */
+  --secondary: 203 60 95; /* light blue #EBF4FA */
   --secondary-foreground: 30 41 59; /* dark text */
-  --muted: 204 65 95; /* light blue #EBF4FA */
+  --muted: 203 60 95; /* light blue #EBF4FA */
   --muted-foreground: 71 85 105; /* gray text */
-  --accent: 204 65 95; /* light blue #EBF4FA */
+  --accent: 203 60 95; /* light blue #EBF4FA */
   --accent-foreground: 30 41 59; /* dark text */
   
   /* Status Colors */
