@@ -323,7 +323,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-2025-08-07',
         messages: [
           {
             role: 'system',
@@ -350,47 +350,50 @@ serve(async (req) => {
         tools: [
           {
             type: 'function',
-            name: 'get_directions',
-            description: 'Get directions to a campus building. Use when user asks for directions, navigation, or location of buildings.',
-            parameters: {
-              type: 'object',
-              properties: {
-                building: { 
-                  type: 'string',
-                  description: 'The building name or alias (e.g., "library", "ERB", "business building")'
-                }
-              },
-              required: ['building']
+            function: {
+              name: 'get_directions',
+              description: 'Get directions to a campus building. Use when user asks for directions, navigation, or location of buildings.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  building: { 
+                    type: 'string',
+                    description: 'The building name or alias (e.g., "library", "ERB", "business building")'
+                  }
+                },
+                required: ['building']
+              }
             }
           },
           {
             type: 'function',
-            name: 'set_reminder',
-            description: 'Set a reminder for events or classes. Use when user wants to be reminded about something.',
-            parameters: {
-              type: 'object',
-              properties: {
-                title: { 
-                  type: 'string',
-                  description: 'Title of the event or class'
+            function: {
+              name: 'set_reminder',
+              description: 'Set a reminder for events or classes. Use when user wants to be reminded about something.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  title: { 
+                    type: 'string',
+                    description: 'Title of the event or class'
+                  },
+                  datetime: { 
+                    type: 'string',
+                    description: 'Date and time in ISO format'
+                  },
+                  type: { 
+                    type: 'string',
+                    enum: ['event', 'class'],
+                    description: 'Type of reminder'
+                  }
                 },
-                datetime: { 
-                  type: 'string',
-                  description: 'Date and time in ISO format'
-                },
-                type: { 
-                  type: 'string',
-                  enum: ['event', 'class'],
-                  description: 'Type of reminder'
-                }
-              },
-              required: ['title', 'datetime']
+                required: ['title', 'datetime']
+              }
             }
           }
         ],
         tool_choice: 'auto',
-        max_tokens: 400,
-        temperature: 0.3,
+        max_completion_tokens: 400,
       }),
     });
 
