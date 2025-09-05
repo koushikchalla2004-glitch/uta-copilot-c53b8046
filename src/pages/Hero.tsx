@@ -89,10 +89,11 @@ const Hero = () => {
                 
                 {/* Menu dropdown */}
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50"
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="absolute top-full left-0 mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-xl shadow-floating border border-gray-200/50 z-50"
                 >
                   <div className="p-4">
                     <div className="text-center mb-4">
@@ -106,13 +107,15 @@ const Hero = () => {
                       {menuItems.map((item, index) => (
                         <button
                           key={item.label}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-gray-50/80 transition-all duration-200 group hover:transform hover:scale-[1.02]"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          <div className="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                          <div className="w-6 h-6 rounded-lg bg-gray-100/80 flex items-center justify-center group-hover:bg-gray-200/80 transition-all duration-200 group-hover:scale-110">
                             <item.icon className="w-3 h-3 text-gray-600" />
                           </div>
-                          <span className="text-gray-700 font-medium font-mono text-sm">{item.label}</span>
+                          <span className="text-gray-700 font-medium font-mono text-sm group-hover:text-gray-900 transition-colors">
+                            {item.label}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -120,12 +123,14 @@ const Hero = () => {
                     <div className="pt-3 mt-3 border-t border-gray-200">
                       <button 
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg hover:bg-red-50 transition-colors duration-200 group"
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left rounded-lg hover:bg-red-50/80 transition-all duration-200 group hover:transform hover:scale-[1.02]"
                       >
-                        <div className="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                        <div className="w-6 h-6 rounded-lg bg-red-100/80 flex items-center justify-center group-hover:bg-red-200/80 transition-all duration-200 group-hover:scale-110">
                           <LogOut className="w-3 h-3 text-red-600" />
                         </div>
-                        <span className="text-red-700 font-medium font-mono text-sm">Sign out</span>
+                        <span className="text-red-700 font-medium font-mono text-sm group-hover:text-red-800 transition-colors">
+                          Sign out
+                        </span>
                       </button>
                     </div>
                   </div>
