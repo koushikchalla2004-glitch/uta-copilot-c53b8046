@@ -134,6 +134,26 @@ export default {
 				'elegant': '0 10px 30px -10px rgba(0, 0, 0, 0.3)',
 				'glass': '0 8px 32px rgba(0, 0, 0, 0.1)',
 				'floating': '0 20px 40px -10px rgba(0, 0, 0, 0.2)'
+			},
+			spacing: {
+				'touch-min': 'var(--touch-target-min)',
+				'touch-comfortable': 'var(--touch-target-comfortable)', 
+				'touch-large': 'var(--touch-target-large)',
+				'mobile-xs': 'var(--mobile-spacing-xs)',
+				'mobile-sm': 'var(--mobile-spacing-sm)',
+				'mobile-md': 'var(--mobile-spacing-md)',
+				'mobile-lg': 'var(--mobile-spacing-lg)',
+				'mobile-xl': 'var(--mobile-spacing-xl)',
+				'mobile-2xl': 'var(--mobile-spacing-2xl)'
+			},
+			fontSize: {
+				'mobile-xs': 'var(--mobile-text-xs)',
+				'mobile-sm': 'var(--mobile-text-sm)', 
+				'mobile-base': 'var(--mobile-text-base)',
+				'mobile-lg': 'var(--mobile-text-lg)',
+				'mobile-xl': 'var(--mobile-text-xl)',
+				'mobile-2xl': 'var(--mobile-text-2xl)',
+				'mobile-3xl': 'var(--mobile-text-3xl)'
 			}
 		}
 	},

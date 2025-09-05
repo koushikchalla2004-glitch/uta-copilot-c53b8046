@@ -350,20 +350,20 @@ export const ChatInterface = () => {
 
           {/* Centered Input */}
           <motion.div
-            className="w-full max-w-2xl"
+            className="w-full max-w-2xl px-mobile-md"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Card className="p-3 glass-card backdrop-blur-lg bg-white/10 border-white/20">
-              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-3">
+            <Card className="p-mobile-sm glass-card backdrop-blur-lg bg-white/10 border-white/20">
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex items-center gap-mobile-sm">
                 <div className="flex-1 relative">
                   <Input
                     ref={inputRef}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Message UTA Copilot..."
-                    className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-12 text-white placeholder:text-white/70 text-lg py-4"
+                    className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 pr-14 text-white placeholder:text-white/70 text-mobile-lg py-mobile-md min-h-touch-min"
                     disabled={isTyping}
                   />
                   
@@ -371,8 +371,8 @@ export const ChatInterface = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 border-2 transition-all duration-200 ${
+                    size="touch"
+                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 border-2 transition-all duration-200 ${
                       voiceInterface.isRecording 
                         ? 'bg-red-500 text-white border-red-500 animate-pulse shadow-lg' 
                         : isSpeaking 
@@ -411,8 +411,8 @@ export const ChatInterface = () => {
                     <Button 
                       type="submit" 
                       disabled={!inputValue.trim() || isTyping}
-                      size="lg"
-                      className="bg-white text-black hover:bg-white/90 h-12 w-12 p-0 rounded-xl"
+                      size="touch-large"
+                      className="bg-white text-black hover:bg-white/90 p-0 rounded-xl"
                     >
                       {isTyping ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -437,9 +437,9 @@ export const ChatInterface = () => {
           transition={{ duration: 0.5 }}
         >
           {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto pb-8">
-            <div className="max-w-4xl mx-auto px-4 md:px-6">
-              <div className="py-6 space-y-6 min-h-full">
+          <div className="flex-1 overflow-y-auto pb-8 chat-container-mobile">
+            <div className="max-w-4xl mx-auto px-mobile-md md:px-6">
+              <div className="py-mobile-lg space-y-mobile-lg min-h-full">
                 <AnimatePresence>
                   {messages.map((message) => (
                     <motion.div

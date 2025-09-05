@@ -52,28 +52,28 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
       />
 
       {/* Floating Voice Controls */}
-      <div className={`fixed bottom-6 right-6 z-40 flex flex-col gap-3 ${className}`}>
+      <div className={`fixed bottom-mobile-lg right-mobile-lg z-40 flex flex-col gap-mobile-sm ${className}`}>
         {/* Audio Toggle Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={voice.toggleAudio}
-          className={`w-12 h-12 rounded-full shadow-lg transition-all ${
+          className={`touch-target rounded-full shadow-lg transition-all ${
             voice.audioEnabled 
               ? 'bg-primary/20 text-primary border-2 border-primary/30' 
               : 'bg-muted text-muted-foreground border-2 border-muted-foreground/30'
           }`}
         >
           {voice.audioEnabled ? (
-            <Volume2 className="w-5 h-5 mx-auto" />
+            <Volume2 className="w-5 h-5" />
           ) : (
-            <VolumeX className="w-5 h-5 mx-auto" />
+            <VolumeX className="w-5 h-5" />
           )}
         </motion.button>
 
         {/* Main Voice Button */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
             console.log('Floating mic button clicked, current state:', buttonState);
@@ -86,7 +86,7 @@ export const FloatingVoiceButton: React.FC<FloatingVoiceButtonProps> = ({
             }
           }}
           disabled={voice.isProcessing}
-          className={`w-16 h-16 rounded-full shadow-xl backdrop-blur-sm transition-all duration-300 ${
+          className={`touch-target-large rounded-full shadow-xl backdrop-blur-sm transition-all duration-300 ${
             buttonState === 'recording' 
               ? 'bg-red-500/90 text-white animate-pulse ring-4 ring-red-500/30' 
               : buttonState === 'processing'

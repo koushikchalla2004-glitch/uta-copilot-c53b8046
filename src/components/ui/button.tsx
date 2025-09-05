@@ -18,12 +18,17 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        mobile: "bg-foreground text-background hover:bg-foreground/90 min-h-touch-min px-mobile-lg py-mobile-md rounded-2xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95",
+        "mobile-outline": "border-2 border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-background min-h-touch-min px-mobile-lg py-mobile-md rounded-2xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95",
+        "mobile-voice": "bg-primary text-primary-foreground hover:bg-primary/90 min-w-touch-large min-h-touch-large rounded-full shadow-xl transition-all duration-200 hover:scale-110 active:scale-95",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        touch: "min-h-touch-min min-w-touch-min",
+        "touch-large": "min-h-touch-large min-w-touch-large",
       },
     },
     defaultVariants: {

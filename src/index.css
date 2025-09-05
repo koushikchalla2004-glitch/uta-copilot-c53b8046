@@ -5,7 +5,7 @@
 /* Import custom fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600;700;800&display=swap');
 
-/* Professional Presentation Theme - Pure White and Black */
+/* Professional Presentation Theme - Pure White and Black with Mobile Optimization */
 :root {
   /* Core Colors - Clean gradient background */
   --background: 0 0% 100%; /* pure white HSL */
@@ -53,16 +53,38 @@
   --soft-white-foreground: 0 0% 0%; /* black text on soft white HSL */
   --radius: 0.5rem;
   
+  /* Mobile Touch Target Sizes */
+  --touch-target-min: 44px; /* iOS/Android minimum touch target */
+  --touch-target-comfortable: 48px; /* More comfortable touch target */
+  --touch-target-large: 56px; /* Large touch target for primary actions */
+  
+  /* Mobile Spacing System */
+  --mobile-spacing-xs: 0.5rem; /* 8px */
+  --mobile-spacing-sm: 0.75rem; /* 12px */
+  --mobile-spacing-md: 1rem; /* 16px */
+  --mobile-spacing-lg: 1.5rem; /* 24px */
+  --mobile-spacing-xl: 2rem; /* 32px */
+  --mobile-spacing-2xl: 2.5rem; /* 40px */
+  
+  /* Mobile Typography Scale */
+  --mobile-text-xs: 0.75rem; /* 12px */
+  --mobile-text-sm: 0.875rem; /* 14px */
+  --mobile-text-base: 1rem; /* 16px */
+  --mobile-text-lg: 1.125rem; /* 18px */
+  --mobile-text-xl: 1.25rem; /* 20px */
+  --mobile-text-2xl: 1.5rem; /* 24px */
+  --mobile-text-3xl: 1.875rem; /* 30px */
+  
   /* Professional Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   
-  /* Professional Animation Timings */
-  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Mobile-Optimized Animation Timings */
+  --transition-mobile-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-mobile-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-mobile-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -480,4 +502,183 @@
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   box-shadow: var(--shadow-md);
+}
+
+/* Mobile-First Touch Targets */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.touch-target-large {
+  min-height: var(--touch-target-large);
+  min-width: var(--touch-target-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Mobile Input Optimizations */
+.mobile-input {
+  font-size: var(--mobile-text-base);
+  padding: var(--mobile-spacing-md);
+  border-radius: 1rem;
+  min-height: var(--touch-target-min);
+  transition: all var(--transition-mobile-normal);
+}
+
+.mobile-input:focus {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Mobile Button Variants */
+.btn-mobile-primary {
+  min-height: var(--touch-target-min);
+  padding: var(--mobile-spacing-md) var(--mobile-spacing-lg);
+  font-size: var(--mobile-text-base);
+  font-weight: 600;
+  border-radius: 1rem;
+  transition: all var(--transition-mobile-normal);
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+}
+
+.btn-mobile-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-mobile-primary:active {
+  transform: translateY(0);
+  transition: all var(--transition-mobile-fast);
+}
+
+/* Mobile Chat Optimizations */
+.chat-container-mobile {
+  padding: var(--mobile-spacing-md);
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-input-mobile {
+  padding: var(--mobile-spacing-lg);
+  border-radius: 1.5rem;
+  min-height: var(--touch-target-comfortable);
+  font-size: var(--mobile-text-base);
+  line-height: 1.5;
+}
+
+/* Mobile Voice Button */
+.voice-btn-mobile {
+  width: var(--touch-target-large);
+  height: var(--touch-target-large);
+  border-radius: 50%;
+  position: fixed;
+  bottom: var(--mobile-spacing-xl);
+  right: var(--mobile-spacing-lg);
+  z-index: 50;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  box-shadow: var(--shadow-xl);
+  transition: all var(--transition-mobile-normal);
+}
+
+.voice-btn-mobile:hover {
+  transform: scale(1.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.voice-btn-mobile:active {
+  transform: scale(0.95);
+  transition: all var(--transition-mobile-fast);
+}
+
+/* Mobile Typography */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--mobile-text-base);
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: var(--mobile-text-3xl);
+    line-height: 1.3;
+    margin-bottom: var(--mobile-spacing-lg);
+  }
+  
+  h2 {
+    font-size: var(--mobile-text-2xl);
+    line-height: 1.4;
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  h3 {
+    font-size: var(--mobile-text-xl);
+    line-height: 1.4;
+    margin-bottom: var(--mobile-spacing-sm);
+  }
+  
+  p {
+    font-size: var(--mobile-text-base);
+    line-height: 1.6;
+    margin-bottom: var(--mobile-spacing-md);
+  }
+  
+  .text-sm {
+    font-size: var(--mobile-text-sm);
+  }
+  
+  .text-xs {
+    font-size: var(--mobile-text-xs);
+  }
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+  .nav-mobile {
+    padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+  }
+  
+  .nav-item-mobile {
+    min-height: var(--touch-target-min);
+    padding: var(--mobile-spacing-sm) var(--mobile-spacing-md);
+    margin: var(--mobile-spacing-xs) 0;
+    border-radius: 0.75rem;
+    transition: all var(--transition-mobile-fast);
+  }
+  
+  .nav-item-mobile:active {
+    transform: scale(0.98);
+    background: hsl(var(--accent));
+  }
+}
+
+/* Mobile Accessibility */
+@media (max-width: 768px) {
+  .focus-visible:focus-visible {
+    outline: 3px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+  
+  /* Ensure text remains readable on mobile */
+  .mobile-text-contrast {
+    color: hsl(var(--foreground));
+    font-weight: 500;
+  }
+  
+  /* Mobile-specific hover states (touch feedback) */
+  .mobile-touch-feedback:active {
+    background: hsl(var(--accent));
+    transform: scale(0.98);
+    transition: all var(--transition-mobile-fast);
+  }
 }
