@@ -111,12 +111,11 @@ export const ChatInterface = () => {
 
   // Voice interface integration
   const voice = useVoiceInterface({
-    onTranscription: (text) => {
+    onTranscription: async (text) => {
+      console.log('Voice transcription received:', text);
       setInputValue(text);
-      // Show confirmation before searching
-      if (window.confirm(`Search for: "${text}"?`)) {
-        handleSendMessage();
-      }
+      // Auto-search after voice input (no confirmation needed)
+      await handleSendMessage(text);
     },
     onSpeakingChange: setIsSpeaking
   });
@@ -147,10 +146,10 @@ export const ChatInterface = () => {
     ));
   };
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
-    const userMessage = inputValue.trim();
+  const handleSendMessage = async (messageText?: string) => {
+    const userMessage = messageText || inputValue.trim();
+    if (!userMessage) return;
+    
     setInputValue('');
     
     // Add user message
@@ -166,7 +165,15 @@ export const ChatInterface = () => {
         if (agentRoute.agent === 'navigation' && agentRoute.action === 'get_directions') {
           const result = await NavigationAgent.getDirections(agentRoute.params.building);
           const messageId = addMessage('assistant', result.message, true);
-          setTimeout(() => updateMessageTyping(messageId, false), result.message.length * 25);
+          setTimeout(() => {
+            updateMessageTyping(messageId, false);
+            // Auto-speak navigation responses if voice is enabled
+            if (voice.audioEnabled && result.message) {
+              setTimeout(() => {
+                voice.speakText(result.message);
+              }, 300);
+            }
+          }, result.message.length * 25);
           
           if (result.success) {
             toast({
@@ -223,9 +230,12 @@ export const ChatInterface = () => {
       const messageId = addMessage('assistant', data.response || "I apologize, but I am unable to process your request at this time. Please try again momentarily.", true);
       setTimeout(() => {
         updateMessageTyping(messageId, false);
-        // Auto-speak AI responses if voice is enabled
+        // Auto-speak AI responses if voice is enabled (enhanced timing)
         if (voice.audioEnabled && data.response) {
-          voice.speakText(data.response);
+          setTimeout(() => {
+            console.log('Speaking AI response:', data.response);
+            voice.speakText(data.response);
+          }, 300);
         }
       }, data.response ? data.response.length * 25 : 2000);
 
@@ -364,7 +374,7 @@ export const ChatInterface = () => {
           />
           <voice.MicButton />
           <Button
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isTyping}
             size="icon"
             className="w-11 h-11 rounded-xl bg-primary hover:bg-primary/90"

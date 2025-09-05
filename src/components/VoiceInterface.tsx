@@ -61,14 +61,14 @@ export const useVoiceInterface = ({
           setSilenceTimer(null);
         }
 
-        // Set new silence timer (2.5 seconds) only if we have text and are recording
+        // Set new silence timer (1 second) only if we have text and are recording
         if (currentText.trim() && isRecording) {
           const timer = setTimeout(() => {
             if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-              console.log('Auto-stopping recording due to silence');
+              console.log('Auto-stopping recording due to silence (1 second)');
               stopRecording();
             }
-          }, 2500);
+          }, 1000);
           setSilenceTimer(timer);
         }
       };
