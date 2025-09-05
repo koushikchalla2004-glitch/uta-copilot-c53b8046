@@ -74,7 +74,7 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             e.stopPropagation();
             if (!isOpen) setIsOpen(true);
           }}
-          className="relative w-16 h-16 rounded-full bg-gradient-to-r from-primary via-primary-glow to-primary shadow-2xl hover:shadow-3xl transition-all duration-300 group border-2 border-background/20"
+          className="relative w-16 h-16 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 shadow-xl hover:shadow-2xl transition-all duration-300 group border border-white/20 btn-professional"
           size="icon"
         >
           <motion.div
@@ -87,8 +87,8 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             <Menu className="w-6 h-6 text-white" />
           </motion.div>
           
-          {/* Animated ring */}
-          <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-pulse" />
+          {/* Professional glow effect */}
+          <div className="absolute inset-0 rounded-2xl border border-white/40 animate-pulse-professional" />
         </Button>
       </motion.div>
 
@@ -105,13 +105,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
             <Button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('X button clicked!'); // Debug log
                 setIsOpen(false);
               }}
-              className="w-14 h-14 rounded-full bg-background/95 backdrop-blur-md border-2 border-border/60 hover:bg-background shadow-2xl transition-all duration-300 hover:scale-110"
+              className="w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200 hover:bg-white shadow-lg transition-all duration-300 hover:scale-105 btn-outline-professional"
               size="icon"
             >
-              <X className="w-6 h-6 text-foreground" />
+              <X className="w-6 h-6 text-slate-700" />
             </Button>
           </motion.div>
         )}
@@ -121,12 +120,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Background Overlay */}
+            {/* Professional Background Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
@@ -147,12 +146,12 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                   transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 25 }}
                   className="mb-8"
                 >
-                  <div className="w-24 h-24 bg-gradient-to-br from-primary via-primary-glow to-primary rounded-full flex items-center justify-center shadow-2xl mx-auto mb-4 border-4 border-background/30">
+                  <div className="w-24 h-24 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-xl mx-auto mb-4 border border-white/20">
                     <Sparkles className="w-12 h-12 text-white" />
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-transparent animate-pulse" />
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent animate-pulse-professional" />
                   </div>
-                  <h2 className="text-3xl font-bold text-foreground mb-2">UTA Copilot</h2>
-                  <p className="text-muted-foreground">Your Campus Assistant</p>
+                  <h2 className="text-3xl font-bold text-slate-900 mb-2">UTA Copilot</h2>
+                  <p className="text-slate-600">Your Campus Assistant</p>
                 </motion.div>
 
                 {/* Menu Options in Center */}
@@ -174,13 +173,13 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                         damping: 25
                       }}
                       onClick={() => handleNavigation(item.path)}
-                      className="group cursor-pointer p-4 rounded-2xl bg-background/70 backdrop-blur-md border border-border/30 hover:bg-background/90 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                      className="group cursor-pointer p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/50 hover:bg-white/95 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg animate-fade-in-up"
                     >
                       <div className="flex flex-col items-center space-y-3">
                         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} p-3 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
                           <item.icon className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
+                        <span className="text-sm font-semibold text-slate-700 group-hover:text-sky-700 transition-colors duration-200">
                           {item.label}
                         </span>
                       </div>
@@ -198,14 +197,13 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                   <Button
                     onClick={onThemeToggle}
                     variant="outline"
-                    className="flex-1 rounded-xl py-3 font-medium bg-background/70 backdrop-blur-md border border-border/30 hover:bg-background/90"
+                    className="flex-1 rounded-xl py-3 font-medium bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-white/95 btn-outline-professional"
                   >
-                    {isDark ? '☀️ Light' : '🌙 Dark'}
+                    🎨 Theme
                   </Button>
                   <Button
                     onClick={handleLogout}
-                    variant="destructive"
-                    className="flex-1 rounded-xl py-3 font-medium"
+                    className="flex-1 rounded-xl py-3 font-medium bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white btn-professional"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
