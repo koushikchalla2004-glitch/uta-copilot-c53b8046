@@ -77,6 +77,10 @@ export const UniqueMenu = ({ onThemeToggle, isDark }: UniqueMenuProps) => {
                 animate={{ rotate: 0, opacity: 1 }}
                 exit={{ rotate: 180, opacity: 0 }}
                 transition={{ duration: 0.3 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(false);
+                }}
               >
                 <X className="w-6 h-6 text-white" />
               </motion.div>
