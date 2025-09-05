@@ -4,7 +4,9 @@ import { OrbitControls } from '@react-three/drei';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot } from 'lucide-react';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { Search, Mic, MicOff, Volume2, User, LogOut, Send, Bot, Menu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeVoice } from '@/hooks/useRealtimeVoice';
@@ -231,6 +233,7 @@ const StarScene = ({ isListening, isSpeaking }: { isListening: boolean; isSpeaki
 const Hero = () => {
   console.log('Hero component rendering...');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentChatId, setCurrentChatId] = useState<string>('current');
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -261,20 +264,29 @@ const Hero = () => {
   // Use voice messages if connected, otherwise use text messages
   const chatMessages = voiceConnected ? voiceMessages : textMessages;
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Logged out",
-        description: "You've been successfully logged out.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive",
-      });
+  const handleNewChat = () => {
+    setTextMessages([
+      {
+        id: '1',
+        text: "Hi! I'm your UTA Copilot. How can I help you today?",
+        isUser: false,
+        timestamp: new Date()
+      }
+    ]);
+    setCurrentChatId('new-' + Date.now());
+    setSearchQuery('');
+    if (voiceConnected) {
+      disconnectVoiceChat();
     }
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    // In a real app, you would load the chat history here
+    toast({
+      title: "Chat Selected",
+      description: `Loading chat session ${chatId}...`,
+    });
   };
 
   const scrollToBottom = () => {
@@ -355,236 +367,240 @@ const Hero = () => {
     handleVoiceToggle();
   };
 
-  console.log('Hero about to render, voiceConnected:', voiceConnected, 'isListening:', isListening, 'isSpeaking:', isSpeaking);
   
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
-      {/* Voice Visualizer */}
-      <VoiceVisualizer
-        isListening={isListening} 
-        isSpeaking={isSpeaking} 
-        isConnected={voiceConnected} 
-      />
-      
-      {/* 3D Stars Background */}
-      <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
-          <StarScene isListening={isListening} isSpeaking={isSpeaking} />
-        </Canvas>
-      </div>
-
-      {/* Top Navigation */}
-      <div className="relative z-10 flex justify-between items-center p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-emerald-400 to-cyan-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">U</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white">UTA Copilot</h1>
-        </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full bg-black">
+        <AppSidebar 
+          onNewChat={handleNewChat}
+          onSelectChat={handleSelectChat}
+          currentChatId={currentChatId}
+        />
         
-        <Button 
-          onClick={handleLogout}
-          className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 text-white"
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Logout
-        </Button>
-      </div>
+        <main className="flex-1 relative overflow-hidden">
+          {/* Voice Visualizer */}
+          <VoiceVisualizer
+            isListening={isListening} 
+            isSpeaking={isSpeaking} 
+            isConnected={voiceConnected} 
+          />
+          
+          {/* 3D Stars Background */}
+          <div className="absolute inset-0">
+            <Canvas camera={{ position: [0, 0, 10], fov: 75 }}>
+              <StarScene isListening={isListening} isSpeaking={isSpeaking} />
+            </Canvas>
+          </div>
 
-      {/* Chat Interface */}
-      <div className="relative z-10 flex flex-col h-screen">
-        {/* Header */}
-        <div className="text-center py-8 px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
-              UTA Copilot
-            </span>
-          </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Your intelligent campus companion powered by AI
-          </p>
-        </div>
+          {/* Top Navigation */}
+          <div className="relative z-10 flex justify-between items-center p-6">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="text-white hover:bg-white/10 p-2 rounded-lg">
+                <Menu className="w-5 h-5" />
+              </SidebarTrigger>
+              <div className="w-10 h-10 bg-gradient-to-r from-emerald-400 to-cyan-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">U</span>
+              </div>
+              <h1 className="text-2xl font-bold text-white">UTA Copilot</h1>
+            </div>
+          </div>
 
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-hidden px-4 md:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-              {chatMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                >
-                  {message.isUser ? (
-                    <div className="flex gap-3 max-w-[80%] flex-row-reverse">
-                      {/* User Avatar */}
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-white" />
-                      </div>
-                      
-                      {/* User Message Bubble */}
-                      <div className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white rounded-2xl px-4 py-3">
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-                          {message.text}
-                        </p>
-                        <p className="text-xs mt-1 text-white/70">
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    // AI Message with Typing Animation
-                    (message as any).isTyping ? (
-                      <TypingAnimation
-                        text={message.text}
-                        onComplete={() => {
-                          setTypingMessageId(null);
-                          setTextMessages(prev => 
-                            prev.map(msg => 
-                              msg.id === message.id 
-                                ? { ...msg, isTyping: false }
-                                : msg
-                            )
-                          );
-                        }}
-                        speed={30}
-                      />
-                    ) : (
-                      <div className="flex gap-3 max-w-[80%]">
-                        {/* AI Avatar */}
-                        <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                          <Bot className="w-4 h-4 text-white" />
-                        </div>
-                        
-                        {/* AI Message Bubble */}
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-2xl px-4 py-3">
-                          <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-                            {message.text}
-                          </p>
-                          <p className="text-xs mt-1 text-white/50">
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              ))}
-              
-              {/* Loading Indicator */}
-              {(isLoading || voiceConnecting) && (
-                <div className="flex justify-start">
-                  <TypingIndicator />
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
+          {/* Chat Interface */}
+          <div className="relative z-10 flex flex-col h-screen">
+            {/* Header */}
+            <div className="text-center py-8 px-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                <span className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 bg-clip-text text-transparent">
+                  UTA Copilot
+                </span>
+              </h2>
+              <p className="text-lg text-white/80 max-w-2xl mx-auto">
+                Your intelligent campus companion powered by AI
+              </p>
             </div>
 
-            {/* Input Area */}
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 mb-4">
-              {/* Voice Status Indicator */}
-              {voiceConnected && (
-                <div className="mb-3 text-center">
-                  {isListening ? (
-                    <div className="flex items-center justify-center gap-2 text-green-400 animate-pulse">
-                      <div className="relative">
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                        <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                      </div>
-                      <span className="text-sm font-medium animate-bounce">🎤 Listening...</span>
-                      <div className="flex gap-1">
-                        <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
-                        <div className="w-1 h-6 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-1 h-5 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-                      </div>
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-hidden px-4 md:px-6 lg:px-8">
+              <div className="max-w-4xl mx-auto h-full flex flex-col">
+                <div className="flex-1 overflow-y-auto mb-4 space-y-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                  {chatMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                    >
+                      {message.isUser ? (
+                        <div className="flex gap-3 max-w-[80%] flex-row-reverse">
+                          {/* User Avatar */}
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-white" />
+                          </div>
+                          
+                          {/* User Message Bubble */}
+                          <div className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 text-white rounded-2xl px-4 py-3">
+                            <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                              {message.text}
+                            </p>
+                            <p className="text-xs mt-1 text-white/70">
+                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        // AI Message with Typing Animation
+                        (message as any).isTyping ? (
+                          <TypingAnimation
+                            text={message.text}
+                            onComplete={() => {
+                              setTypingMessageId(null);
+                              setTextMessages(prev => 
+                                prev.map(msg => 
+                                  msg.id === message.id 
+                                    ? { ...msg, isTyping: false }
+                                    : msg
+                                )
+                              );
+                            }}
+                            speed={30}
+                          />
+                        ) : (
+                          <div className="flex gap-3 max-w-[80%]">
+                            {/* AI Avatar */}
+                            <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                              <Bot className="w-4 h-4 text-white" />
+                            </div>
+                            
+                            {/* AI Message Bubble */}
+                            <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-2xl px-4 py-3">
+                              <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                                {message.text}
+                              </p>
+                              <p className="text-xs mt-1 text-white/50">
+                                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      )}
                     </div>
-                  ) : isSpeaking ? (
-                    <div className="flex items-center justify-center gap-2 text-blue-400">
-                      <div className="relative">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
-                        <div className="absolute inset-0 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                      </div>
-                      <span className="text-sm font-medium animate-bounce">🔊 UTA Copilot is speaking...</span>
-                      <div className="flex gap-1">
-                        <div className="w-1 h-6 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-1 h-8 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-1 h-5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-                        <div className="w-1 h-7 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-                      </div>
+                  ))}
+                  
+                  {/* Loading Indicator */}
+                  {(isLoading || voiceConnecting) && (
+                    <div className="flex justify-start">
+                      <TypingIndicator />
                     </div>
-                  ) : (
-                    <div className="text-white/60 text-sm flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                      ✅ Voice chat active - Speak naturally or type below
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <div className="flex-1 relative">
-                  <Input
-                    type="text"
-                    placeholder={voiceConnected ? "Voice chat active - speak or type..." : "Ask me anything about UTA..."}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                    disabled={isLoading || voiceConnecting}
-                    className="bg-transparent border-none text-white placeholder-white/60 text-base py-3 px-4 focus:ring-0 focus:border-none"
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleSendMessage}
-                  disabled={isLoading || voiceConnecting || !searchQuery.trim()}
-                  className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 p-3 rounded-xl transition-all duration-300 disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-                
-                {/* Voice Chat Toggle */}
-                <Button
-                  onClick={handleVoiceToggle}
-                  disabled={voiceConnecting}
-                  className={`p-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
-                    voiceConnected
-                      ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30'
-                      : voiceConnecting
-                      ? 'bg-yellow-500 shadow-lg shadow-yellow-500/30'
-                      : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 shadow-lg shadow-emerald-500/30'
-                  } ${voiceConnected || voiceConnecting ? 'animate-pulse' : ''}`}
-                >
-                  {/* Ripple effect for active states */}
-                  {(voiceConnected || voiceConnecting) && (
-                    <div className="absolute inset-0 bg-white/20 rounded-xl animate-ping"></div>
                   )}
                   
-                  {voiceConnecting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : voiceConnected ? (
-                    <div className="relative">
-                      <MicOff className="w-5 h-5 text-white animate-bounce" />
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping"></div>
-                    </div>
-                  ) : (
-                    <Mic className="w-5 h-5 text-white hover:scale-110 transition-transform" />
-                  )}
-                </Button>
-              </div>
-              
-              {/* Instructions */}
-              {!voiceConnected && (
-                <div className="mt-3 text-center text-white/60 text-sm">
-                  💡 Click the microphone icon to start voice chat for a more natural conversation!
+                  <div ref={messagesEndRef} />
                 </div>
-              )}
+
+                {/* Input Area */}
+                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 mb-4">
+                  {/* Voice Status Indicator */}
+                  {voiceConnected && (
+                    <div className="mb-3 text-center">
+                      {isListening ? (
+                        <div className="flex items-center justify-center gap-2 text-green-400 animate-pulse">
+                          <div className="relative">
+                            <div className="w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                            <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                          </div>
+                          <span className="text-sm font-medium animate-bounce">🎤 Listening...</span>
+                          <div className="flex gap-1">
+                            <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0s' }}></div>
+                            <div className="w-1 h-6 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-1 h-5 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                          </div>
+                        </div>
+                      ) : isSpeaking ? (
+                        <div className="flex items-center justify-center gap-2 text-blue-400">
+                          <div className="relative">
+                            <div className="w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
+                            <div className="absolute inset-0 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                          </div>
+                          <span className="text-sm font-medium animate-bounce">🔊 UTA Copilot is speaking...</span>
+                          <div className="flex gap-1">
+                            <div className="w-1 h-6 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                            <div className="w-1 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-1 h-8 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-1 h-5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                            <div className="w-1 h-7 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-white/60 text-sm flex items-center justify-center gap-2">
+                          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                          ✅ Voice chat active - Speak naturally or type below
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <div className="flex-1 relative">
+                      <Input
+                        type="text"
+                        placeholder={voiceConnected ? "Voice chat active - speak or type..." : "Ask me anything about UTA..."}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                        disabled={isLoading || voiceConnecting}
+                        className="bg-transparent border-none text-white placeholder-white/60 text-base py-3 px-4 focus:ring-0 focus:border-none"
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleSendMessage}
+                      disabled={isLoading || voiceConnecting || !searchQuery.trim()}
+                      className="bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 p-3 rounded-xl transition-all duration-300 disabled:opacity-50"
+                    >
+                      <Send className="w-5 h-5" />
+                    </Button>
+                    
+                    {/* Voice Chat Toggle */}
+                    <Button
+                      onClick={handleVoiceToggle}
+                      disabled={voiceConnecting}
+                      className={`p-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                        voiceConnected
+                          ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30'
+                          : voiceConnecting
+                          ? 'bg-yellow-500 shadow-lg shadow-yellow-500/30'
+                          : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-600 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-700 shadow-lg shadow-emerald-500/30'
+                      } ${voiceConnected || voiceConnecting ? 'animate-pulse' : ''}`}
+                    >
+                      {/* Ripple effect for active states */}
+                      {(voiceConnected || voiceConnecting) && (
+                        <div className="absolute inset-0 bg-white/20 rounded-xl animate-ping"></div>
+                      )}
+                      
+                      {voiceConnecting ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : voiceConnected ? (
+                        <div className="relative">
+                          <MicOff className="w-5 h-5 text-white animate-bounce" />
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full animate-ping"></div>
+                        </div>
+                      ) : (
+                        <Mic className="w-5 h-5 text-white hover:scale-110 transition-transform" />
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {/* Instructions */}
+                  {!voiceConnected && (
+                    <div className="mt-3 text-center text-white/60 text-sm">
+                      💡 Click the microphone icon to start voice chat for a more natural conversation!
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
