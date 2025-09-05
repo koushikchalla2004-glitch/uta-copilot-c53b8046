@@ -228,9 +228,19 @@ export const ChatInterface = () => {
         // Note: Voice responses will be handled by FloatingVoiceButton component
       }, data.response ? data.response.length * 25 : 2000);
 
+      // Friendly clarification for location-intent queries
+      if (/(near me|nearby|closest|nearest)/i.test(userMessage)) {
+        const followUpId = addMessage(
+          'assistant',
+          'Want me to use your device location to find nearby spots? Or share a building/area on campus and I\'ll tailor it.',
+          true
+        );
+        setTimeout(() => updateMessageTyping(followUpId, false), 2200);
+      }
+
     } catch (error: any) {
       console.error('Chat error:', error);
-      const messageId = addMessage('assistant', "I am currently experiencing technical difficulties. Please try your request again in a few moments.", true);
+      const messageId = addMessage('assistant', "That one's on me—I couldn't complete that just now. Want me to try again? If it's a 'near me' request, share your location or a nearby building so I can be precise.", true);
       setTimeout(() => updateMessageTyping(messageId, false), 2000);
     } finally {
       setIsTyping(false);
