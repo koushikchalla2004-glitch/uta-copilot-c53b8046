@@ -5,33 +5,33 @@
 /* Import custom fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Inter+Tight:wght@300;400;500;600;700;800&display=swap');
 
-/* Professional Presentation Theme - White, Light Blue, Black */
+/* Professional Presentation Theme - Pure White and Black */
 :root {
-  /* Core Colors */
-  --background: 255 255 255; /* pure white */
-  --foreground: 0 0 0; /* pure black for text */
-  --card: 255 255 255; /* white cards */
-  --card-foreground: 0 0 0; /* black text */
-  --popover: 255 255 255; /* white */
-  --popover-foreground: 0 0 0; /* black text */
+  /* Core Colors - Pure White and Black */
+  --background: 0 0% 100%; /* pure white HSL */
+  --foreground: 0 0% 0%; /* pure black HSL */
+  --card: 0 0% 100%; /* pure white HSL */
+  --card-foreground: 0 0% 0%; /* pure black HSL */
+  --popover: 0 0% 100%; /* pure white HSL */
+  --popover-foreground: 0 0% 0%; /* pure black HSL */
   
-  /* Light Blue Palette (#EBF4FA) */
-  --primary: 203 60 95; /* #EBF4FA - correct HSL conversion */
-  --primary-hover: 203 60 90; /* slightly darker on hover */
-  --primary-foreground: 0 0 0; /* black text on light blue */
+  /* Light Blue Accents */
+  --primary: 203 60% 95%; /* light blue HSL */
+  --primary-hover: 203 60% 90%; /* slightly darker on hover HSL */
+  --primary-foreground: 0 0% 0%; /* black text on light blue HSL */
   
-  /* Professional Colors */
-  --secondary: 203 60 95; /* light blue */
-  --secondary-foreground: 0 0 0; /* black text */
-  --muted: 203 30 98; /* very light blue */
-  --muted-foreground: 0 0 40; /* dark gray text */
-  --accent: 203 60 95; /* light blue */
-  --accent-foreground: 0 0 0; /* black text */
+  /* Professional Grays */
+  --secondary: 0 0% 96%; /* very light gray HSL */
+  --secondary-foreground: 0 0% 0%; /* black text HSL */
+  --muted: 0 0% 96%; /* very light gray HSL */
+  --muted-foreground: 0 0% 45%; /* medium gray text HSL */
+  --accent: 203 60% 95%; /* light blue HSL */
+  --accent-foreground: 0 0% 0%; /* black text HSL */
   
   /* Borders & Dividers */
-  --border: 0 0 20; /* dark gray borders */
-  --input: 0 0 20; /* dark gray input borders */
-  --ring: 203 60 95; /* light blue focus ring */
+  --border: 0 0% 90%; /* light gray borders HSL */
+  --input: 0 0% 90%; /* light gray input borders HSL */
+  --ring: 203 60% 95%; /* light blue focus ring HSL */
   --radius: 0.5rem;
   
   /* Professional Shadows */
@@ -334,6 +334,29 @@
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
   outline: none;
+}
+
+/* Pure White and Black Chat Bubbles */
+.chat-bubble-user {
+  background: hsl(var(--foreground)); /* pure black */
+  color: hsl(var(--background)); /* pure white text */
+  border-radius: 1.5rem 1.5rem 0.5rem 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.chat-bubble-assistant {
+  background: hsl(var(--background)); /* pure white */
+  color: hsl(var(--foreground)); /* pure black text */
+  border: 1px solid hsl(var(--border));
+  border-radius: 1.5rem 1.5rem 1.5rem 0.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.chat-bubble-assistant:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 /* Modern Chat Bubbles */
