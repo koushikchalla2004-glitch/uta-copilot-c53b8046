@@ -8,12 +8,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { NavigationAgent, ReminderAgent, AgentRouter } from '@/utils/agents';
+import { multiAgentCoordinator } from '@/utils/multi-agent-coordinator';
 import { useVoiceInterface } from './VoiceInterface';
 import { LiveCaptions } from './LiveCaptions';
 import { useResponseOptimization } from '@/hooks/useResponseOptimization';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { TTSControls } from './TTSControls';
+import { MultiAgentDashboard } from './MultiAgentDashboard';
 
 interface Message {
   id: string;
@@ -274,7 +276,51 @@ export const ChatInterface = () => {
         return;
       }
 
-      // 4. Check for specialized agents
+      // 4. Try Multi-Agent System (NEW - High Performance)
+      console.log('🤖 Trying multi-agent system...');
+      const agentResult = await multiAgentCoordinator.processComplexQuery(userMessage);
+      
+      if (agentResult.primary.success && agentResult.primary.confidence > 0.6) {
+        let agentResponse = agentResult.primary.message;
+        
+        // Add performance indicators
+        const performanceInfo = `\n\n_🚀 Processed by ${agentResult.agentsUsed.join(', ')} agent(s) in ${agentResult.totalTime}ms using ${agentResult.strategy} strategy_`;
+        
+        // If we have secondary results, combine them
+        if (agentResult.secondary && agentResult.secondary.length > 0) {
+          agentResponse += '\n\n**Additional Information:**\n';
+          agentResult.secondary.forEach(secondary => {
+            if (secondary.success) {
+              agentResponse += `\n${secondary.message.substring(0, 200)}...\n`;
+            }
+          });
+        }
+
+        const prefix = agentResult.strategy === 'parallel' ? '⚡' : 
+                      agentResult.strategy === 'cascade' ? '🔄' : '🎯';
+        
+        const messageId = addMessage('assistant', `${prefix} ${agentResponse}`, true);
+        setTimeout(() => {
+          updateMessageTyping(messageId, false);
+          const suggestions = optimization.generateFollowUpSuggestions(userMessage, agentResponse);
+          setFollowUpSuggestions(suggestions);
+        }, agentResponse.length * 15); // Fast response for agent-handled queries
+
+        // Store in cache for future use
+        await optimization.storeInCache(userMessage, agentResponse, agentResult.primary.source);
+        await conversationMemory.addMessage('assistant', agentResponse, { 
+          source: 'multi_agent',
+          agents: agentResult.agentsUsed,
+          strategy: agentResult.strategy,
+          processingTime: agentResult.totalTime
+        });
+        
+        optimization.setIsLoading(false);
+        setIsTyping(false);
+        return;
+      }
+
+      // 5. Check for specialized legacy agents (fallback)
       const agentRoute = await AgentRouter.processQuery(userMessage);
       
       if (agentRoute.agent && agentRoute.confidence > 0.7) {
@@ -642,6 +688,9 @@ export const ChatInterface = () => {
         </p>
       </div>
     </div>
+
+    {/* Multi-Agent Performance Dashboard */}
+    <MultiAgentDashboard />
     </>
   );
 };
