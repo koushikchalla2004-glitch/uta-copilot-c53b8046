@@ -1,5 +1,6 @@
 import { NavigationAgent, ReminderAgent } from './agents';
 import { DiningAgent, AcademicAgent, EventAgent, ServiceAgent } from './specialized-agents';
+import { enhancedRealtimeAgents } from './enhanced-realtime-agents';
 
 interface AgentResponse {
   success: boolean;
@@ -30,6 +31,11 @@ export class MultiAgentCoordinator {
     this.agents.set('service', new ServiceAgent());
     this.agents.set('navigation', new NavigationAgent());
     this.agents.set('reminder', new ReminderAgent());
+    
+    // Add enhanced real-time agents
+    enhancedRealtimeAgents.forEach(agent => {
+      this.agents.set(agent.name.toLowerCase().replace(' ', '_'), agent);
+    });
     
     // Initialize performance tracking
     for (const agentName of this.agents.keys()) {

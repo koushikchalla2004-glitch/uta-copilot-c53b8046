@@ -262,6 +262,45 @@ export type Database = {
         }
         Relationships: []
       }
+      facility_occupancy: {
+        Row: {
+          building_name: string | null
+          created_at: string | null
+          current_occupancy: number | null
+          facility_name: string
+          facility_type: string | null
+          id: number
+          last_updated: string | null
+          max_capacity: number
+          occupancy_percentage: number | null
+          status: string | null
+        }
+        Insert: {
+          building_name?: string | null
+          created_at?: string | null
+          current_occupancy?: number | null
+          facility_name: string
+          facility_type?: string | null
+          id?: never
+          last_updated?: string | null
+          max_capacity: number
+          occupancy_percentage?: number | null
+          status?: string | null
+        }
+        Update: {
+          building_name?: string | null
+          created_at?: string | null
+          current_occupancy?: number | null
+          facility_name?: string
+          facility_type?: string | null
+          id?: never
+          last_updated?: string | null
+          max_capacity?: number
+          occupancy_percentage?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       faculty: {
         Row: {
           dept: string | null
@@ -430,6 +469,45 @@ export type Database = {
         }
         Relationships: []
       }
+      live_alerts: {
+        Row: {
+          affected_areas: string[] | null
+          alert_type: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: number
+          is_active: boolean | null
+          message: string
+          severity: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          affected_areas?: string[] | null
+          alert_type?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: never
+          is_active?: boolean | null
+          message: string
+          severity?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          affected_areas?: string[] | null
+          alert_type?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: never
+          is_active?: boolean | null
+          message?: string
+          severity?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       menus: {
         Row: {
           created_at: string | null
@@ -510,6 +588,54 @@ export type Database = {
           description?: string | null
           id?: number
           name?: string | null
+        }
+        Relationships: []
+      }
+      parking_availability: {
+        Row: {
+          available_spaces: number | null
+          created_at: string | null
+          hourly_rate: number | null
+          id: number
+          is_open: boolean | null
+          last_updated: string | null
+          lat: number | null
+          lng: number | null
+          lot_code: string | null
+          lot_name: string
+          permit_type: string | null
+          reserved_spaces: number | null
+          total_spaces: number
+        }
+        Insert: {
+          available_spaces?: number | null
+          created_at?: string | null
+          hourly_rate?: number | null
+          id?: never
+          is_open?: boolean | null
+          last_updated?: string | null
+          lat?: number | null
+          lng?: number | null
+          lot_code?: string | null
+          lot_name: string
+          permit_type?: string | null
+          reserved_spaces?: number | null
+          total_spaces: number
+        }
+        Update: {
+          available_spaces?: number | null
+          created_at?: string | null
+          hourly_rate?: number | null
+          id?: never
+          is_open?: boolean | null
+          last_updated?: string | null
+          lat?: number | null
+          lng?: number | null
+          lot_code?: string | null
+          lot_name?: string
+          permit_type?: string | null
+          reserved_spaces?: number | null
+          total_spaces?: number
         }
         Relationships: []
       }
@@ -679,6 +805,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_wait_times: {
+        Row: {
+          created_at: string | null
+          estimated_wait_minutes: number | null
+          id: number
+          last_updated: string | null
+          location_name: string
+          queue_length: number | null
+          service_type: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_wait_minutes?: number | null
+          id?: never
+          last_updated?: string | null
+          location_name: string
+          queue_length?: number | null
+          service_type?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          estimated_wait_minutes?: number | null
+          id?: never
+          last_updated?: string | null
+          location_name?: string
+          queue_length?: number | null
+          service_type?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      shuttle_tracking: {
+        Row: {
+          capacity_status: string | null
+          created_at: string | null
+          current_location: unknown | null
+          eta_minutes: number | null
+          id: number
+          is_active: boolean | null
+          last_updated: string | null
+          lat: number | null
+          lng: number | null
+          next_stop: string | null
+          route_name: string
+          vehicle_id: string
+        }
+        Insert: {
+          capacity_status?: string | null
+          created_at?: string | null
+          current_location?: unknown | null
+          eta_minutes?: number | null
+          id?: never
+          is_active?: boolean | null
+          last_updated?: string | null
+          lat?: number | null
+          lng?: number | null
+          next_stop?: string | null
+          route_name: string
+          vehicle_id: string
+        }
+        Update: {
+          capacity_status?: string | null
+          created_at?: string | null
+          current_location?: unknown | null
+          eta_minutes?: number | null
+          id?: never
+          is_active?: boolean | null
+          last_updated?: string | null
+          lat?: number | null
+          lng?: number | null
+          next_stop?: string | null
+          route_name?: string
+          vehicle_id?: string
+        }
+        Relationships: []
       }
       tuition: {
         Row: {
