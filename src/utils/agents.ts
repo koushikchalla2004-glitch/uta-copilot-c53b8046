@@ -16,30 +16,63 @@ export class NavigationAgent {
       // Format building name for maps query
       const formattedBuilding = `${building} University of Texas at Arlington, TX`;
       
-      // Create Google Maps URL
-      const mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(formattedBuilding)}`;
+      // Detect device and create appropriate maps URL
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Try different approaches to avoid popup blockers
-      const link = document.createElement('a');
-      link.href = mapsUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      let mapsUrl: string;
+      let appName: string;
       
-      // Temporarily add to DOM and click
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (isIOS) {
+        // Try Apple Maps first on iOS
+        mapsUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(formattedBuilding)}&saddr=${encodeURIComponent(origin)}&dirflg=d`;
+        appName = 'Apple Maps';
+      } else {
+        // Use Google Maps for all other platforms
+        mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(formattedBuilding)}`;
+        appName = 'Google Maps';
+      }
+      
+      // Try to open the native app first, then fallback to web
+      if (isMobile) {
+        // On mobile, try to open native app
+        window.location.href = mapsUrl;
+        
+        // Fallback to web version if app doesn't open within 2 seconds
+        setTimeout(() => {
+          if (isIOS) {
+            // Apple Maps web fallback
+            const webUrl = `https://maps.apple.com/?daddr=${encodeURIComponent(formattedBuilding)}&saddr=${encodeURIComponent(origin)}`;
+            window.open(webUrl, '_blank');
+          } else {
+            // Google Maps web version
+            const webUrl = `https://www.google.com/maps/dir/${encodeURIComponent(origin)}/${encodeURIComponent(formattedBuilding)}`;
+            window.open(webUrl, '_blank');
+          }
+        }, 2000);
+      } else {
+        // On desktop, open in new tab
+        const link = document.createElement('a');
+        link.href = mapsUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        // Temporarily add to DOM and click
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
       
       return {
         success: true,
-        message: `Opening directions to ${building} in Google Maps`,
+        message: `Opening directions to ${building} in ${appName}`,
         action: 'navigation_opened'
       };
     } catch (error) {
       console.error('Navigation error:', error);
       return {
         success: false,
-        message: `Unable to open directions to ${building}. Please try manually searching "${building} UTA" in Google Maps.`,
+        message: `Unable to open directions to ${building}. Please try manually searching "${building} UTA" in your maps app.`,
       };
     }
   }
