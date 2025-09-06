@@ -7,6 +7,7 @@ import Hero from '@/pages/Hero';
 import DiningPage from '@/pages/DiningPage';
 import EventsPage from '@/pages/EventsPage';
 import AboutPage from '@/pages/AboutPage';
+import RealtimeTestPage from '@/pages/RealtimeTestPage';
 import { Toaster } from '@/components/ui/toaster';
 
 const App = () => {
@@ -71,6 +72,10 @@ const App = () => {
         <Route 
           path="/about" 
           element={session ? <AboutPage /> : <Navigate to="/auth" replace />} 
+        />
+        <Route 
+          path="/realtime-test" 
+          element={session ? <RealtimeTestPage /> : <Navigate to="/auth" replace />} 
         />
         <Route 
           path="/app" 
