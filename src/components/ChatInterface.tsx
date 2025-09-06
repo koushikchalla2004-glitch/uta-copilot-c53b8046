@@ -7,6 +7,7 @@ import { Card } from './ui/card';
 import { ModernChatBubble } from './ModernChatBubble';
 import { ModernCommandPalette } from './ModernCommandPalette';
 import { ModernStatusIndicator } from './ModernStatusIndicator';
+import { SourceCitations } from './SourceCitations';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +29,14 @@ interface Message {
   content: string;
   timestamp: Date;
   isTyping?: boolean;
+  metadata?: {
+    source?: string;
+    strategy?: string;
+    agents?: string[];
+    confidence?: number;
+    processingTime?: number;
+    sources?: any[];
+  };
 }
 
 // Helper function to detect and format links and emails in text
@@ -144,13 +153,14 @@ export const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
-  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false) => {
+  const addMessage = (type: 'user' | 'assistant', content: string, isTyping = false, metadata?: any) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       type,
       content,
       timestamp: new Date(),
-      isTyping
+      isTyping,
+      metadata
     };
     setMessages(prev => [...prev, newMessage]);
     return newMessage.id;
@@ -226,6 +236,7 @@ export const ChatInterface = () => {
     try {
       let responseText = '';
       let isOptimizedResponse = false;
+      let responseMetadata: any = {};
 
       // STEP 1: Try Multi-Agent System first for specialized queries
       console.log('🤖 Multi-Agent System: Processing query...');
@@ -241,14 +252,18 @@ export const ChatInterface = () => {
         responseText = multiAgentResult.primary.message;
         isOptimizedResponse = true;
         
-        // Add multi-agent source info
-        await conversationMemory.addMessage('assistant', responseText, { 
+        // Store metadata for citation display
+        responseMetadata = {
           source: 'multi_agent',
           strategy: multiAgentResult.strategy,
           agents: multiAgentResult.agentsUsed,
           confidence: multiAgentResult.primary.confidence,
-          processingTime: multiAgentResult.totalTime
-        });
+          processingTime: multiAgentResult.totalTime,
+          sources: multiAgentResult.primary.data?.sources || []
+        };
+        
+        // Add multi-agent source info
+        await conversationMemory.addMessage('assistant', responseText, responseMetadata);
       } else {
         // STEP 2: Fallback to Enhanced AI Search
         console.log('🔄 Falling back to enhanced AI search...');
@@ -269,10 +284,15 @@ export const ChatInterface = () => {
 
         responseText = data.response || "I'm having a bit of trouble with that request right now. Could you try asking me something else? I'm here to help! 😊";
         
-        await conversationMemory.addMessage('assistant', responseText, { 
-          source: data.enhanced ? 'enhanced_ai' : 'ai', 
-          sources: data.sources 
-        });
+        // Store metadata for citation display
+        responseMetadata = {
+          source: data.enhanced ? 'enhanced_ai' : 'ai',
+          sources: data.sources || [],
+          confidence: data.confidence,
+          processingTime: data.processingTime
+        };
+        
+        await conversationMemory.addMessage('assistant', responseText, responseMetadata);
       }
 
       // Clean response text from markdown formatting for professional appearance
@@ -292,7 +312,7 @@ export const ChatInterface = () => {
       
       // Hide typing indicator and add final message with typing animation
       setShowTypingIndicator(false);
-      const messageId = addMessage('assistant', responseText, true);
+      const messageId = addMessage('assistant', responseText, true, responseMetadata);
       
       // After typing animation completes, update to final message
       setTimeout(() => {
@@ -448,7 +468,7 @@ export const ChatInterface = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <ModernChatBubble
+                       <ModernChatBubble
                         type={message.type}
                         content={message.content}
                         timestamp={message.timestamp}
@@ -459,6 +479,18 @@ export const ChatInterface = () => {
                           }
                         }}
                       />
+                      
+                      {/* Show source citations for assistant messages */}
+                      {message.type === 'assistant' && message.metadata && !message.isTyping && (
+                        <SourceCitations
+                          sources={message.metadata.sources}
+                          sourceType={message.metadata.source}
+                          agentsUsed={message.metadata.agents}
+                          strategy={message.metadata.strategy}
+                          confidence={message.metadata.confidence}
+                          processingTime={message.metadata.processingTime}
+                        />
+                      )}
                     </motion.div>
                   ))}
                   
