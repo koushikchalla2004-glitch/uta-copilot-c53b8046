@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap, Command } from 'lucide-react';
+import { Send, Bot, User, Loader2, ExternalLink, Clock, Lightbulb, Zap, Command, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -21,6 +21,8 @@ import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useSentiment } from '@/hooks/useSentiment';
 import { TypingAnimation, TypingIndicator } from './TypingAnimation';
 import { TTSControls } from './TTSControls';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { PersonalizationPanel } from './PersonalizationPanel';
 
 
 interface Message {
@@ -120,6 +122,7 @@ export const ChatInterface = () => {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [showPersonalizationPanel, setShowPersonalizationPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -134,6 +137,9 @@ export const ChatInterface = () => {
 
   // Sentiment analysis
   const sentiment = useSentiment();
+
+  // User preferences for personalization
+  const { preferences, learnFromQuery, getPersonalizedSuggestions } = useUserPreferences();
 
   // Voice interface for chat
   const voiceInterface = useVoiceInterface({
@@ -221,6 +227,9 @@ export const ChatInterface = () => {
     const userSentimentResult = sentiment.analyze(userMessage);
     const userSentimentLabel = sentiment.labelFromScore(userSentimentResult.score);
     
+    // Learn from user query for personalization
+    learnFromQuery(userMessage);
+
     // Add user message to conversation memory with sentiment metadata
     await conversationMemory.addMessage('user', userMessage, {
       sentiment: userSentimentLabel,
@@ -317,7 +326,14 @@ export const ChatInterface = () => {
       // After typing animation completes, update to final message
       setTimeout(() => {
         updateMessageTyping(messageId, false);
-        const suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
+        let suggestions = optimization.generateFollowUpSuggestions(userMessage, responseText);
+        
+        // Add personalized suggestions if enabled
+        if (preferences.communication.followUpSuggestions) {
+          const personalizedSuggestions = getPersonalizedSuggestions();
+          suggestions = [...suggestions, ...personalizedSuggestions].slice(0, 4); // Limit to 4 total
+        }
+        
         setFollowUpSuggestions(suggestions);
         triggerTTSForMessage(responseText);
       }, responseText.length * 20 + 2000); // Timing adjusted for typing speed
@@ -567,6 +583,17 @@ export const ChatInterface = () => {
                         disabled={isTyping}
                       />
                       
+                      {/* Settings Button */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="absolute right-12 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 bg-white/20 text-white border-white/30 hover:bg-white/30 hover:border-white/50 shadow-sm"
+                        onClick={() => setShowPersonalizationPanel(true)}
+                      >
+                        <Settings className="w-3 h-3" />
+                      </Button>
+                      
                       {/* Voice Button */}
                       <Button
                         type="button"
@@ -627,6 +654,11 @@ export const ChatInterface = () => {
       <ModernCommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
+      />
+
+      <PersonalizationPanel
+        isOpen={showPersonalizationPanel}
+        onClose={() => setShowPersonalizationPanel(false)}
       />
       
     </>
