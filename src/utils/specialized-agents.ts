@@ -36,73 +36,92 @@ export class DiningAgent implements Agent {
     const startTime = Date.now();
     
     try {
-      // Get dining locations with current status
-      const { data: locations, error } = await supabase
-        .from('dining_locations')
-        .select('*')
-        .order('name');
+      // Use the new dining-hours edge function for real-time data
+      const { data: diningData, error } = await supabase.functions.invoke('dining-hours', {
+        body: { 
+          location: this.extractLocationFromQuery(query),
+          includeMenus: query.toLowerCase().includes('menu') || query.toLowerCase().includes('food')
+        }
+      });
 
       if (error) throw error;
 
-      // Get today's menus if available
-      const { data: menus } = await supabase
-        .from('menus')
-        .select('*')
-        .eq('menu_date', new Date().toISOString().split('T')[0]);
-
-      let response = "🍽️ **Campus Dining Information:**\n\n";
+      let response = "🍽️ **Campus Dining - Real-Time Status:**\n\n";
       
-      if (locations && locations.length > 0) {
-        locations.forEach(location => {
-          const status = location.is_open ? '🟢 Open' : '🔴 Closed';
+      if (diningData?.success && diningData.locations?.length > 0) {
+        diningData.locations.forEach((location: any) => {
+          const status = location.isCurrentlyOpen ? '🟢 **OPEN NOW**' : '🔴 **CLOSED**';
           response += `**${location.name}** (${location.campus_area})\n`;
-          response += `Status: ${status}\n`;
+          response += `${status}\n`;
           
-          if (location.hours && Array.isArray(location.hours) && location.hours.length > 0) {
-            const firstHour = location.hours[0];
-            const hourText = typeof firstHour === 'object' && firstHour !== null && 'text' in firstHour 
-              ? (firstHour as any).text 
-              : 'Check website for hours';
-            response += `Hours: ${hourText}\n`;
+          if (location.nextStatusChange) {
+            response += `⏰ ${location.nextStatusChange}\n`;
           }
-          response += '\n';
-        });
-      }
+          
+          if (location.parsedHours && location.parsedHours.length > 0) {
+            const firstHour = location.parsedHours[0];
+            response += `🕐 Hours: ${firstHour.open} - ${firstHour.close}\n`;
+          }
 
-      // Add menu information if available
-      if (menus && menus.length > 0) {
-        response += "📋 **Today's Featured Items:**\n";
-        menus.forEach(menu => {
-          if (menu.items && typeof menu.items === 'object') {
-            Object.entries(menu.items).forEach(([category, items]) => {
+          // Add menu info if available
+          if (location.todaysMenu && Object.keys(location.todaysMenu).length > 0) {
+            response += "📋 **Today's Menu Highlights:**\n";
+            Object.entries(location.todaysMenu).forEach(([category, items]: [string, any]) => {
               if (Array.isArray(items) && items.length > 0) {
-                response += `• ${category}: ${items.slice(0, 3).join(', ')}\n`;
+                response += `• ${category}: ${items.slice(0, 2).join(', ')}\n`;
               }
             });
           }
+          response += '\n';
         });
+
+        // Add summary
+        if (diningData.summary) {
+          response += `📊 **Campus Summary:** ${diningData.summary.open} open, ${diningData.summary.closed} closed\n`;
+          response += `🕒 Last updated: ${new Date(diningData.timestamp).toLocaleTimeString()}\n\n`;
+        }
+      } else {
+        response += "No dining locations found or service temporarily unavailable.\n\n";
       }
 
-      response += "\nFor real-time hours and menus, check the UTA dining website!";
+      response += "💡 **Ask me:** \"Is [location] open?\" or \"What's the menu at [location]?\"";
 
       return {
         success: true,
-        data: { locations, menus },
+        data: { 
+          locations: diningData?.locations || [],
+          realTime: true,
+          timestamp: diningData?.timestamp
+        },
         message: response,
-        confidence: 0.9,
+        confidence: 0.95,
         processingTime: Date.now() - startTime,
-        source: 'dining_agent'
+        source: 'dining_agent_realtime'
       };
     } catch (error) {
+      console.error('Dining agent error:', error);
       return {
         success: false,
         data: null,
-        message: 'I had trouble getting dining information. Please try again or check the UTA dining website.',
+        message: 'I had trouble getting real-time dining information. Please try again or check the UTA dining website.',
         confidence: 0.1,
         processingTime: Date.now() - startTime,
         source: 'dining_agent'
       };
     }
+  }
+
+  private extractLocationFromQuery(query: string): string | undefined {
+    const locations = ['maverick cafe', 'connection cafe', 'commons', 'university center'];
+    const queryLower = query.toLowerCase();
+    
+    for (const location of locations) {
+      if (queryLower.includes(location)) {
+        return location;
+      }
+    }
+    
+    return undefined;
   }
 }
 
