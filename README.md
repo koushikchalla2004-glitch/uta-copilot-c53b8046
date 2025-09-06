@@ -1,4 +1,4 @@
-Overview
+##Overview
 
 The uta‑copilot‑c53b8046 repository is a full‑stack implementation of UTA Copilot, an intelligent campus assistant for the University of Texas at Arlington. It comprises a React/TypeScript front‑end backed by Supabase for authentication and data storage, and a FastAPI back‑end (located in the apps/api folder) that exposes additional endpoints for chat heuristics, speech‑to‑text transcription and calendar file generation. The front‑end uses Vite and Tailwind CSS with Capacitor configuration to enable deployment as a mobile app.
 
