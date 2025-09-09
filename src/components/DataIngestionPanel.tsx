@@ -55,10 +55,17 @@ const DATA_SOURCES = [
   },
   {
     id: 'courses',
-    name: 'Courses',
+    name: 'Courses (All / default CSE)',
     icon: <BookOpen className="w-5 h-5" />,
     description: 'Course catalog and schedules',
     url: 'https://catalog.uta.edu'
+  },
+  {
+    id: 'courses_cse',
+    name: 'Courses (CSE only)',
+    icon: <BookOpen className="w-5 h-5" />,
+    description: 'Computer Science & Engineering course catalog',
+    url: 'https://catalog.uta.edu/coursedescriptions/cse/'
   }
 ];
 

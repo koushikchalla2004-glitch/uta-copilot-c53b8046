@@ -41,8 +41,12 @@ serve(async (req) => {
       case 'faculty':
         result = await ingestFaculty(supabase);
         break;
+      case 'courses_cse':
+        result = await ingestCoursesCSE(supabase);
+        break;
       case 'courses':
-        result = await ingestCourses(supabase);
+        // Default to CSE import for now
+        result = await ingestCoursesCSE(supabase);
         break;
       default:
         throw new Error(`Unknown source: ${source}`);
