@@ -542,33 +542,6 @@ export const ChatInterface = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
-              {/* Follow-up suggestions */}
-              {followUpSuggestions.length > 0 && (
-                <motion.div
-                  className="flex flex-wrap gap-2 justify-center mb-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  {followUpSuggestions.map((suggestion, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setInputValue(suggestion);
-                        handleSendMessage(suggestion);
-                        setFollowUpSuggestions([]);
-                      }}
-                      className="text-xs glass-card hover:glass-card-hover border-white/20 text-white/80 hover:text-white"
-                    >
-                      <Lightbulb className="w-3 h-3 mr-1" />
-                      {suggestion}
-                    </Button>
-                  ))}
-                </motion.div>
-              )}
-
               {/* Search Input Section - Enhanced Dark Theme */}
               <div className="w-full max-w-3xl mx-auto">
                 <Card className="p-3 glass-card backdrop-blur-xl bg-black/40 border-white/20 shadow-xl ring-1 ring-white/10">
