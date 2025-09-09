@@ -36,6 +36,10 @@ function generateFallbackResponse(query: string): string {
     return "🗺️ **UTA Campus Information:**\n\n• **Interactive campus map** available on UTA website\n• **Visitor information center** at University Hall\n• **Campus tours** available for prospective students\n• **Major buildings** include Engineering Research Building, Business Building, Science Hall\n• **Emergency call boxes** located throughout campus\n• **Campus shuttles** connect different areas\n\nFor detailed maps and directions, visit uta.edu/maps or call (817) 272-2011.";
   }
   
+  if (lowerQuery.includes('scholarship') || lowerQuery.includes('financial aid') || lowerQuery.includes('grant')) {
+    return "💰 **UTA Scholarships & Financial Aid:**\n\n• **Presidential Scholarship** - Up to $16,000 for top academic achievers\n• **Maverick Academic Scholarship** - Merit-based aid for incoming freshmen\n• **Specialized scholarships** for engineering, nursing, and other programs\n• **Transfer scholarships** available for community college students\n• **Need-based aid** including Pell Grant supplements\n• **FAFSA deadline:** March 1st for priority consideration\n\nContact Financial Aid Office at finaid@uta.edu or (817) 272-3561 for personalized assistance. Visit the Mav ScholarShop portal to apply!";
+  }
+  
   // Default response for general queries
   return `🎓 **UTA Campus Information:**\n\nI'd be happy to help you with information about the University of Texas at Arlington! Here are some key resources:\n\n• **Main website:** uta.edu\n• **Student services:** (817) 272-2011\n• **Campus tours and information:** admissions.uta.edu\n• **Emergency services:** (817) 272-3003\n\nFor specific questions about "${query}", I recommend:\n• Visiting the UTA website\n• Calling the main information line\n• Stopping by the Visitor Information Center\n\nIs there something specific about UTA you'd like to know more about?`;
 }
@@ -112,12 +116,13 @@ async function getRagContext(query: string): Promise<{ contextText: string; sour
     const qWeb = query.length > 200 ? query.slice(0, 200) : query;
     const limitPer = 3;
 
-    const [buildingsRes, coursesRes, facultyRes, programsRes, eventsRes] = await Promise.all([
+    const [buildingsRes, coursesRes, facultyRes, programsRes, eventsRes, scholarshipsRes] = await Promise.all([
       db.from('buildings').select('id,name,code,category').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
       db.from('courses').select('id,code,title,description,catalog_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
       db.from('faculty').select('id,name,dept,office,profile_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
       db.from('programs').select('id,name,dept,level,catalog_url,overview').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
       db.from('events').select('id,title,description,location,start_time,source_url').textSearch('search_tsv', qWeb, { type: 'websearch' }).limit(limitPer),
+      db.from('scholarships').select('id,name,type,amount_min,amount_max,description,application_deadline,source_url').or(`name.ilike.%${qWeb}%,type.ilike.%${qWeb}%,description.ilike.%${qWeb}%`).limit(limitPer),
     ]);
 
     const clamp = (s?: string | null, n = 180) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -175,6 +180,26 @@ async function getRagContext(query: string): Promise<{ contextText: string; sour
           title: e.title + (e.start_time ? ` — ${fmt(e.start_time)}` : ''),
           snippet: clamp(e.location || e.description),
           url: e.source_url || undefined,
+        });
+      });
+    }
+
+    if (scholarshipsRes.data) {
+      scholarshipsRes.data.forEach((s: any) => {
+        const amount = s.amount_min && s.amount_max 
+          ? `$${s.amount_min.toLocaleString()}-$${s.amount_max.toLocaleString()}`
+          : s.amount_min 
+            ? `Up to $${s.amount_min.toLocaleString()}`
+            : 'Amount varies';
+        const deadline = s.application_deadline 
+          ? ` (Deadline: ${new Date(s.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+          : '';
+        
+        sources.push({
+          category: 'Scholarship',
+          title: `${s.name} — ${amount}${deadline}`,
+          snippet: clamp(s.description),
+          url: s.source_url || undefined,
         });
       });
     }
@@ -504,6 +529,10 @@ async function generateHumanFallbackResponse(query: string): Promise<string> {
   
   if (lowerQuery.includes('event') || lowerQuery.includes('activity')) {
     return response + "I love that you're looking to get involved on campus! While I can't pull up the exact events right now, the Student Activities office and the UTA events calendar online will have all the latest happenings. There's always something fun going on at UTA! 🎉";
+  }
+  
+  if (lowerQuery.includes('scholarship') || lowerQuery.includes('financial aid')) {
+    return response + "Financial aid is so important! I wish I could give you the specific scholarship details right now, but the Financial Aid Office at (817) 272-3561 or finaid@uta.edu will have all the current scholarship opportunities and can help you find the best options for your situation. Don't forget to check out the Mav ScholarShop portal too! 💰";
   }
   
   // Default empathetic response

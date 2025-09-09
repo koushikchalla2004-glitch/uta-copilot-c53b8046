@@ -806,6 +806,51 @@ export type Database = {
           },
         ]
       }
+      scholarships: {
+        Row: {
+          amount_max: number | null
+          amount_min: number | null
+          application_deadline: string | null
+          contact_info: string | null
+          created_at: string | null
+          description: string | null
+          eligibility_requirements: string[] | null
+          id: number
+          name: string
+          renewable: boolean | null
+          source_url: string | null
+          type: string
+        }
+        Insert: {
+          amount_max?: number | null
+          amount_min?: number | null
+          application_deadline?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          eligibility_requirements?: string[] | null
+          id?: number
+          name: string
+          renewable?: boolean | null
+          source_url?: string | null
+          type: string
+        }
+        Update: {
+          amount_max?: number | null
+          amount_min?: number | null
+          application_deadline?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          eligibility_requirements?: string[] | null
+          id?: number
+          name?: string
+          renewable?: boolean | null
+          source_url?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       service_wait_times: {
         Row: {
           created_at: string | null
