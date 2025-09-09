@@ -1,5 +1,5 @@
 import { NavigationAgent, ReminderAgent } from './agents';
-import { DiningAgent, AcademicAgent, EventAgent, ServiceAgent } from './specialized-agents';
+import { DiningAgent, AcademicAgent, EventAgent, ServiceAgent, ScholarshipAgent } from './specialized-agents';
 import { enhancedRealtimeAgents } from './enhanced-realtime-agents';
 
 interface AgentResponse {
@@ -29,6 +29,7 @@ export class MultiAgentCoordinator {
     this.agents.set('academic', new AcademicAgent());
     this.agents.set('event', new EventAgent());
     this.agents.set('service', new ServiceAgent());
+    this.agents.set('scholarship', new ScholarshipAgent());
     this.agents.set('navigation', new NavigationAgent());
     this.agents.set('reminder', new ReminderAgent());
     
@@ -301,6 +302,7 @@ export class MultiAgentCoordinator {
     if (queryLower.includes('course') || queryLower.includes('class')) intents.push('academic');
     if (queryLower.includes('parking') || queryLower.includes('wifi')) intents.push('service');
     if (queryLower.includes('building') || queryLower.includes('direction')) intents.push('navigation');
+    if (queryLower.includes('scholarship') || queryLower.includes('financial aid')) intents.push('scholarship');
     
     return intents;
   }

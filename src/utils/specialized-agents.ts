@@ -425,3 +425,111 @@ export class ServiceAgent implements Agent {
     };
   }
 }
+
+// Scholarship Agent - handles financial aid and scholarship queries
+export class ScholarshipAgent implements Agent {
+  name = 'scholarship';
+
+  canHandle(query: string): number {
+    const scholarshipKeywords = [
+      'scholarship', 'financial aid', 'grant', 'funding', 'money', 'tuition',
+      'pell grant', 'fafsa', 'aid', 'payment', 'cost', 'fee', 'deadline'
+    ];
+    
+    const queryLower = query.toLowerCase();
+    const matchCount = scholarshipKeywords.filter(keyword => 
+      queryLower.includes(keyword)
+    ).length;
+    
+    return Math.min(matchCount * 0.4, 0.95);
+  }
+
+  async process(query: string): Promise<AgentResponse> {
+    const startTime = Date.now();
+    
+    try {
+      console.log('Scholarship agent processing query:', query);
+      
+      const { data: scholarships, error } = await supabase
+        .from('scholarships')
+        .select('*')
+        .or(`name.ilike.%${query}%,type.ilike.%${query}%,description.ilike.%${query}%`)
+        .order('amount_max', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Scholarship query error:', error);
+        throw error;
+      }
+
+      if (!scholarships || scholarships.length === 0) {
+        return {
+          success: false,
+          data: null,
+          message: "I couldn't find specific scholarships matching your query, but UTA offers many financial aid opportunities! Contact the Financial Aid Office at (817) 272-3561 or visit finaid@uta.edu for personalized assistance.",
+          confidence: 0.3,
+          processingTime: Date.now() - startTime,
+          source: 'scholarship_agent'
+        };
+      }
+
+      let response = "💰 **UTA Scholarships & Financial Aid:**\n\n";
+      
+      scholarships.forEach(scholarship => {
+        const amount = scholarship.amount_min && scholarship.amount_max 
+          ? `$${scholarship.amount_min.toLocaleString()} - $${scholarship.amount_max.toLocaleString()}`
+          : scholarship.amount_min 
+            ? `Up to $${scholarship.amount_min.toLocaleString()}`
+            : 'Amount varies';
+            
+        const deadline = scholarship.application_deadline 
+          ? ` (Deadline: ${new Date(scholarship.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+          : '';
+          
+        const renewable = scholarship.renewable ? ' ✅ Renewable' : '';
+
+        response += `**${scholarship.name}** - ${amount}${deadline}${renewable}\n`;
+        response += `*Type:* ${scholarship.type.charAt(0).toUpperCase() + scholarship.type.slice(1)}\n`;
+        response += `*Description:* ${scholarship.description}\n`;
+        
+        if (scholarship.eligibility_requirements && scholarship.eligibility_requirements.length > 0) {
+          response += `*Requirements:* ${scholarship.eligibility_requirements.join(', ')}\n`;
+        }
+        
+        if (scholarship.contact_info) {
+          response += `*Contact:* ${scholarship.contact_info}\n`;
+        }
+        
+        response += "\n";
+      });
+
+      response += "💡 **Key Deadlines:**\n";
+      response += "• Presidential Scholarship: December 1st\n";
+      response += "• FAFSA Priority Deadline: March 1st\n";
+      response += "• Most Merit Scholarships: December 1st\n\n";
+      
+      response += "📞 **Get Help:** Financial Aid Office at (817) 272-3561 or finaid@uta.edu";
+
+      const processingTime = Date.now() - startTime;
+      
+      return {
+        success: true,
+        data: { scholarships, count: scholarships.length },
+        message: response,
+        confidence: 0.9,
+        processingTime,
+        source: 'scholarship_agent'
+      };
+    } catch (error) {
+      console.error('Scholarship agent error:', error);
+      return {
+        success: false,
+        data: null,
+        message: "I had trouble accessing scholarship information right now. For the most current scholarships and financial aid, please contact the Financial Aid Office at (817) 272-3561 or visit finaid@uta.edu.",
+        confidence: 0.2,
+        processingTime: Date.now() - startTime,
+        source: 'scholarship_agent_error'
+      };
+    }
+  }
+}

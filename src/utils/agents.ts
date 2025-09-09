@@ -8,6 +8,56 @@ export interface AgentResponse {
 
 // Navigation Agent - handles directions and map navigation
 export class NavigationAgent {
+  canHandle(query: string): number {
+    const navigationPatterns = [
+      'directions to', 'how to get to', 'where is', 'navigate to',
+      'find', 'location of', 'go to', 'take me to', 'building'
+    ];
+    
+    const queryLower = query.toLowerCase();
+    const matchCount = navigationPatterns.filter(pattern => 
+      queryLower.includes(pattern)
+    ).length;
+    
+    return Math.min(matchCount * 0.4, 0.95);
+  }
+
+  async process(query: string): Promise<{ success: boolean; data?: any; message: string; confidence: number; processingTime: number; source: string }> {
+    const startTime = Date.now();
+    
+    try {
+      const buildingMatch = await NavigationAgent.findBuilding(query);
+      
+      if (buildingMatch.building) {
+        const result = await NavigationAgent.getDirections(buildingMatch.building);
+        return {
+          success: result.success,
+          data: { building: buildingMatch.building, action: result.action },
+          message: result.message,
+          confidence: buildingMatch.confidence,
+          processingTime: Date.now() - startTime,
+          source: 'navigation_agent'
+        };
+      } else {
+        return {
+          success: false,
+          message: "I couldn't identify which building you're looking for. Could you be more specific?",
+          confidence: 0.1,
+          processingTime: Date.now() - startTime,
+          source: 'navigation_agent'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: "I had trouble processing your navigation request. Please try again.",
+        confidence: 0.1,
+        processingTime: Date.now() - startTime,
+        source: 'navigation_agent_error'
+      };
+    }
+  }
+
   static async getDirections(building: string, destination?: string): Promise<AgentResponse> {
     try {
       // If destination is provided, use it; otherwise use current location
@@ -126,6 +176,90 @@ export class NavigationAgent {
 
 // Reminder Agent - handles alarms and reminders
 export class ReminderAgent {
+  canHandle(query: string): number {
+    const reminderPatterns = [
+      'remind me', 'set reminder', 'alarm for', 'notify me',
+      "don't forget", 'schedule reminder', 'remember to'
+    ];
+    
+    const queryLower = query.toLowerCase();
+    const matchCount = reminderPatterns.filter(pattern => 
+      queryLower.includes(pattern)
+    ).length;
+    
+    return Math.min(matchCount * 0.6, 0.95);
+  }
+
+  async process(query: string): Promise<{ success: boolean; data?: any; message: string; confidence: number; processingTime: number; source: string }> {
+    const startTime = Date.now();
+    
+    try {
+      // Extract event/reminder details from query
+      const extractedInfo = this.extractReminderInfo(query);
+      
+      if (extractedInfo.title) {
+        const result = await ReminderAgent.setReminder(
+          extractedInfo.title, 
+          extractedInfo.datetime, 
+          extractedInfo.type
+        );
+        
+        return {
+          success: result.success,
+          data: { reminder: extractedInfo, action: result.action },
+          message: result.message,
+          confidence: 0.8,
+          processingTime: Date.now() - startTime,
+          source: 'reminder_agent'
+        };
+      } else {
+        return {
+          success: false,
+          message: "I couldn't identify what you'd like me to remind you about. Could you be more specific about the event and time?",
+          confidence: 0.2,
+          processingTime: Date.now() - startTime,
+          source: 'reminder_agent'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: "I had trouble setting up your reminder. Please try again.",
+        confidence: 0.1,
+        processingTime: Date.now() - startTime,
+        source: 'reminder_agent_error'
+      };
+    }
+  }
+
+  private extractReminderInfo(query: string): { title: string; datetime: string; type: 'event' | 'class' } {
+    // Basic extraction - would be enhanced with NLP
+    const queryLower = query.toLowerCase();
+    
+    // Default to 1 hour from now if no time specified
+    const defaultTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    
+    // Try to extract title after reminder keywords
+    let title = query;
+    const reminderKeywords = ['remind me', 'set reminder', 'alarm for', 'notify me'];
+    
+    for (const keyword of reminderKeywords) {
+      if (queryLower.includes(keyword)) {
+        title = query.substring(query.toLowerCase().indexOf(keyword) + keyword.length).trim();
+        break;
+      }
+    }
+    
+    // Determine type
+    const type = queryLower.includes('class') ? 'class' : 'event';
+    
+    return {
+      title: title || 'Reminder',
+      datetime: defaultTime,
+      type
+    };
+  }
+
   static async setReminder(eventTitle: string, datetime: string, type: 'event' | 'class' = 'event'): Promise<AgentResponse> {
     try {
       const eventDate = new Date(datetime);
