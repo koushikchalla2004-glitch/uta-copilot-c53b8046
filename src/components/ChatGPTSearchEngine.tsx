@@ -143,13 +143,6 @@ export const ChatGPTSearchEngine = () => {
     }
   };
 
-  const suggestions = [
-    "Where is the Central Library?",
-    "Find the Engineering Research Building",
-    "Show me dining options on campus",
-    "What's happening at UTA today?",
-    "How do I get to the MAC?"
-  ];
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-6">
@@ -205,31 +198,6 @@ export const ChatGPTSearchEngine = () => {
           </div>
         </form>
 
-        {/* Search Suggestions */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="space-y-2"
-        >
-          <p className="text-center text-sm text-muted-foreground mb-4">
-            Try asking:
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {suggestions.map((suggestion, index) => (
-              <motion.button
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                onClick={() => setQuery(suggestion)}
-                className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors duration-200"
-              >
-                {suggestion}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   );
